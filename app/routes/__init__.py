@@ -5,7 +5,7 @@ bp = Blueprint('routes', __name__)
 
 @bp.before_request
 def limit_remote_addr():
-    trusted_ips = ('127.0.0.1', '138.197.190.226')
+    trusted_ips = ('127.0.0.1', '138.197.190.226', '10.135.16.185')
     if not request.remote_addr in trusted_ips:
         abort(403, description=f'your ip addr. is: => {request.remote_addr}')  # Forbidden
 
