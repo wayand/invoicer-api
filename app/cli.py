@@ -11,22 +11,6 @@ import click
 def seed():
     """Seed the user database."""
     msg=[]
-    # create new user
-    lawangjan = User.query.filter_by(email='lawangjan@hotmail.com').first()
-    if not lawangjan:
-        new_user = User(
-            organization_id=1,
-            owner=True,
-            name='lawang jan',
-            email='lawangjan@hotmail.com',
-            password_hash=User.generate_hash('dzpwd@!0'),
-            is_two_factor_auth=True,
-            otp_secret=User.generate_otp_secret()
-        )
-        new_user.save()
-        msg.append(f'created user: lawangjan@hotmail.com')
-    else:
-        msg.append(f'user already exists: {lawangjan.email}')
 
     #create new category
     default_country = Country.query.filter_by(id=1).first()
@@ -42,13 +26,13 @@ def seed():
     else:
         msg.append(f'country already exists: {default_country.name}')
 
+    #organization
     default_organization= Organization.query.filter_by(id=1).first()
     if not default_organization:
         new_organization = Organization(
             name='Tolk WB',
             slug='tolk-wb',
             logo='logo.jpg',
-            invoice_no_mode='',
             email='lawangjan@hotmail.com',
             country_id=1
         )
@@ -56,6 +40,24 @@ def seed():
         msg.append('created organization')
     else:
         msg.append(f'organization already exists: {default_organization.name}')
+
+    # create new user
+    lawangjan = User.query.filter_by(email='lawangjan@hotmail.com').first()
+    if not lawangjan:
+        new_user = User(
+            organization_id=1,
+            owner=True,
+            name='lawang jan',
+            email='lawangjan@hotmail.com',
+            password_hash=User.generate_hash('dzpwd@!0'),
+            is_two_factor_auth=True,
+            otp_secret=User.generate_otp_secret(),
+            otp_secret_temp=''
+        )
+        new_user.save()
+        msg.append(f'created user: lawangjan@hotmail.com')
+    else:
+        msg.append(f'user already exists: {lawangjan.email}')
 
     default_client= Client.query.filter_by(id=1).first()
     if not default_client:
