@@ -1,10 +1,9 @@
-from app.models.client import Client
-from os import name
 from flask.cli import with_appcontext
 from app.models import (
-    User, Country, Organization, Client, Invoice, Product, InvoiceLine, 
-    AccountType, AccountGroup, TaxRate)
-import click
+    db, User, Country, Organization, Client, Invoice, Product, InvoiceLine, 
+    Account, AccountType, AccountGroup, TaxRate)
+import click, json, os
+from sqlalchemy import exc
 
 @click.command()
 @with_appcontext
@@ -185,6 +184,21 @@ def seed():
                 msg.append('   -> already exists: '+ tax_rate['name'])
     else:
         msg.append('Tax Rates already exists: '+ default_tax_rates[0].name)
+
+    # Added built-in accounts - loaded from jsonfile
+    with open("app/seed/accounts.json", "r") as read_file:
+        accounts = json.load(read_file)
+
+        msg.append('creating Accounts:')
+
+        for account in accounts:
+            try:
+                account_obj = Account(**account)
+                account_obj.save()
+                msg.append('   -> created tax rate: '+ account.get('name'))
+            except exc.IntegrityError as e:
+                db.session.rollback()
+                msg.append('   -> already exists: '+ account.get("name"))
 
     print('Seed results:')
     for m in msg:

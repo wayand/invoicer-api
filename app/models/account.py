@@ -37,7 +37,7 @@ class Account(BaseModel):
 
     bank_id= db.Column(db.Integer, nullable=True)
     bank_registration_number = db.Column(db.Integer, nullable=True)
-    bank_account_number = db.Column(db.Integer, nullable=True)
+    bank_account_number = db.Column(db.BigInteger, nullable=True)
     bank_swift_number = db.Column(db.String(50), server_default='', default='', nullable=True)
     bank_iban_number = db.Column(db.String(50), server_default='', default='', nullable=True)
 
