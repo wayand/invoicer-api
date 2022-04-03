@@ -4,6 +4,8 @@ from app.models import (
     Account, AccountType, AccountGroup, TaxRate)
 import click, json, os
 from sqlalchemy import exc
+import glob 
+from pprint import pprint
 
 @click.command()
 @with_appcontext
@@ -21,189 +23,216 @@ def seed():
             icon='dk'
         )
         new_country.save()
-        msg.append('created country')
+        click.echo('created country')
     else:
-        msg.append(f'country already exists: {default_country.name}')
+        click.echo(f'country already exists: {default_country.name}')
 
-    #organization
-    default_organization= Organization.query.filter_by(id=1).first()
-    if not default_organization:
-        new_organization = Organization(
-            name='Tolk WB',
-            slug='tolk-wb',
-            logo='logo.jpg',
-            email='lawangjan@hotmail.com',
-            country_id=1
-        )
-        new_organization.save()
-        msg.append('created organization')
-    else:
-        msg.append(f'organization already exists: {default_organization.name}')
+    #organizations
+    organizations = glob.glob('app/seed/orgs/*.json', recursive=False)
+    for org_json_path in organizations:
 
-    # create new user
-    lawangjan = User.query.filter_by(email='lawangjan@hotmail.com').first()
-    if not lawangjan:
-        new_user = User(
-            organization_id=1,
-            owner=True,
-            name='lawang jan',
-            email='lawangjan@hotmail.com',
-            password_hash=User.generate_hash('dzpwd@!0'),
-            is_two_factor_auth=True,
-            otp_secret=User.generate_otp_secret(),
-            otp_secret_temp=''
-        )
-        new_user.save()
-        msg.append(f'created user: lawangjan@hotmail.com')
-    else:
-        msg.append(f'user already exists: {lawangjan.email}')
+        with open(org_json_path, "r") as f:
+            org_data = json.load(f)
+            click.echo('\nCreating Organization: ' + org_data.get('name'))
 
-    default_client= Client.query.filter_by(id=1).first()
-    if not default_client:
-        new_client = Client(
-            name='TolkDanmark',
-            logo='logo.jpg',
-            email='tolkdanmark@hotmail.com',
-            organization_id=1,
-            country_id=1
-        )
-        new_client.save()
-        msg.append('created client')
-    else:
-        msg.append(f'client already exists: {default_client.name}')
+            # extracting users, clients and products
+            org_users = org_data.pop('users')
+            org_products = org_data.pop('products')
+            org_clients = org_data.pop('clients')
+            account_types = org_data.pop('account_types')
+            tax_rates = org_data.pop('tax_rates')
 
-    default_invoice = Invoice.query.all()
-    if not len(default_invoice) > 0:
-        new_invoice = Invoice(
-            organization_id=1,
-            client_id=1,
-            invoice_no='1',
-            invoice_date='2021-01-10',
-            duedate='2021-01-10',
-            amount=12.99,
-            gross_amount=13.88,
-            vat_amount=4.77    
-        )
-        new_invoice.save()
-        msg.append('created invoice')
-    else:
-        msg.append(f'invoice already exists: length: {len(default_invoice)} -> {default_invoice[0].amount}')
+            organization_obj = Organization.find_by(
+                                                    name=org_data.get('name'), 
+                                                    slug=org_data.get('slug'),
+                                                    email=org_data.get('email')
+                                                    )
 
-    default_product = Product.query.all()
-    if not len(default_product) > 0:
-        new_product= Product(
-            organization_id=1,
-            name='F.tolk',
-            description='',
-            unit_price=199.50
-        )
-        new_product.save()
-        msg.append('created Product')
-    else:
-        msg.append(f'Product already exists: length: {len(default_product)} -> {default_product[0].name}')
-
-    default_invoiceline = InvoiceLine.query.all()
-    if not len(default_invoiceline) > 0:
-        new_invoiceline = InvoiceLine(
-            invoice_id=1,
-            product_id=1,
-            description='24-09-2021 [2332432] f.tolk 08-10:30 (*)',
-            quantity=1,
-            unit_price=13.88,
-            amount=199.50
-        )
-        new_invoiceline.save()
-        msg.append('created invoiceLine')
-    else:
-        msg.append(f'invoice already exists: {len(default_invoiceline)} -> {default_invoiceline[0].amount}')
-
-    default_account_types = AccountType.query.all()
-    if not len(default_account_types) == 5:
-        account_type_list = [
-            {'name': 'Liability','normal_balance': 'credit','report_type': 'balanceSheet'},#1
-            {'name': 'Asset','normal_balance': 'debit', 'report_type': 'balanceSheet'},#2
-            {'name': 'Income','normal_balance': 'credit','report_type': 'incomeStatement'},#3
-            {'name': 'Expense','normal_balance': 'debit','report_type': 'incomeStatement'},#4
-            {'name': 'Equity','normal_balance': 'credit','report_type': 'balanceSheet'}#5
-        ]
-        msg.append('creating account-type:')
-
-        for acc_type in account_type_list:
-            exist = AccountType.find_by(name=acc_type['name']) is not None
-            if not exist:
-                acc_type_obj = AccountType(**acc_type)
-                acc_type_obj.save()
-                msg.append('   -> created account-type: '+ acc_type['name'])
+            if not organization_obj:
+                organization_obj = Organization(**org_data)
+                organization_obj.save()
+                click.echo('done: '+ org_data.get('name'))
             else:
-                msg.append('   -> already exists: '+ acc_type['name'])
-    else:
-        msg.append('Account types already exists: '+ default_account_types[0].name)
+                click.echo('already exists Organization: '+ org_data.get("name"))
+                
 
-    default_account_groups = AccountGroup.query.all()
-    if not len(default_account_groups) > 0:
-        account_group_list = [
-            {'organization_id': 1, 'account_type_id': 3, 'name': 'Indtægter', 'number': 1100, 'interval_start': 1100, 'interval_end': 1199},
-            {'organization_id': 1, 'account_type_id': 4, 'name': 'Salgsomkostninger', 'number': 1200, 'interval_start': 1200, 'interval_end': 1299},
-            {'organization_id': 1, 'account_type_id': 4, 'name': 'Lønomkostninger', 'number': 1400, 'interval_start': 1400, 'interval_end': 1499},
-            {'organization_id': 1, 'account_type_id': 4, 'name': 'Bilomkostninger', 'number': 1700, 'interval_start': 1700, 'interval_end': 1799},
-            {'organization_id': 1, 'account_type_id': 4, 'name': 'Administrationsomkostninger', 'number': 1800, 'interval_start': 1800, 'interval_end': 1899},
-            {'organization_id': 1, 'account_type_id': 4, 'name': 'Afskrivninger', 'number': 2000, 'interval_start': 2000, 'interval_end': 2099},
-            {'organization_id': 1, 'account_type_id': 3, 'name': 'Finansielle indtægter', 'number': 2200, 'interval_start': 2200, 'interval_end': 2299},
-            {'organization_id': 1, 'account_type_id': 4, 'name': 'Finansielle udgifter', 'number': 2300, 'interval_start': 2300, 'interval_end': 2399},
-            {'organization_id': 1, 'account_type_id': 2, 'name': 'Bank- og kontantbeholdninger', 'number': 5700, 'interval_start': 5700, 'interval_end': 5799},
-            {'organization_id': 1, 'account_type_id': 1, 'name': 'Skyldig moms', 'number': 7200, 'interval_start': 7200, 'interval_end': 7299},
-        ]
-        msg.append('creating account-group:')
-
-        for acc_group in account_group_list:
-            exist = AccountGroup.find_by(organization_id=1, name=acc_group['name']) is not None
-            if not exist:
-                acc_group_obj = AccountGroup(**acc_group)
-                acc_group_obj.save()
-                msg.append('   -> created account-group: '+ acc_group['name'])
+            ###########################
+            # Organization -> users
+            click.echo('\n-> creating users for Organization: '+ org_data.get('name'))
+            if org_users:
+                for user_data in org_users:
+                    try:
+                        user_data['organization_id'] = organization_obj.id
+                        user_data['password_hash'] = User.generate_hash(user_data.get('password_hash'))
+                        user_data['otp_secret'] = User.generate_otp_secret()
+                        user_obj = User(**user_data)
+                        user_obj.save()
+                        click.echo('-- created user: '+ user_data.get('name'))
+                    except exc.IntegrityError as e:
+                        db.session.rollback()
+                        click.echo('-- already exists user: '+ user_data.get("name") + str(e.args))
             else:
-                msg.append('   -> already exists: '+ acc_group['name'])
-    else:
-        msg.append('Account group already exists: '+ default_account_groups[0].name)
-
-    default_tax_rates = TaxRate.query.all()
-    if not len(default_tax_rates) > 0:
-        tax_rate_list = [
-            {'organization_id': 1, 'name': 'Salgsmoms','abbreviation': 'S','applies_to_purchases': False, 'applies_to_sales': True, 'description': '25% moms på salg til Danmark samt private EU-kunder.', 'is_active': True, 'is_predefined': True, 'predefined_tag': '2014_sales', 'rate': 0.25},
-            {'organization_id': 1, 'name': 'Købsmoms','abbreviation': 'K','applies_to_purchases': True, 'applies_to_sales': False, 'description': '25% moms på normale fradragsberettigede varer/ydelser købt i Danmark.', 'is_active': True, 'is_predefined': True, 'predefined_tag': '2014_purchases', 'rate': 0.25},
-        ]
-        msg.append('creating Tax rates:')
-
-        for tax_rate in tax_rate_list:
-            exist = TaxRate.find_by(organization_id=1, name=tax_rate['name']) is not None
-            if not exist:
-                taxrate_obj = TaxRate(**tax_rate)
-                taxrate_obj.save()
-                msg.append('   -> created tax rate: '+ tax_rate['name'])
+                click.echo('-- No users found')
+            
+            #############################
+            # Organization -> Products
+            click.echo('\n-> creating products for Organization: '+ org_data.get('name'))
+            if org_products:
+                for product_data in org_products:
+                    product_obj = Product.find_by(
+                                    name=product_data.get('name'),
+                                    organization_id=organization_obj.id
+                                )
+                    if not product_obj:                    
+                        product_data['organization_id'] = organization_obj.id
+                        product_obj = Product(**product_data)
+                        product_obj.save()
+                        click.echo('-- created product: '+ product_data.get('name'))
+                    else:
+                        click.echo('-- already exists: '+ product_data.get("name"))
             else:
-                msg.append('   -> already exists: '+ tax_rate['name'])
-    else:
-        msg.append('Tax Rates already exists: '+ default_tax_rates[0].name)
+                click.echo('-- No products found')
 
-    # Added built-in accounts - loaded from jsonfile
-    with open("app/seed/accounts.json", "r") as read_file:
-        accounts = json.load(read_file)
+            ############################
+            # Organization -> Clients
+            click.echo('\n-> creating clients for Organization: '+ org_data.get('name'))
+            if org_clients:
+                for client_data in org_clients:
 
-        msg.append('creating Accounts:')
+                    # extract client invoices
+                    client_invoices = client_data.pop('invoices')
 
-        for account in accounts:
-            try:
-                account_obj = Account(**account)
-                account_obj.save()
-                msg.append('   -> created tax rate: '+ account.get('name'))
-            except exc.IntegrityError as e:
-                db.session.rollback()
-                msg.append('   -> already exists: '+ account.get("name"))
+                    client_obj = Client.find_by(
+                                    name=client_data.get('name'),
+                                    email=client_data.get('email'),
+                                    organization_id=organization_obj.id
+                                )
+                    if not client_obj:
+                        client_data['organization_id'] = organization_obj.id
+                        client_obj = Client(**client_data)
+                        client_obj.save()
+                        click.echo('-- created client: '+ client_data.get('name'))
+                    else:
+                        click.echo('-- already exists: '+ client_data.get("name"))
 
-    print('Seed results:')
-    for m in msg:
-        print('--', m)
+                    #####################
+                    # client invoices
+                    click.echo('\n-- -> creating invoices for client: ' + client_data.get('name'))
 
+                    if client_invoices:
+                        for invoice_data in client_invoices:
+                            try:
+                                invoice_data['organization_id'] = organization_obj.id
+                                invoice_data['client_id'] = client_obj.id
+                                lines = invoice_data.pop('lines')
+
+                                # add product to invoiceLine
+                                for line in lines:
+                                    line['product_id'] = product_obj.id
+                                
+                                invoice_obj = Invoice(**invoice_data, lines=[
+                                    InvoiceLine(**line) for line in lines
+                                ])
+                                invoice_obj.save()
+                                click.echo('-- -- created invoice number: '+ invoice_data.get('invoice_no'))
+                            except exc.IntegrityError as e:
+                                db.session.rollback()
+                                click.echo('-- -- already exists: '+ invoice_data.get("invoice_no"))
+            else:
+                click.echo('-- No clients found')
+
+
+            ########################
+            # Organization built-in tax_rates
+            click.echo('\n-> creating Tax-rates for Organization: '+ org_data.get('name'))
+            if tax_rates:
+                for tax_rate_data in tax_rates:
+                    tax_rate_obj = TaxRate.find_by(
+                                        name=tax_rate_data.get('name'),
+                                        organization_id=organization_obj.id
+                                    )
+                    if not tax_rate_obj:
+                        tax_rate_data['organization_id'] = organization_obj.id
+                        tax_rate_obj = TaxRate(**tax_rate_data)
+                        tax_rate_obj.save()
+                        click.echo('-- created Tax-rate '+ tax_rate_data.get('name'))
+                    else:
+                        click.echo('-- already exists: '+ tax_rate_data.get("name"))
+
+            #################################
+            # Organization built-in accounts
+            click.echo('\n-> creating Account types for Organization: '+ org_data.get('name'))
+            if account_types:
+                for account_type_data in account_types:
+
+                    # extract account_groups
+                    account_type_groups = account_type_data.pop('account_groups')
+
+                    account_type_obj = AccountType.find_by(
+                                            name=account_type_data.get('name'),
+                                            organization_id=organization_obj.id
+                                        )
+
+                    if not account_type_obj:
+                        account_type_data['organization_id'] = organization_obj.id
+                        account_type_obj = AccountType(**account_type_data)
+                        account_type_obj.save()
+                        click.echo('-- created Account type: '+ account_type_data.get('name'))
+                    else:
+                        click.echo('-- already exists: '+ account_type_data.get("name"))
+
+                    #####################
+                    # account_groups
+                    click.echo('\n-- -> creating account groups for account-type: ' + account_type_data.get('name'))
+
+                    if account_type_groups:
+                        for account_group_data in account_type_groups:
+
+                            # extract accounts
+                            if account_group_data.get('accounts') is not None:
+                                accounts = account_group_data.pop('accounts')
+
+                            account_group_obj = AccountGroup.find_by(
+                                                    name=account_group_data.get('name'),
+                                                    organization_id=organization_obj.id,
+                                                    account_type_id=account_type_obj.id
+                                                )
+
+                            if not account_group_obj:
+                                account_group_data['organization_id'] = organization_obj.id
+                                account_group_data['account_type_id'] = account_type_obj.id
+                                account_group_obj = AccountGroup(**account_group_data)
+                                account_group_obj.save()
+                                click.echo('-- -- created Account group: '+ account_group_data.get('name'))
+                            else:
+                                click.echo('-- -- already exists: '+ account_group_data.get("name"))
+                            
+                            #####################
+                            # accounts
+                            click.echo('\n-- -- -> creating accounts for account-group: ' + account_group_data.get('name'))
+
+                            if accounts:
+                                for account_data in accounts:
+
+                                    tax_rate_id = None
+                                    if account_data.get('tax_rate_id'):
+                                
+                                        tax_rate_obj = TaxRate.find_by(
+                                                            name=account_data.get('tax_rate_id'),
+                                                            organization_id=organization_obj.id
+                                                        )
+                                        tax_rate_id = tax_rate_obj.id
+                                    try:
+                                        account_data['organization_id'] = organization_obj.id
+                                        account_data['account_type_id'] = account_type_obj.id
+                                        account_data['account_group_id'] = account_group_obj.id
+                                        account_data['tax_rate_id'] = tax_rate_id
+                                        account_obj = Account(**account_data)
+                                        account_obj.save()
+                                        click.echo('-- -- -- created Account: '+ account_data.get('name'))
+                                    except exc.IntegrityError as e:
+                                        db.session.rollback()
+                                        click.echo('-- -- -- already exists: '+ account_data.get("name"))
 
 def register_commands(app):
     """Register CLI commands."""

@@ -3,9 +3,25 @@ from app.models import db, BaseModel
 class Invoice(BaseModel):
     __tablename__ = 'invoices'
 
-    organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), nullable=False)
+    id_seq = db.Sequence(__tablename__+'_id_seq')
+
+    id = db.Column(
+        db.Integer,
+        id_seq,
+        server_default=id_seq.next_value(),
+        autoincrement=True,
+        primary_key=False,
+        unique=True,
+        nullable=False)
+
+    """
+    Primary keys: organization_id, invoice_no
+    """
+
+    organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), primary_key=True, nullable=False)
+    invoice_no = db.Column(db.String(100), primary_key=True, nullable=False)
+
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False )
-    invoice_no = db.Column(db.String(100), unique=True, nullable=False)
     invoice_date = db.Column(db.Date, default=None, nullable=False)
     duedate = db.Column(db.Date, default=None, nullable=False)
     amount = db.Column(db.Numeric(10,3), server_default='0.00', default=0.00, nullable=False)

@@ -4,6 +4,8 @@ from app.models import db, BaseModel, invoice
 class InvoiceLine(BaseModel):
     __tablename__ = 'invoice_lines'
 
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True, nullable=False)
+
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoices.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     description = db.Column(db.String(255), nullable=False)

@@ -9,11 +9,27 @@ import jwt
 class User(BaseModel):
     __tablename__ = 'users'
 
-    organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), nullable=False)
-    name = db.Column(db.String(64), unique=True, nullable=False)
+    id_seq = db.Sequence(__tablename__+'_id_seq')
+
+    id = db.Column(
+        db.Integer,
+        id_seq,
+        server_default=id_seq.next_value(),
+        autoincrement=True,
+        primary_key=False,
+        unique=True,
+        nullable=False)
+
+    """
+    Primary keys: organization_id, email
+    """
+
+    organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), primary_key=True, nullable=False)
+    email = db.Column(db.String(120), primary_key=True, nullable = False)
+
+    name = db.Column(db.String(64), nullable=False)
     owner = db.Column(db.Boolean, server_default=db.text('false'), default=False, nullable=False)
     password_hash = db.Column(db.String(128), nullable = False)
-    email = db.Column(db.String(120), unique=True, nullable = False)
     is_two_factor_auth = db.Column(db.Boolean, server_default=db.text('false'), default=False, nullable=False)
     otp_secret = db.Column(db.String(16), nullable=False)
     otp_secret_temp = db.Column(db.String(16), nullable=False)

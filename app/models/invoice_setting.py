@@ -1,10 +1,13 @@
+from enum import unique
 from xmlrpc.client import Boolean
 from app.models import db, BaseModel
 
 class InvoiceSetting(BaseModel):
     __tablename__ = 'invoice_settings'
 
-    organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), nullable=False)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True, nullable=False)
+
+    organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), unique=True, nullable=False)
     default_account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
     default_deposit_account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
 

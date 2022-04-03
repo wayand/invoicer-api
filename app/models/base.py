@@ -5,8 +5,7 @@ db = SQLAlchemy()
 
 class BaseModel(db.Model):
     __abstract__ = True
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow, nullable=True)
 
@@ -38,7 +37,7 @@ class BaseModel(db.Model):
                 db.session.commit()
             except Exception as e:
                 db.session.rollback()
-                raise e
+                raise
 
         self.after_save()
 

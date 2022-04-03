@@ -40,7 +40,8 @@ class DevelopmentConfig(Config):
     DEVELOPMENT = True
     SQLALCHEMY_ECHO = False
     # SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'my_secrets.db')}"
-    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://root@localhost:3306/invoicer_db"
+    # SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://root@localhost:3306/invoicer_db"
+    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://wayand@localhost:5432/invoicer_db"
 
 class TestingConfig(Config):
     TESTING = True
