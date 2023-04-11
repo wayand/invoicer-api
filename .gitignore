@@ -42,5 +42,5 @@ venv
 app.db
 .flaskenv
 *.db
-temp_upload/
+uploads/*
 logs/*

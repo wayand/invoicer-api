@@ -1,5 +1,5 @@
 from logging import log
-from flask import request, current_app, send_from_directory, safe_join, send_file
+from flask import request, current_app, send_from_directory
 from sqlalchemy import exc, and_, not_, or_
 from app.routes import bp
 from app.models import db, User, Organization, organization_schema, organizations_schema

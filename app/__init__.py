@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_migrate import Migrate, migrate
+from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 import logging, os, sys
 from logging.handlers import TimedRotatingFileHandler
@@ -14,7 +14,7 @@ jwt = JWTManager()
 def create_app(config_class):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    CORS(app)
+    CORS(app, origins=["http://localhost:8080","https://invoicer.wayand.dk"], supports_credentials=True)
     
     mail.init_app(app)
 

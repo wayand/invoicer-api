@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THIS IS MY HOHO TITLE - {{html_title}} - WE WE TITLE</title>
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+
+    <style type="text/css">
+        
+        /* Base styles */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #FFFFFF;
+            color: #ffffff;
+            box-shadow: 0px 3px 6px #00000029;
+        }
+
+        /* Light mode styles */
+        @media (prefers-color-scheme: light) {
+            /* Light mode */
+            body {
+                background-color: #FFFFFF;
+                color: #000000;
+            }
+
+            body .container {
+                background-color: #FFFFFF !important;
+                color: #000000 !important;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #333333 ;
+                color: #FFFFFF ;
+            }
+
+            body .container {
+                background-color: #333333 !important;
+                color: #FFFFFF !important;
+            }
+        }
+
+        /* Header */
+        .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #DDDDDD;
+        }
+
+        .header img {
+        max-width: 100%;
+        height: auto;
+        }
+
+        /* Footer */
+        .footer {
+        padding-top: 20px;
+        margin-top: 20px;
+        border-top: 1px solid #DDDDDD;
+        text-align: center;
+        font-size: 0.8em;
+        }
+		
+		
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="https://invoicer.wayand.dk/assets/images/logo/logo.png" alt="The Invoicer">
+        </header>
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+        <footer class="footer">
+            <p>&copy; 2023
+                <a href="#">Privacy Policy</a> | <a href="#">Terms & Conditions</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

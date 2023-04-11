@@ -44,6 +44,7 @@ class UserSchema(UserBaseSchema):
     name = fields.String(required=True, validate=[validate.Length(min=1, max=100)])
     owner = fields.Boolean(required=True)
     is_two_factor_auth = fields.Boolean(required=True)
+    two_factor_auth_type = fields.String(required=True)
 
 reset_password_schema = ResetPasswordSchema()
 userchangepassword_schema = UserChangePasswordSchema()

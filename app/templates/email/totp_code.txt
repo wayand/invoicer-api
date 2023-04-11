@@ -1,0 +1,11 @@
+Hi {{user_name}}! <br>
+{{thanks_msg}} <br><br>
+
+Your TOTP Code: <br>
+{{totp_code}}
+
+<br>
+<br>
+
+BR<br>
+Invoicer Team 
