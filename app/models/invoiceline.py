@@ -1,5 +1,5 @@
 from app.models.base import BaseModel
-from app.models import db, BaseModel, invoice
+from app.models import db, BaseModel
 
 class InvoiceLine(BaseModel):
     __tablename__ = 'invoice_lines'

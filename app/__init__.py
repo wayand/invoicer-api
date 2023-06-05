@@ -14,7 +14,7 @@ jwt = JWTManager()
 def create_app(config_class):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    CORS(app, origins=["http://localhost:8080","https://invoicer.wayand.dk"], supports_credentials=True)
+    CORS(app, origins=["http://localhost:8080","https://invoicer.wayand.dk", "http://invoicer.local:8080"], supports_credentials=True)
     
     mail.init_app(app)
 

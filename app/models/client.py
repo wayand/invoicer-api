@@ -1,5 +1,3 @@
-from enum import unique
-from operator import index
 from app.models import db, BaseModel
 
 class Client(BaseModel):

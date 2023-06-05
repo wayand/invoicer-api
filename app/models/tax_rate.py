@@ -1,4 +1,3 @@
-from enum import unique
 from app.models import db, BaseModel
 
 class TaxRate(BaseModel):

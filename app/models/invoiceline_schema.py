@@ -1,4 +1,3 @@
-from flask.json import dump
 from app.models import ma, InvoiceLine
 from marshmallow import (
     fields,
