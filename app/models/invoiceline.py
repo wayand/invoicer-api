@@ -1,4 +1,3 @@
-from app.models.base import BaseModel
 from app.models import db, BaseModel
 
 class InvoiceLine(BaseModel):
