@@ -1,0 +1,202 @@
+{ 
+    "name": "Demo ApS",
+    "slug": "demo-aps",
+    "logo": "",
+    "email": "demo@hotmail.com",
+    "country_id": 1,
+    "users": [
+        {
+            "owner": true,
+            "name": "Demo App",
+            "email": "demo@hotmail.com",
+            "password_hash": "demo",
+            "is_two_factor_auth": false,
+            "otp_secret": "",
+            "otp_secret_temp": ""
+        }
+    ],
+    "products": [
+        {
+            "name": "demo product",
+            "description": "demo beskrivelse",
+            "unit_price": 199.50
+        }
+    ],
+    "clients": [
+        {
+            "name": "Demo ApS",
+            "logo": "",
+            "email": "info@demo.dk",
+            "country_id": 1,
+            "invoices": [
+                {
+                    "invoice_no": "1",
+                    "invoice_date": "2021-01-10",
+                    "duedate": "2021-01-10",
+                    "amount": 12.99,
+                    "gross_amount": 13.88,
+                    "vat_amount": 4.77,
+                    "lines": [
+                        {
+                            "product_id": 0,
+                            "description": "demo product",
+                            "quantity": 1,
+                            "unit_price": 13.88,
+                            "amount": 199.50
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "tax_rates": [
+        {"name": "Salgsmoms","abbreviation": "S","applies_to_purchases": false, "applies_to_sales": true, "description": "25% moms på salg til Danmark samt private EU-kunder.", "is_active": true, "is_predefined": true, "predefined_tag": "2014_sales", "rate": 0.25},
+        {"name": "Købsmoms","abbreviation": "K","applies_to_purchases": true, "applies_to_sales": false, "description": "25% moms på normale fradragsberettigede varer/ydelser købt i Danmark.", "is_active": true, "is_predefined": true, "predefined_tag": "2014_purchases", "rate": 0.25}
+    ],
+    "account_types": [
+        {"name": "Liability", "normal_balance": "credit", "report_type": "balanceSheet",
+            "account_groups": [
+                {"name": "Skyldig moms", "number": 7200, "interval_start": 7200, "interval_end": 7299, "accounts": []}
+            ]
+        },
+        {"name": "Asset", "normal_balance": "debit", "report_type": "balanceSheet",
+            "account_groups": [
+                {"name": "Bank- og kontantbeholdninger", "number": 5700, "interval_start": 5700, "interval_end": 5799, "accounts": [
+                    {
+                        "account_type_id": 2,
+                        "account_group_id": 9,
+                        "tax_rate_id": null,
+                        "name": "Bank",
+                        "description": "Den primære bankkonto",
+                        "number": 5710,
+                        "currency_id": "DKK",
+                        "bank_id": 1,
+                        "bank_registration_number": 2279,
+                        "bank_account_number": 80907867560,
+                        "bank_swift_number": "swifti",
+                        "bank_iban_number": "ibani",
+                        "is_bank_account": 1,
+                        "is_payment_enabled": 1,
+                        "is_archived": 0,
+                        "is_deposit": 1
+                    },
+                    {
+                        "account_type_id": 2,
+                        "account_group_id": 9,
+                        "tax_rate_id": null,
+                        "name": "Kontantbeholdning",
+                        "description": "Beholdning til kontanter.",
+                        "number": 5720,
+                        "currency_id": "DKK",
+                        "bank_id": 0,
+                        "bank_registration_number": 0,
+                        "bank_account_number": 0,
+                        "bank_swift_number": "",
+                        "bank_iban_number": "",
+                        "is_bank_account": 0,
+                        "is_payment_enabled": 1,
+                        "is_archived": 0,
+                        "is_deposit": 1
+                    }
+                ]}
+            ]
+        },
+        {"name": "Income", "normal_balance": "credit", "report_type": "incomeStatement",
+            "account_groups": [
+                {"name": "Indtægter", "number": 1100, "interval_start": 1100, "interval_end": 1199, "accounts": [
+                    {
+                        "account_type_id": 3,
+                        "account_group_id": 1,
+                        "tax_rate_id": "Salgsmoms",
+                        "name": "Salg",
+                        "description": "Alt salg der vedrører normal forretningsmæssig aktivitet.",
+                        "number": 1110,
+                        "currency_id": "DKK",
+                        "bank_id": 0,
+                        "bank_registration_number": 0,
+                        "bank_account_number": 0,
+                        "bank_swift_number": "",
+                        "bank_iban_number": "",
+                        "is_bank_account": 0,
+                        "is_payment_enabled": 0,
+                        "is_archived": 0,
+                        "is_deposit": 0
+                    }
+                    
+                ]},
+                {"name": "Finansielle indtægter", "number": 2200, "interval_start": 2200, "interval_end": 2299, "accounts": []}
+            ]
+        },
+        {"name": "Expense", "normal_balance": "debit", "report_type": "incomeStatement",
+            "account_groups": [
+                {"name": "Salgsomkostninger", "number": 1200, "interval_start": 1200, "interval_end": 1299, "accounts": [
+                    {
+                        "account_type_id": 4,
+                        "account_group_id": 2,
+                        "tax_rate_id": "Købsmoms",
+                        "name": "Vareindkøb",
+                        "description": "Varer der indgår i dit primære salg.",
+                        "number": 1210,
+                        "currency_id": "DKK",
+                        "bank_id": null,
+                        "bank_registration_number": 0,
+                        "bank_account_number": 0,
+                        "bank_swift_number": "",
+                        "bank_iban_number": "",
+                        "is_bank_account": 0,
+                        "is_payment_enabled": 0,
+                        "is_archived": 0,
+                        "is_deposit": 0
+                    }
+                    
+                ]},
+                {"name": "Lønomkostninger", "number": 1400, "interval_start": 1400, "interval_end": 1499, "accounts": []},
+                {"name": "Bilomkostninger", "number": 1700, "interval_start": 1700, "interval_end": 1799, "accounts": []},
+                {"name": "Administrationsomkostninger", "number": 1800, "interval_start": 1800, "interval_end": 1899, "accounts": [
+                    {
+                        "account_type_id": 4,
+                        "account_group_id": 5,
+                        "tax_rate_id": null,
+                        "name": "Kørselsgodtgørelse",
+                        "description": "Dækning af omkostninger pr. km kørt i din egen bil.",
+                        "number": 1850,
+                        "currency_id": "DKK",
+                        "bank_id": 0,
+                        "bank_registration_number": 0,
+                        "bank_account_number": 0,
+                        "bank_swift_number": "",
+                        "bank_iban_number": "",
+                        "is_bank_account": 0,
+                        "is_payment_enabled": 0,
+                        "is_archived": 0,
+                        "is_deposit": 0
+                    },
+                    {
+                        "account_type_id": 4,
+                        "account_group_id": 5,
+                        "tax_rate_id": "Købsmoms",
+                        "name": "Telefon og internet",
+                        "description": "Regninger for telefon, internet og mobil.",
+                        "number": 1830,
+                        "currency_id": "DKK",
+                        "bank_id": null,
+                        "bank_registration_number": 0,
+                        "bank_account_number": 0,
+                        "bank_swift_number": "",
+                        "bank_iban_number": "",
+                        "is_bank_account": 0,
+                        "is_payment_enabled": 0,
+                        "is_archived": 0,
+                        "is_deposit": 0
+                    }
+                    
+                ]},
+                {"name": "Afskrivninger", "number": 2000, "interval_start": 2000, "interval_end": 2099, "accounts": []},
+                {"name": "Finansielle udgifter", "number": 2300, "interval_start": 2300, "interval_end": 2399, "accounts": []}
+            ]
+        },
+        {"name": "Equity", "normal_balance": "credit", "report_type": "balanceSheet",
+            "account_groups": []
+        }
+    ]
+}

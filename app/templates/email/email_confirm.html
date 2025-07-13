@@ -1,0 +1,69 @@
+{% extends "email/base.html" %}
+
+{% block content %}
+    <style type="text/css">
+    
+    /* Light mode styles */
+    @media (prefers-color-scheme: light) {
+
+        /* CTA Button and div */
+        .cta-div {
+            font-family:Arial,sans-serif; 
+            font-size:16px !important; 
+            color:#000000 !important; 
+            font-weight:bold !important; 
+            height:42px;
+            
+            width: 275px;
+            background-color: rgb(172, 109, 165) !important;
+            border-radius: 4px;
+        }
+    }
+    /* Dark mode styles */
+    @media (prefers-color-scheme: dark) {
+        /* CTA Button and div */
+        .cta-div {
+            font-family:Arial,sans-serif; 
+            font-size:16px !important; 
+            color:#ffffff !important; 
+            font-weight:bold !important; 
+            height:42px;
+            
+            width: 275px;
+            background-color: rgb(29,122,84) !important;
+            border-radius: 4px;
+        }
+    }
+
+    </style>
+    <h1>Account Verification</h1>
+    <p>Hello <span>{{user_name}}!</span> </p>
+
+    <br aria-hidden="true">
+
+    <p>Thank you for choosing Invoicer! 
+        Please confirm your email address
+        by clicking the link below.
+    </p>
+
+    <br aria-hidden="true">
+    
+    <div class="cta-div" height="42" align="center" valign="middle">
+        <a href="{{ confirm_url }}"
+            target="_blank" rel="noopener noreferrer"
+            data-auth="NotApplicable"
+            style="text-decoration:none; color:#ffffff; line-height:42px; display:block"
+            data-linkindex="1">Verify your email address</a>
+    </div>
+    
+    <br aria-hidden="true">
+    <br aria-hidden="true">
+        If you did not sign up for a Invoicer account, you can simply disregard this email.
+    <p></p>
+    <br aria-hidden="true">
+    <br aria-hidden="true">
+    <p>Happy Invoicing!</p>
+    <br aria-hidden="true">
+    <p>The Invoicer Team, Cheers!</p>
+
+{% endblock %}

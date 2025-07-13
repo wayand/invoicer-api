@@ -1,0 +1,27 @@
+name: Deploy to invoicer-api.wayand.dk
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+
+        - name: Set up SSH
+          run: |
+            mkdir -p ~/.ssh
+            echo "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_ed25519
+            chmod 600 ~/.ssh/id_ed25519
+            ssh-keyscan -H ${{ secrets.HETZNER_IP_ADDRESS }} >> ~/.ssh/known_hosts
+
+        - name: Copy files via SCP
+          run: rsync -avz --delete ./* www-data@${{ secrets.HETZNER_IP_ADDRESS }}:/srv/docker/invoicer/invoicer-api/
+
+        - name: Run deploy script
+          run: ssh www-data@${{ secrets.HETZNER_IP_ADDRESS }} "bash /srv/docker/invoicer/deploy.sh"

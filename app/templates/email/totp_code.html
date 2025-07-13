@@ -1,0 +1,12 @@
+{% extends "email/base.html" %}
+
+{% block content %}
+    <h1>Hi <span>{{user_name}}!</span> </h1>
+    <td>Please use the following verification OTP on the Invoicer App to confirm your identity.</td>
+
+    <p>Verification TOTP: </p>
+
+    <p><b>{{totp_code}}</b></p>
+
+    <p>This OTP will expire in 30 minutes.</p>
+{% endblock %}
