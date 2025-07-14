@@ -22,9 +22,9 @@ jobs:
 
         - name: Copy files via rsync
           run: rsync -avz --delete \
-                 --exclude='__pycache__/' \
-                 --exclude='*.pyc' \
-                 ./* www-data@${{ secrets.HETZNER_IP_ADDRESS }}:/srv/docker/invoicer/invoicer-api/
+                --exclude='__pycache__/' \
+                --exclude='*.pyc' \
+                ./* www-data@${{ secrets.HETZNER_IP_ADDRESS }}:/srv/docker/invoicer/invoicer-api/
 
         - name: Run deploy script
           run: ssh www-data@${{ secrets.HETZNER_IP_ADDRESS }} "bash /srv/docker/invoicer/deploy.sh"
