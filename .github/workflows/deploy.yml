@@ -21,10 +21,11 @@ jobs:
             ssh-keyscan -H ${{ secrets.HETZNER_IP_ADDRESS }} >> ~/.ssh/known_hosts
 
         - name: Copy files via rsync
-          run: rsync -avz --delete \
-                --exclude='__pycache__/' \
-                --exclude='*.pyc' \
-                ./* www-data@${{ secrets.HETZNER_IP_ADDRESS }}:/srv/docker/invoicer/invoicer-api/
+          run:  |
+            rsync -avz --delete \
+              --exclude='__pycache__/' \
+              --exclude='*.pyc' \
+              ./* www-data@${{ secrets.HETZNER_IP_ADDRESS }}:/srv/docker/invoicer/invoicer-api/
 
         - name: Run deploy script
           run: ssh www-data@${{ secrets.HETZNER_IP_ADDRESS }} "bash /srv/docker/invoicer/deploy.sh"
