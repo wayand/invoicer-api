@@ -124,7 +124,7 @@ def update_invoice(organization_id, invoice_id):
         if len(lines) < 1:
             return {'error': 'InvoiceLines length should be greater than 1!'}, 400
 
-        invoice.client_id = data.get('client_id', invoice.client_id)
+        invoice.contact_id = data.get('contact_id', invoice.contact_id)
         invoice.invoice_no = data.get('invoice_no', invoice.invoice_no)
         invoice.invoice_date = data.get('invoice_date', invoice.invoice_date)
         invoice.duedate = data.get('duedate', invoice.duedate)

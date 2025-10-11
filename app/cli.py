@@ -1,6 +1,6 @@
 from flask.cli import with_appcontext
 from app.models import (
-    db, User, Country, Organization, Client, Invoice, Product, InvoiceLine, 
+    db, User, Country, Organization, Contact, Invoice, Product, InvoiceLine, 
     Account, AccountType, AccountGroup, TaxRate)
 import click, json, os
 from sqlalchemy import exc
@@ -35,10 +35,10 @@ def seed():
             org_data = json.load(f)
             click.echo('\nCreating Organization: ' + org_data.get('name'))
 
-            # extracting users, clients and products
+            # extracting users, contacts and products
             org_users = org_data.pop('users')
             org_products = org_data.pop('products')
-            org_clients = org_data.pop('clients')
+            org_contacts = org_data.pop('contacts')
             account_types = org_data.pop('account_types')
             tax_rates = org_data.pop('tax_rates')
 
@@ -94,36 +94,36 @@ def seed():
                 click.echo('-- No products found')
 
             ############################
-            # Organization -> Clients
-            click.echo('\n-> creating clients for Organization: '+ org_data.get('name'))
-            if org_clients:
-                for client_data in org_clients:
+            # Organization -> contacts
+            click.echo('\n-> creating contacts for Organization: '+ org_data.get('name'))
+            if org_contacts:
+                for contact_data in org_contacts:
 
-                    # extract client invoices
-                    client_invoices = client_data.pop('invoices')
+                    # extract Contact invoices
+                    contact_invoices = contact_data.pop('invoices')
 
-                    client_obj = Client.find_by(
-                                    name=client_data.get('name'),
-                                    email=client_data.get('email'),
+                    contact_obj = Contact.find_by(
+                                    name=contact_data.get('name'),
+                                    email=contact_data.get('email'),
                                     organization_id=organization_obj.id
                                 )
-                    if not client_obj:
-                        client_data['organization_id'] = organization_obj.id
-                        client_obj = Client(**client_data)
-                        client_obj.save()
-                        click.echo('-- created client: '+ client_data.get('name'))
+                    if not contact_obj:
+                        contact_data['organization_id'] = organization_obj.id
+                        contact_obj = Contact(**contact_data)
+                        contact_obj.save()
+                        click.echo('-- created Contact: '+ contact_data.get('name'))
                     else:
-                        click.echo('-- already exists: '+ client_data.get("name"))
+                        click.echo('-- already exists: '+ contact_data.get("name"))
 
                     #####################
-                    # client invoices
-                    click.echo('\n-- -> creating invoices for client: ' + client_data.get('name'))
+                    # Contact invoices
+                    click.echo('\n-- -> creating invoices for Contact: ' + contact_data.get('name'))
 
-                    if client_invoices:
-                        for invoice_data in client_invoices:
+                    if contact_invoices:
+                        for invoice_data in contact_invoices:
                             try:
                                 invoice_data['organization_id'] = organization_obj.id
-                                invoice_data['client_id'] = client_obj.id
+                                invoice_data['contact_id'] = contact_obj.id
                                 lines = invoice_data.pop('lines')
 
                                 # add product to invoiceLine
@@ -139,7 +139,7 @@ def seed():
                                 db.session.rollback()
                                 click.echo('-- -- already exists: '+ invoice_data.get("invoice_no"))
             else:
-                click.echo('-- No clients found')
+                click.echo('-- No contacts found')
 
 
             ########################

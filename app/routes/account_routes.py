@@ -1,16 +1,17 @@
 from flask import request
-from sqlalchemy import exc, and_, not_
-from app.routes import bp
+from flask_jwt_extended import current_user, jwt_required
+from sqlalchemy import exc
+
 from app.models import (
-    db,
     Account,
     AccountGroup,
     DepositAccountSchema,
-    accounts_schema,
-    account_schema,
     account_groups_schema,
+    account_schema,
+    accounts_schema,
+    db,
 )
-from flask_jwt_extended import jwt_required, current_user
+from app.routes import bp
 
 
 @bp.get("/account-groups")
@@ -24,7 +25,7 @@ def get_account_groups():
 @bp.get("/deposit-accounts")
 # @jwt_required()
 def get_deposit_accounts():
-    organization_id = 1  # current_user.organization_id
+    organization_id = 2  # current_user.organization_id
     accounts = Account.query.filter_by(organization_id=organization_id, is_deposit=True)
     return DepositAccountSchema(many=True).jsonify(accounts)
 
@@ -98,7 +99,7 @@ def update_account(account_id):
         account.update()
 
         return account_schema.dump(account), 200
-    except exc.IntegrityError as e:
+    except exc.IntegrityError:
         db.session.rollback()
         return {"error": f"This account name is already in use ({account.name})"}, 409
     except Exception as e:
@@ -128,7 +129,7 @@ def create_account():
 
         return account_schema.jsonify(account), 201
 
-    except exc.IntegrityError as e:
+    except exc.IntegrityError:
         return {"error": f"This account already exists ({account.name})"}, 409
     except Exception as e:
         return {"error": str(e)}, 400

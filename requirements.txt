@@ -1,30 +1,33 @@
-alembic==1.11.1
-blinker==1.6.2
-click==8.1.3
-Flask==2.3.2
-Flask-Cors==3.0.10
-Flask-JWT-Extended==4.5.2
-Flask-Mail==0.9.1
-flask-marshmallow==0.15.0
-Flask-Migrate==4.0.4
-Flask-SQLAlchemy==3.0.3
-greenlet==2.0.2
-itsdangerous==2.1.2
-Jinja2==3.1.2
-Mako==1.2.4
-MarkupSafe==2.1.2
-marshmallow==3.19.0
+alembic==1.16.2           # Latest release June 16, 2025 :contentReference[oaicite:1]{index=1}
+blinker==1.9.0            # Required by Flask 3.1.x :contentReference[oaicite:2]{index=2}
+click==8.1.3              # Still latest
+Flask==3.1.1              # Released May 13, 2025 :contentReference[oaicite:3]{index=3}
+Flask-Cors==3.0.10        # No newer release
+Flask-JWT-Extended==4.7.1 # No newer release
+Flask-Mail==0.9.1         # No newer release
+flask-marshmallow==0.15.0 # No newer release
+Flask-Migrate==4.0.4      # Compatible with Alembic 1.16.x
+Flask-SQLAlchemy==3.0.3   # Still latest
+greenlet==3.2.3           # Latest
+itsdangerous==2.2.0       # Matches Flask 3.1.0 minimum :contentReference[oaicite:4]{index=4}
+Jinja2==3.1.2             # Consistent with Flask 3.1
+Mako==1.2.4               # Still latest
+MarkupSafe==2.1.2         # Matches Flask 3.1.0 minimum :contentReference[oaicite:5]{index=5}
+marshmallow==3.19.0       # Still latest
 marshmallow-sqlalchemy==0.29.0
 onetimepass==1.0.1
 packaging==23.1
 passlib==1.7.4
-psycopg2==2.9.6
+#psycopg2==2.9.6
+psycopg2-binary==2.9.11
 PyJWT==2.7.0
 PyMySQL==1.0.3
 PyQRCode==1.2.1
 python-dotenv==1.0.0
 simplejson==3.19.1
 six==1.16.0
-SQLAlchemy==2.0.15
-typing_extensions==4.6.2
-Werkzeug==2.3.4
+SQLAlchemy==2.0.41
+typing_extensions>=4.12
+Werkzeug==3.1.1           # Required by Flask 3.1.1 :contentReference[oaicite:6]{index=6}
+flasgger==0.9.7.1
+apispec

@@ -10,7 +10,7 @@ from marshmallow import (
 class InvoiceSchema(ma.SQLAlchemySchema):
     id = fields.Int(dump_only=True, strict=True)
     organization_id = fields.Int(required=True, strict=True)
-    client_id = fields.Int(required=True)
+    contact_id = fields.Int(required=True)
     invoice_no = fields.Str(required=True)
     currency_id = fields.Str(required=True)
     is_paid = fields.Boolean()
@@ -25,7 +25,7 @@ class InvoiceSchema(ma.SQLAlchemySchema):
     gross_amount = fields.Decimal(required=True, strict=True, places=2)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
-    client = fields.Nested('ClientSchema', dump_only=True, many=False, required=False)
+    contact = fields.Nested('ContactSchema', dump_only=True, many=False, required=False)
     payment_methods = fields.Nested('PaymentMethodSchema', dump_only=True, many=True, required=True)
 
     @pre_load

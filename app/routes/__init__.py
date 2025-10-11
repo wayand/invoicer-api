@@ -23,7 +23,7 @@ from app.routes import organization_routes
 from app.routes import taxrate_routes
 from app.routes import country_routes
 from app.routes import product_routes
-from app.routes import client_routes
+from app.routes import contact_routes
 from app.routes import account_routes
 from app.routes import invoice_routes
 from app.routes import invoiceline_routes
