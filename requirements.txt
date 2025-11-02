@@ -18,7 +18,8 @@ marshmallow-sqlalchemy==0.29.0
 onetimepass==1.0.1
 packaging==23.1
 passlib==1.7.4
-psycopg2-binary==2.9.11
+psycopg2==2.9.6
+#psycopg2-binary==2.9.11
 PyJWT==2.7.0
 PyQRCode==1.2.1
 python-dotenv==1.0.0
