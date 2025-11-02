@@ -51,7 +51,7 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SITE_DOMAIN = "http://localhost:8080"
+    SITE_DOMAIN = "http://localhost:5001"
     ENV = "development"
     DEVELOPMENT = True
     SQLALCHEMY_ECHO = False

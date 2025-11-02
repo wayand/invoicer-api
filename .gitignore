@@ -45,3 +45,7 @@ app.db
 *.db
 uploads/*
 logs/*
+
+# seed json files
+app/seed/orgs/*
+!app/seed/orgs/demo.json
