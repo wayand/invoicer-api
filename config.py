@@ -51,7 +51,7 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SITE_DOMAIN = "http://localhost:5001"
+    SITE_DOMAIN = os.environ.get("SITE_DOMAIN")
     ENV = "development"
     DEVELOPMENT = True
     SQLALCHEMY_ECHO = False

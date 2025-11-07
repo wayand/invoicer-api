@@ -2,7 +2,7 @@ from flask_mail import Message
 from flask import current_app
 from app import mail
 from flask import render_template
-
+from urllib.parse import quote
 
 def send_email(subject, sender, recipients, text_body, html_body):
     msg = Message(subject, sender=("The Invoicer", sender), recipients=recipients)
@@ -45,7 +45,7 @@ def send_password_reset_email(user):
 
 
 def send_confirm_mail(user_email, token):
-    confirm_url = f"{current_app.config['SITE_DOMAIN']}/confirm-email/{token}"
+    confirm_url = f"{current_app.config['SITE_DOMAIN']}/confirm-email/{quote(token)}"
     send_email(
         "Please confirm your email",
         sender=current_app.config["MAIL_DEFAULT_SENDER"],
