@@ -30,3 +30,4 @@ typing_extensions>=4.12
 Werkzeug==3.1.1           # Required by Flask 3.1.1 :contentReference[oaicite:6]{index=6}
 flasgger==0.9.7.1
 apispec
+pytest

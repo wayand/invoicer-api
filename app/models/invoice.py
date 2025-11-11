@@ -21,7 +21,7 @@ class Invoice(BaseModel):
     organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), primary_key=True, nullable=False)
     invoice_no = db.Column(db.String(100), primary_key=True, nullable=False)
 
-    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False )
+    contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'), nullable=False )
     invoice_date = db.Column(db.Date, default=None, nullable=False)
     duedate = db.Column(db.Date, default=None, nullable=False)
     amount = db.Column(db.Numeric(10,3), server_default='0.00', default=0.00, nullable=False)
@@ -34,7 +34,7 @@ class Invoice(BaseModel):
     template_id = db.Column(db.String(100), server_default='1', default='1', nullable=False)
     excluding_vat = db.Column(db.Boolean, server_default=db.text('true'), default=True, nullable=False)
 
-    client = db.relationship('Client', backref="invoices")
+    contact = db.relationship('Contact', backref="invoices")
     lines = db.relationship('InvoiceLine', backref="invoices", cascade="all, delete")
 
     def __repr__(self):

@@ -1,5 +1,5 @@
 from flask import request
-from sqlalchemy import exc, and_, not_
+from sqlalchemy import exc
 from app.routes import bp
 from app.models import (
     db,
@@ -22,9 +22,9 @@ def get_account_groups():
 
 
 @bp.get("/deposit-accounts")
-# @jwt_required()
+@jwt_required()
 def get_deposit_accounts():
-    organization_id = 1  # current_user.organization_id
+    organization_id = current_user.organization_id
     accounts = Account.query.filter_by(organization_id=organization_id, is_deposit=True)
     return DepositAccountSchema(many=True).jsonify(accounts)
 
@@ -98,7 +98,7 @@ def update_account(account_id):
         account.update()
 
         return account_schema.dump(account), 200
-    except exc.IntegrityError as e:
+    except exc.IntegrityError:
         db.session.rollback()
         return {"error": f"This account name is already in use ({account.name})"}, 409
     except Exception as e:
@@ -128,7 +128,7 @@ def create_account():
 
         return account_schema.jsonify(account), 201
 
-    except exc.IntegrityError as e:
+    except exc.IntegrityError:
         return {"error": f"This account already exists ({account.name})"}, 409
     except Exception as e:
         return {"error": str(e)}, 400
