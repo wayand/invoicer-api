@@ -2,7 +2,6 @@ from datetime import datetime
 from flask import request, current_app, jsonify, abort, session
 from app.routes import bp
 from app.models import (
-    db,
     User,
     Organization,
     RevokedToken,

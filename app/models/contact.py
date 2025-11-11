@@ -1,7 +1,7 @@
 from app.models import db, BaseModel
 
-class Client(BaseModel):
-    __tablename__ = 'clients'
+class Contact(BaseModel):
+    __tablename__ = 'contacts'
 
     id_seq = db.Sequence(__tablename__+'_id_seq')
 
@@ -32,4 +32,5 @@ class Client(BaseModel):
     country_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
     contactperson_name = db.Column(db.String(255), nullable=True)
     contactperson_email = db.Column(db.String(255), nullable=True)
-    type = db.Column(db.String(10), server_default='company', default='company', nullable=False)
+    is_company = db.Column(db.Boolean, server_default=db.text('false'), default=False, nullable=False)
+    type = db.Column(db.String(10), server_default='client', default='client', nullable=False)

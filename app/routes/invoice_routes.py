@@ -19,7 +19,7 @@ def mark_as_sent(invoice_id):
         invoice = Invoice.query.filter_by(organization_id=organization_id, id=invoice_id).first_or_404(description=f'Invoice with id {invoice_id} not found!')
         if not isinstance(invoice_data['is_sent'], bool):
             return { 'error': '"is_sent" is NOT of type boolean!'}, 422
-        
+
         invoice.is_sent = invoice_data.get('is_sent', invoice.is_sent)
         invoice.update()
 
@@ -124,7 +124,7 @@ def update_invoice(organization_id, invoice_id):
         if len(lines) < 1:
             return {'error': 'InvoiceLines length should be greater than 1!'}, 400
 
-        invoice.client_id = data.get('client_id', invoice.client_id)
+        invoice.contact_id = data.get('contact_id', invoice.contact_id)
         invoice.invoice_no = data.get('invoice_no', invoice.invoice_no)
         invoice.invoice_date = data.get('invoice_date', invoice.invoice_date)
         invoice.duedate = data.get('duedate', invoice.duedate)

@@ -23,6 +23,7 @@ class User(BaseModel):
     )
 
     """
+    TODO: add email as unique index key using flask migration
     Primary keys: organization_id, email
     """
 
@@ -49,6 +50,25 @@ class User(BaseModel):
     )
     otp_secret = db.Column(db.String(16), nullable=False)
     otp_secret_temp = db.Column(db.String(16), nullable=False)
+
+    def __init__(self,
+        organization_id: int,
+        email: str,
+        name: str,
+        password_plaintext: str,
+        owner: bool = False,
+        is_two_factor_auth: bool = False,
+        two_factor_auth_type: str = "2fa_otp_email"
+    ):
+
+        """Initializes a new User object, handling both required fields and defaults."""
+        self.organization_id = organization_id
+        self.email = email
+        self.name = name
+        self.password_hash = self.generate_hash(password_plaintext)
+        self.owner = owner
+        self.is_two_factor_auth = is_two_factor_auth
+        self.two_factor_auth_type = two_factor_auth_type
 
     def __repr__(self):
         return f"<User {self.name}>"

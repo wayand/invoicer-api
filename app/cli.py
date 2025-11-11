@@ -1,17 +1,15 @@
 from flask.cli import with_appcontext
 from app.models import (
-    db, User, Country, Organization, Client, Invoice, Product, InvoiceLine, 
+    db, User, Country, Organization, Contact, Invoice, Product, InvoiceLine,
     Account, AccountType, AccountGroup, TaxRate)
-import click, json, os
+import click, json
 from sqlalchemy import exc
-import glob 
-from pprint import pprint
+import glob
 
 @click.command()
 @with_appcontext
 def seed():
     """Seed the user database."""
-    msg=[]
 
     #create new category
     default_country = Country.query.filter_by(id=1).first()
@@ -35,15 +33,15 @@ def seed():
             org_data = json.load(f)
             click.echo('\nCreating Organization: ' + org_data.get('name'))
 
-            # extracting users, clients and products
+            # extracting users, contacts and products
             org_users = org_data.pop('users')
             org_products = org_data.pop('products')
-            org_clients = org_data.pop('clients')
+            org_contacts = org_data.pop('contacts')
             account_types = org_data.pop('account_types')
             tax_rates = org_data.pop('tax_rates')
 
             organization_obj = Organization.find_by(
-                                                    name=org_data.get('name'), 
+                                                    name=org_data.get('name'),
                                                     slug=org_data.get('slug'),
                                                     email=org_data.get('email')
                                                     )
@@ -54,7 +52,7 @@ def seed():
                 click.echo('done: '+ org_data.get('name'))
             else:
                 click.echo('already exists Organization: '+ org_data.get("name"))
-                
+
 
             ###########################
             # Organization -> users
@@ -73,7 +71,7 @@ def seed():
                         click.echo('-- already exists user: '+ user_data.get("name") + str(e.args))
             else:
                 click.echo('-- No users found')
-            
+
             #############################
             # Organization -> Products
             click.echo('\n-> creating products for Organization: '+ org_data.get('name'))
@@ -83,7 +81,7 @@ def seed():
                                     name=product_data.get('name'),
                                     organization_id=organization_obj.id
                                 )
-                    if not product_obj:                    
+                    if not product_obj:
                         product_data['organization_id'] = organization_obj.id
                         product_obj = Product(**product_data)
                         product_obj.save()
@@ -94,42 +92,42 @@ def seed():
                 click.echo('-- No products found')
 
             ############################
-            # Organization -> Clients
-            click.echo('\n-> creating clients for Organization: '+ org_data.get('name'))
-            if org_clients:
-                for client_data in org_clients:
+            # Organization -> Contacts
+            click.echo('\n-> creating contacts for Organization: '+ org_data.get('name'))
+            if org_contacts:
+                for contact_data in org_contacts:
 
-                    # extract client invoices
-                    client_invoices = client_data.pop('invoices')
+                    # extract contact invoices
+                    contact_invoices = contact_data.pop('invoices')
 
-                    client_obj = Client.find_by(
-                                    name=client_data.get('name'),
-                                    email=client_data.get('email'),
+                    contact_obj = Contact.find_by(
+                                    name=contact_data.get('name'),
+                                    email=contact_data.get('email'),
                                     organization_id=organization_obj.id
                                 )
-                    if not client_obj:
-                        client_data['organization_id'] = organization_obj.id
-                        client_obj = Client(**client_data)
-                        client_obj.save()
-                        click.echo('-- created client: '+ client_data.get('name'))
+                    if not contact_obj:
+                        contact_data['organization_id'] = organization_obj.id
+                        contact_obj = Contact(**contact_data)
+                        contact_obj.save()
+                        click.echo('-- created contact: '+ contact_data.get('name'))
                     else:
-                        click.echo('-- already exists: '+ client_data.get("name"))
+                        click.echo('-- already exists: '+ contact_data.get("name"))
 
                     #####################
-                    # client invoices
-                    click.echo('\n-- -> creating invoices for client: ' + client_data.get('name'))
+                    # contact invoices
+                    click.echo('\n-- -> creating invoices for contact: ' + contact_data.get('name'))
 
-                    if client_invoices:
-                        for invoice_data in client_invoices:
+                    if contact_invoices:
+                        for invoice_data in contact_invoices:
                             try:
                                 invoice_data['organization_id'] = organization_obj.id
-                                invoice_data['client_id'] = client_obj.id
+                                invoice_data['contact_id'] = contact_obj.id
                                 lines = invoice_data.pop('lines')
 
                                 # add product to invoiceLine
                                 for line in lines:
                                     line['product_id'] = product_obj.id
-                                
+
                                 invoice_obj = Invoice(**invoice_data, lines=[
                                     InvoiceLine(**line) for line in lines
                                 ])
@@ -139,7 +137,7 @@ def seed():
                                 db.session.rollback()
                                 click.echo('-- -- already exists: '+ invoice_data.get("invoice_no"))
             else:
-                click.echo('-- No clients found')
+                click.echo('-- No contacts found')
 
 
             ########################
@@ -206,7 +204,7 @@ def seed():
                                 click.echo('-- -- created Account group: '+ account_group_data.get('name'))
                             else:
                                 click.echo('-- -- already exists: '+ account_group_data.get("name"))
-                            
+
                             #####################
                             # accounts
                             click.echo('\n-- -- -> creating accounts for account-group: ' + account_group_data.get('name'))
@@ -216,7 +214,7 @@ def seed():
 
                                     tax_rate_id = None
                                     if account_data.get('tax_rate_id'):
-                                
+
                                         tax_rate_obj = TaxRate.find_by(
                                                             name=account_data.get('tax_rate_id'),
                                                             organization_id=organization_obj.id
