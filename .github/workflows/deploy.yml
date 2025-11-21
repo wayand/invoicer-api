@@ -12,6 +12,9 @@ jobs:
     test:
         name: Run Unit tests
         runs-on: ubuntu-latest
+        env:
+            TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432
+            TEST_DB_NAME: test_invoicer_db
 
         steps:
           - name: Checkout code
@@ -28,7 +31,7 @@ jobs:
                 pip install -r requirements.txt
 
           - name: Run tests
-            run: python -m pytest -v
+            run: python -m pytest -vs
 
     deploy:
         name: Deploy to invoicer-api.wayand.dk
