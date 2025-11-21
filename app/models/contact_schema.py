@@ -1,14 +1,18 @@
-from app.models import ma, Contact
-from marshmallow import (
-    fields,
-    validate
-)
+from flask_marshmallow import Marshmallow
+from marshmallow import fields, validate
+
+from .contact import Contact
+
+ma = Marshmallow()
+
 
 class ContactSchema(ma.SQLAlchemySchema):
     id = fields.Integer(dump_only=True)
     organization_id = fields.Integer()
     country_id = fields.Integer()
-    name = fields.String(required=True, validate=[validate.Length(min=1, max=100)])
+    name = fields.String(
+        required=True, validate=[validate.Length(min=1, max=100)]
+    )
     logo = fields.String()
     registration_no = fields.String()
     type = fields.String()
@@ -27,6 +31,7 @@ class ContactSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Contact
         include_fk = True
+
 
 contact_schema = ContactSchema()
 contacts_schema = ContactSchema(many=True)

@@ -1,10 +1,14 @@
-from app.models import db, BaseModel
-from passlib.hash import pbkdf2_sha256 as sha256
-import os, base64, onetimepass
-from flask import current_app
+import base64
+import os
 import urllib.parse
 from time import time
+
 import jwt
+import onetimepass
+from flask import current_app
+from passlib.hash import pbkdf2_sha256 as sha256
+
+from .base import BaseModel, db
 
 
 class User(BaseModel):
@@ -28,7 +32,10 @@ class User(BaseModel):
     """
 
     organization_id = db.Column(
-        db.Integer, db.ForeignKey("organizations.id"), primary_key=True, nullable=False
+        db.Integer,
+        db.ForeignKey("organizations.id"),
+        primary_key=True,
+        nullable=False,
     )
     email = db.Column(db.String(120), primary_key=True, nullable=False)
     email_is_confirmed = db.Column(db.Boolean, nullable=False, default=False)
@@ -36,7 +43,10 @@ class User(BaseModel):
 
     name = db.Column(db.String(64), nullable=False)
     owner = db.Column(
-        db.Boolean, server_default=db.text("false"), default=False, nullable=False
+        db.Boolean,
+        server_default=db.text("false"),
+        default=False,
+        nullable=False,
     )
     password_hash = db.Column(db.String(128), nullable=False)
     is_two_factor_auth = db.Column(
@@ -51,16 +61,18 @@ class User(BaseModel):
     otp_secret = db.Column(db.String(16), nullable=False)
     otp_secret_temp = db.Column(db.String(16), nullable=False)
 
-    def __init__(self,
+    def __init__(
+        self,
         organization_id: int,
         email: str,
         name: str,
         password_plaintext: str,
         owner: bool = False,
-        is_two_factor_auth: bool = False,
-        two_factor_auth_type: str = "2fa_otp_email"
+        is_two_factor_auth: bool = True,
+        two_factor_auth_type: str = "2fa_otp_email",
+        otp_secret: str = "",
+        otp_secret_temp: str = "",
     ):
-
         """Initializes a new User object, handling both required fields and defaults."""
         self.organization_id = organization_id
         self.email = email
@@ -69,6 +81,8 @@ class User(BaseModel):
         self.owner = owner
         self.is_two_factor_auth = is_two_factor_auth
         self.two_factor_auth_type = two_factor_auth_type
+        self.otp_secret = otp_secret
+        self.otp_secret_temp = otp_secret_temp
 
     def __repr__(self):
         return f"<User {self.name}>"
@@ -90,7 +104,9 @@ class User(BaseModel):
 
     def get_totp_code(self, expire_in_sec=30):
         """param expire_in_sec: length of TOTP interval (30 seconds by default)"""
-        return onetimepass.get_totp(self.otp_secret, interval_length=expire_in_sec)
+        return onetimepass.get_totp(
+            self.otp_secret, interval_length=expire_in_sec
+        )
 
     def verify_totp(self, token, expire_in_sec=30):
         return onetimepass.valid_totp(
@@ -112,7 +128,9 @@ class User(BaseModel):
     def verify_reset_password_token(token):
         try:
             id = jwt.decode(
-                token, current_app.config["JWT_SECRET_KEY"], algorithms=["HS256"]
+                token,
+                current_app.config["JWT_SECRET_KEY"],
+                algorithms=["HS256"],
             )["reset_password"]
         except Exception as e:
             print("reset_password_verify_error", e)

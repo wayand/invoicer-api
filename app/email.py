@@ -1,8 +1,10 @@
-from flask_mail import Message
-from flask import current_app
-from app import mail
-from flask import render_template
 from urllib.parse import quote
+
+from flask import current_app, render_template
+from flask_mail import Message
+
+from app import mail
+
 
 def send_email(subject, sender, recipients, text_body, html_body):
     msg = Message(subject, sender=("The Invoicer", sender), recipients=recipients)

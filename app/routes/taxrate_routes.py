@@ -1,10 +1,9 @@
-from flask import request
+from flask_jwt_extended import current_user, jwt_required
+
+from app.models.tax_rate import TaxRate
+from app.models.taxrate_schema import taxrates_schema
 from app.routes import bp
-from app.models import TaxRate, taxrate_schema, taxrates_schema
-from flask_jwt_extended import (
-    jwt_required,
-    current_user
-)
+
 
 @bp.get("/tax-rates")
 @jwt_required()

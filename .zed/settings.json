@@ -1,0 +1,28 @@
+// Folder-specific settings
+//
+// For a full list of overridable settings, and general information on folder-specific settings,
+// see the documentation: https://zed.dev/docs/configuring-zed#settings-files
+{
+  "languages": {
+    "Python": {
+        "format_on_save": "on",
+        "language_servers": ["pyright", "ruff"]
+    }
+  },
+  "lsp": {
+      "ruff": {
+            "initialization_options": {
+                "settings": {
+                    "configuration": "ruff.toml"
+                }
+            }
+        },
+        "pyright": {
+            "settings": {
+                "python": {
+                    "pythonPath": ".venv/bin/python"
+                }
+            }
+        }
+  }
+}
