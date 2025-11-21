@@ -1,23 +1,25 @@
 from flask import request
+from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
-from app.routes import bp
-from app.models import (
-    db,
-    Account,
-    AccountGroup,
+
+from app.models.account import Account, AccountGroup
+from app.models.account_schema import (
     DepositAccountSchema,
-    accounts_schema,
-    account_schema,
     account_groups_schema,
+    account_schema,
+    accounts_schema,
 )
-from flask_jwt_extended import jwt_required, current_user
+from app.models.base import db
+from app.routes import bp
 
 
 @bp.get("/account-groups")
 @jwt_required()
 def get_account_groups():
     organization_id = current_user.organization_id
-    account_groups = AccountGroup.query.filter_by(organization_id=organization_id)
+    account_groups = AccountGroup.query.filter_by(
+        organization_id=organization_id
+    )
     return account_groups_schema.jsonify(account_groups)
 
 
@@ -25,7 +27,9 @@ def get_account_groups():
 @jwt_required()
 def get_deposit_accounts():
     organization_id = current_user.organization_id
-    accounts = Account.query.filter_by(organization_id=organization_id, is_deposit=True)
+    accounts = Account.query.filter_by(
+        organization_id=organization_id, is_deposit=True
+    )
     return DepositAccountSchema(many=True).jsonify(accounts)
 
 
@@ -71,7 +75,9 @@ def update_account(account_id):
         account.account_group_id = account_data.get(
             "account_group_id", account.account_group_id
         )
-        account.tax_rate_id = account_data.get("tax_rate_id", account.tax_rate_id)
+        account.tax_rate_id = account_data.get(
+            "tax_rate_id", account.tax_rate_id
+        )
         account.name = account_data.get("name", account.name)
         account.bank_account_number = account_data.get(
             "bank_account_number", account.bank_account_number
@@ -86,21 +92,29 @@ def update_account(account_id):
             "bank_swift_number", account.bank_swift_number
         )
         account.bank_id = account_data.get("bank_id", account.bank_id)
-        account.description = account_data.get("description", account.description)
-        account.currency_id = account_data.get("currency_id", account.currency_id)
+        account.description = account_data.get(
+            "description", account.description
+        )
+        account.currency_id = account_data.get(
+            "currency_id", account.currency_id
+        )
         account.is_bank_account = account_data.get(
             "is_bank_account", account.is_bank_account
         )
         account.is_payment_enabled = account_data.get(
             "is_payment_enabled", account.is_payment_enabled
         )
-        account.is_archived = account_data.get("is_archived", account.is_archived)
+        account.is_archived = account_data.get(
+            "is_archived", account.is_archived
+        )
         account.update()
 
         return account_schema.dump(account), 200
     except exc.IntegrityError:
         db.session.rollback()
-        return {"error": f"This account name is already in use ({account.name})"}, 409
+        return {
+            "error": f"This account name is already in use ({account.name})"
+        }, 409
     except Exception as e:
         return {"error": str(e)}, 500
 
@@ -121,7 +135,9 @@ def create_account():
             organization_id=organization_id, name=account_data.get("name")
         ).first()
         if duplicate_check:
-            raise Exception(f"Account name ({duplicate_check.name}) already exists")
+            raise Exception(
+                f"Account name ({duplicate_check.name}) already exists"
+            )
 
         account = Account(**account_data)
         account.save()

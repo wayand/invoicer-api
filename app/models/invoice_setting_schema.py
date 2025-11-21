@@ -1,9 +1,10 @@
-from app.models import ma, InvoiceSetting
-from marshmallow import (
-    fields,
-    validate,
-    post_dump
-)
+from flask_marshmallow import Marshmallow
+from marshmallow import fields, post_dump
+
+from .invoice_setting import InvoiceSetting
+
+ma = Marshmallow()
+
 
 class InvoiceSettingSchema(ma.SQLAlchemySchema):
     id = fields.Integer(dump_only=True)
@@ -25,11 +26,16 @@ class InvoiceSettingSchema(ma.SQLAlchemySchema):
     @post_dump()
     def convert_decimal(self, data, many):
         if data:
-            data['default_reminder_fee'] = float(data.get('default_reminder_fee')) if data.get('default_reminder_fee') else None
+            data["default_reminder_fee"] = (
+                float(data.get("default_reminder_fee"))
+                if data.get("default_reminder_fee")
+                else None
+            )
         return data
 
     class Meta:
         model = InvoiceSetting
         include_fk = True
+
 
 invoice_setting_schema = InvoiceSettingSchema()

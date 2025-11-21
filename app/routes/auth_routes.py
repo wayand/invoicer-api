@@ -1,32 +1,38 @@
 from datetime import datetime
-from flask import request, current_app, jsonify, abort, session
-from app.routes import bp
-from app.models import (
-    User,
-    Organization,
-    RevokedToken,
-    useremail_schema,
-    user_schema,
-    usertoken_schema,
-    userchangepassword_schema,
-    usertotpsetupdelete_schema,
-    usertotpsetup_schema,
-    reset_password_schema,
-)
-from app.email import send_password_reset_email, send_confirm_mail, send_totp_code_email
-from app import jwt
 from io import BytesIO
-import pyqrcode
-from itsdangerous import URLSafeTimedSerializer
 
+import pyqrcode
+from flask import abort, current_app, jsonify, request, session
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
-    jwt_required,
     current_user,
-    get_jwt_identity,
     get_jwt,
+    get_jwt_identity,
+    jwt_required,
 )
+from itsdangerous import URLSafeTimedSerializer
+
+from app import jwt
+from app.email import (
+    send_confirm_mail,
+    send_password_reset_email,
+    send_totp_code_email,
+)
+from app.models.organization import Organization
+from app.models.revoked_token import RevokedToken
+from app.models.user import User
+from app.models.user_schema import (
+    reset_password_schema,
+    user_schema,
+    userchangepassword_schema,
+    useremail_schema,
+    usertoken_schema,
+    usertotpsetup_schema,
+    usertotpsetupdelete_schema,
+)
+
+from . import bp
 
 
 @jwt.user_lookup_loader
@@ -76,7 +82,9 @@ def delete_totp_auth():
         if errors:
             return {"errors": errors}, 422
 
-        password_hash = usertotpsetupdelete_schema.load(json_data).get("password_hash")
+        password_hash = usertotpsetupdelete_schema.load(json_data).get(
+            "password_hash"
+        )
         user = current_user
         if User.verify_hash(password_hash, user.password_hash):
             user.otp_secret = User.generate_otp_secret()
@@ -127,14 +135,18 @@ def totp_setup():
 
 def generate_token(email):
     serializer = URLSafeTimedSerializer(current_app.config["JWT_SECRET_KEY"])
-    return serializer.dumps(email, salt=current_app.config["SECURITY_PASSWORD_SALT"])
+    return serializer.dumps(
+        email, salt=current_app.config["SECURITY_PASSWORD_SALT"]
+    )
 
 
 def confirm_token(token, expiration=3600):
     serializer = URLSafeTimedSerializer(current_app.config["JWT_SECRET_KEY"])
     try:
         email = serializer.loads(
-            token, salt=current_app.config["SECURITY_PASSWORD_SALT"], max_age=expiration
+            token,
+            salt=current_app.config["SECURITY_PASSWORD_SALT"],
+            max_age=expiration,
         )
         return email
     except Exception:
@@ -162,20 +174,30 @@ def confirm_email(token):
         user.update()
         return {"message": "You have confirmed your account. Thanks!"}
     else:
-        return {"error": ["The confirmation link is invalid or has expired."]}, 400
+        return {
+            "error": ["The confirmation link is invalid or has expired."]
+        }, 400
+
 
 @bp.post("/auth/resend-totp-email")
 @jwt_required(optional=True)
 def resend_totp_email():
     identity = get_jwt_identity()
     if identity:
-        return {"error": ["Can't send totp for an already authenticated user!"], "ses": session.get('logging_in_user')}, 400
+        return {
+            "error": ["Can't send totp for an already authenticated user!"],
+            "ses": session.get("logging_in_user"),
+        }, 400
     else:
-        user = User.find_by(email=session.get('logging_in_user'))
+        user = User.find_by(email=session.get("logging_in_user"))
         if not user:
             return {"error": ["not found user"]}, 400
         send_totp_code_email(user)
-        return {"message": "A new TOTP email has been sent.", "ses": session.get('logging_in_user')}
+        return {
+            "message": "A new TOTP email has been sent.",
+            "ses": session.get("logging_in_user"),
+        }
+
 
 @bp.post("/auth/resend-confirmation-email")
 @jwt_required()
@@ -241,7 +263,9 @@ def send_reset_mail():
                 "message": "Check your email for the instructions to reset your password."
             }
         else:
-            return {"errors": {"email": "We Couldn't find entered email address"}}, 422
+            return {
+                "errors": {"email": "We Couldn't find entered email address"}
+            }, 422
 
     except Exception as e:
         return {"error": str(e)}, 500
@@ -306,12 +330,14 @@ def get_token():
         return {"errors": errors}, 422
 
     try:
-        session.pop('logging_in_user', None)
+        session.pop("logging_in_user", None)
         user_data = usertoken_schema.load(json_data)
         # Searching user by username
         user = User.find_by(email=user_data["email"])
         if not user:
-            return {"error": f"User by email '{user_data['email']}' not found!"}, 404
+            return {
+                "error": f"User by email '{user_data['email']}' not found!"
+            }, 404
         organization = Organization.find_by(id=user.organization_id)
         if not organization:
             return {"error": "not found organization"}, 404
@@ -320,7 +346,7 @@ def get_token():
         if not user.is_two_factor_auth:
             return {"error": "Wrong 2fa method"}, 422
 
-        session['logging_in_user'] = user.email
+        session["logging_in_user"] = user.email
         two_factor_code = user_data.get("otp_2fa")
         if two_factor_code is None:
             if not user.two_factor_auth_type == "2fa_mobile_app":
@@ -329,12 +355,14 @@ def get_token():
             return {
                 "message": "2fa_otp",
                 "twoFactorType": user.two_factor_auth_type,
-                "ses": session.get('logging_in_user')
+                "ses": session.get("logging_in_user"),
             }, 206
 
-        expire_in_sec = 30 if user.two_factor_auth_type == "2fa_mobile_app" else 3600
+        expire_in_sec = (
+            30 if user.two_factor_auth_type == "2fa_mobile_app" else 3600
+        )
         if user.verify_totp(two_factor_code, expire_in_sec=expire_in_sec):
-            session.pop('logging_in_user', None)
+            session.pop("logging_in_user", None)
             access_token = create_access_token(
                 identity=user.email,
                 additional_claims={
@@ -355,7 +383,7 @@ def get_token():
                 "refreshToken": refresh_token,
             }
         else:
-            return {"error": "2FA is wrong, please try again"}, 422
+            return {"error": "2FA is wrong, please try again:"}, 422
 
     except Exception as e:
         return {"error": str(e)}, 500
@@ -372,6 +400,9 @@ def refresh_token():
     a while, so mark the newly created access token as not fresh
     """
     organization = Organization.find_by(id=current_user.organization_id)
+    if organization is None:
+        raise ValueError("Organization not found")
+
     identity = get_jwt_identity()
     access_token = create_access_token(
         identity=identity,
@@ -395,7 +426,8 @@ def revoke_access_token():
     jti = get_jwt()["jti"]
 
     try:
-        revoked_token = RevokedToken(jti=jti)
+        revoked_token = RevokedToken()
+        revoked_token.jti = jti
         revoked_token.save()
         return {"message": "Access token has been revoked"}, 200
     except Exception as e:
@@ -408,7 +440,8 @@ def revoke_refresh_token():
     jti = get_jwt()["jti"]
 
     try:
-        revoked_token = RevokedToken(jti=jti)
+        revoked_token = RevokedToken()
+        revoked_token.jti = jti
         revoked_token.save()
         return {"message": "Refresh token has been revoked"}, 200
     except Exception as e:
