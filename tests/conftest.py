@@ -15,8 +15,8 @@ from app.models.organization import Organization
 from app.models.user import User
 from config import TestingConfig
 
-TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
-TEST_DB_NAME = os.environ.get("TEST_DB_NAME")
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "")
+TEST_DB_NAME = os.environ.get("TEST_DB_NAME", "")
 
 
 @pytest.fixture(scope="module")
