@@ -75,7 +75,7 @@ def create_contact(organization_id):
         return contact_schema.jsonify(contact), 201
     except exc.IntegrityError:
         return {
-            "error": f"This Email address is already in use ({contact.email})"
+            "error": f"This Email address is already in use ({json_data.email})"
         }, 409
     except Exception as e:
         return {"error": str(e)}, 400
