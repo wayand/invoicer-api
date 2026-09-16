@@ -1,0 +1,45 @@
+[project]
+name = "invoicer-api"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic~=1.17.0",
+    "apispec>=6.10.0",
+    "blinker~=1.9.0",
+    "click~=8.3.0",
+    "flasgger~=0.9.7.1",
+    "flask~=3.1.0",
+    "flask-cors~=6.0.0",
+    "flask-jwt-extended~=4.7.1",
+    "flask-mail~=0.10.0",
+    "flask-marshmallow~=1.3.0",
+    "flask-migrate~=4.1.0",
+    "flask-sqlalchemy~=3.1.0",
+    "greenlet~=3.2.0",
+    "gunicorn>=26.2.0",
+    "itsdangerous~=2.2.0",
+    "jinja2~=3.1.0",
+    "mako~=1.3.0",
+    "markupsafe~=3.0.0",
+    "marshmallow~=4.1.0",
+    "marshmallow-sqlalchemy~=1.4.0",
+    "onetimepass~=1.0.1",
+    "packaging~=25.0",
+    "passlib~=1.7.4",
+    "psycopg[binary]>=3.2",
+    "pyjwt~=2.11.0",
+    "pyqrcode~=1.2.1",
+    "python-dotenv~=1.2.0",
+    "simplejson~=3.20.0",
+    "six~=1.17.0",
+    "sqlalchemy>=2.0.41",
+    "typing-extensions>=4.12",
+    "werkzeug~=3.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "psycopg2-binary==2.9.11",
+    "pytest>=9.1.1",
+    "ruff>=0.16.8",
+]

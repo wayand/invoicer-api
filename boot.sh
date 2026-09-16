@@ -7,10 +7,10 @@ find /invoicer-api -name "*.pyc" -delete 2>/dev/null || true
 echo "cache files cleaned"
 
 echo "Starting application..."
-pip3 install -r requirements.txt
+uv sync --frozen
 
-flask db upgrade
+uv run flask db upgrade
 
 echo "I am Here.........DONE while"
 
-exec gunicorn -b :5000 --access-logfile - --error-logfile - run:app
+exec uv run gunicorn -b :5000 --access-logfile - --error-logfile - run:app

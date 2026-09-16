@@ -32,18 +32,12 @@ To set up the API locally:
    cd invoicer-api
    ```
 
-2. Create and activate a virtual environment:
+2. Install dependencies (this also creates the `.venv` automatically):
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: venv\Scripts\activate
+   uv sync
    ```
 
-3. Install package dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Set up the environment variables:
+3. Set up the environment variables:
    - Copy `.env.example` to `.env` and fill in your configuration:
    ```env
    FLASK_APP=app.py
@@ -52,14 +46,14 @@ To set up the API locally:
    SECRET_KEY=your-secret-key
    ```
 
-5. Initialize the database:
+4. Initialize the database:
    ```bash
-   flask db upgrade
+   uv run flask db upgrade
    ```
 
-6. Start the Flask development server:
+5. Start the Flask development server:
    ```bash
-   flask run
+   uv run flask run
    ```
 
 ## API Endpoints
