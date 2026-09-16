@@ -1,10 +1,10 @@
 from flask.cli import with_appcontext
 from app.models import (
-    db, User, Country, Organization, Client, Invoice, Product, InvoiceLine, 
+    db, User, Country, Organization, Client, Invoice, Product, InvoiceLine,
     Account, AccountType, AccountGroup, TaxRate)
 import click, json, os
 from sqlalchemy import exc
-import glob 
+import glob
 from pprint import pprint
 
 @click.command()
@@ -43,7 +43,7 @@ def seed():
             tax_rates = org_data.pop('tax_rates')
 
             organization_obj = Organization.find_by(
-                                                    name=org_data.get('name'), 
+                                                    name=org_data.get('name'),
                                                     slug=org_data.get('slug'),
                                                     email=org_data.get('email')
                                                     )
@@ -54,7 +54,7 @@ def seed():
                 click.echo('done: '+ org_data.get('name'))
             else:
                 click.echo('already exists Organization: '+ org_data.get("name"))
-                
+
 
             ###########################
             # Organization -> users
@@ -62,15 +62,8 @@ def seed():
             if org_users:
                 for user_data in org_users:
                     try:
-<<<<<<< Updated upstream
-                        user_data['organization_id'] = organization_obj.id
-                        user_data['password_hash'] = User.generate_hash(user_data.get('password_hash'))
-                        user_data['otp_secret'] = User.generate_otp_secret()
-=======
                         user_data["organization_id"] = organization_obj.id
                         user_data["otp_secret"] = User.generate_otp_secret()
-                        # print(user_data)
->>>>>>> Stashed changes
                         user_obj = User(**user_data)
                         user_obj.save()
                         click.echo('-- created user: '+ user_data.get('name'))
@@ -79,7 +72,7 @@ def seed():
                         click.echo('-- already exists user: '+ user_data.get("name") + str(e.args))
             else:
                 click.echo('-- No users found')
-            
+
             #############################
             # Organization -> Products
             click.echo('\n-> creating products for Organization: '+ org_data.get('name'))
@@ -89,7 +82,7 @@ def seed():
                                     name=product_data.get('name'),
                                     organization_id=organization_obj.id
                                 )
-                    if not product_obj:                    
+                    if not product_obj:
                         product_data['organization_id'] = organization_obj.id
                         product_obj = Product(**product_data)
                         product_obj.save()
@@ -135,7 +128,7 @@ def seed():
                                 # add product to invoiceLine
                                 for line in lines:
                                     line['product_id'] = product_obj.id
-                                
+
                                 invoice_obj = Invoice(**invoice_data, lines=[
                                     InvoiceLine(**line) for line in lines
                                 ])
@@ -212,7 +205,7 @@ def seed():
                                 click.echo('-- -- created Account group: '+ account_group_data.get('name'))
                             else:
                                 click.echo('-- -- already exists: '+ account_group_data.get("name"))
-                            
+
                             #####################
                             # accounts
                             click.echo('\n-- -- -> creating accounts for account-group: ' + account_group_data.get('name'))
@@ -222,7 +215,7 @@ def seed():
 
                                     tax_rate_id = None
                                     if account_data.get('tax_rate_id'):
-                                
+
                                         tax_rate_obj = TaxRate.find_by(
                                                             name=account_data.get('tax_rate_id'),
                                                             organization_id=organization_obj.id
