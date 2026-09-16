@@ -9,8 +9,8 @@
             "owner": true,
             "name": "Demo App",
             "email": "demo@hotmail.com",
-            "password_hash": "demo",
-            "is_two_factor_auth": false,
+            "password_plaintext": "demo",
+            "is_two_factor_auth": true,
             "otp_secret": "",
             "otp_secret_temp": ""
         }

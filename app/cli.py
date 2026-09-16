@@ -62,9 +62,15 @@ def seed():
             if org_users:
                 for user_data in org_users:
                     try:
+<<<<<<< Updated upstream
                         user_data['organization_id'] = organization_obj.id
                         user_data['password_hash'] = User.generate_hash(user_data.get('password_hash'))
                         user_data['otp_secret'] = User.generate_otp_secret()
+=======
+                        user_data["organization_id"] = organization_obj.id
+                        user_data["otp_secret"] = User.generate_otp_secret()
+                        # print(user_data)
+>>>>>>> Stashed changes
                         user_obj = User(**user_data)
                         user_obj.save()
                         click.echo('-- created user: '+ user_data.get('name'))
