@@ -1,4 +1,4 @@
-{ 
+{
     "name": "Demo ApS",
     "slug": "demo-aps",
     "logo": "",
@@ -22,7 +22,7 @@
             "unit_price": 199.50
         }
     ],
-    "clients": [
+    "contacts": [
         {
             "name": "Demo ApS",
             "logo": "",
@@ -122,7 +122,7 @@
                         "is_archived": 0,
                         "is_deposit": 0
                     }
-                    
+
                 ]},
                 {"name": "Finansielle indtægter", "number": 2200, "interval_start": 2200, "interval_end": 2299, "accounts": []}
             ]
@@ -148,7 +148,7 @@
                         "is_archived": 0,
                         "is_deposit": 0
                     }
-                    
+
                 ]},
                 {"name": "Lønomkostninger", "number": 1400, "interval_start": 1400, "interval_end": 1499, "accounts": []},
                 {"name": "Bilomkostninger", "number": 1700, "interval_start": 1700, "interval_end": 1799, "accounts": []},
@@ -189,7 +189,7 @@
                         "is_archived": 0,
                         "is_deposit": 0
                     }
-                    
+
                 ]},
                 {"name": "Afskrivninger", "number": 2000, "interval_start": 2000, "interval_end": 2099, "accounts": []},
                 {"name": "Finansielle udgifter", "number": 2300, "interval_start": 2300, "interval_end": 2399, "accounts": []}

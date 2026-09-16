@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -29,7 +30,7 @@ class Config:
     SECURITY_PASSWORD_SALT = os.environ.get("SECURITY_PASSWORD_SALT")
 
     UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER")
-    MAX_CONTENT_LENGTH = 1024*2048
+    MAX_CONTENT_LENGTH = 1024 * 2048
     ALLOWED_UPLOAD_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
     MAIL_SERVER = os.environ.get("MAIL_SERVER")
@@ -60,4 +61,4 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URL")
