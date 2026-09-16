@@ -1,24 +1,27 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 class BaseModel(db.Model):
     __abstract__ = True
-    
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now, nullable=True)
 
     """
     Find object by fieldname
     fieldname: dict { username: 'wayand' }
     """
+
     @classmethod
     def find_by(cls, **fieldname):
         return cls.query.filter_by(**fieldname).first()
 
     def before_save(self, *args, **kwargs):
-        print('')
+        print("")
 
     def after_save(self, *args, **kwargs):
         pass
@@ -35,7 +38,7 @@ class BaseModel(db.Model):
         if commit:
             try:
                 db.session.commit()
-            except Exception as e:
+            except Exception:
                 db.session.rollback()
                 raise
 
@@ -51,6 +54,6 @@ class BaseModel(db.Model):
         db.session.delete(self)
         if commit:
             db.session.commit()
-    
+
     def __repr__(self) -> str:
-        return f'this is the baseModal class'
+        return "this is the baseModal class"

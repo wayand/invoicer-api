@@ -1,9 +1,17 @@
-from app.models import db, BaseModel
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, relationship
+
+from .base import BaseModel, db
+
+if TYPE_CHECKING:
+    from .account import Account
+
 
 class TaxRate(BaseModel):
-    __tablename__ = 'tax_rates'
+    __tablename__ = "tax_rates"
 
-    id_seq = db.Sequence(__tablename__+'_id_seq')
+    id_seq = db.Sequence(__tablename__ + "_id_seq")
 
     id = db.Column(
         db.Integer,
@@ -12,25 +20,68 @@ class TaxRate(BaseModel):
         autoincrement=True,
         primary_key=False,
         unique=True,
-        nullable=False)
+        nullable=False,
+    )
 
     """
     Primary keys: organization_id, name, abbreviation
     """
 
-    organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), primary_key=True, nullable=False)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organizations.id"),
+        primary_key=True,
+        nullable=False,
+    )
     name = db.Column(db.String(100), primary_key=True, nullable=False)
     abbreviation = db.Column(db.String(10), primary_key=True, nullable=False)
 
-    applies_to_purchases = db.Column(db.Boolean, server_default=db.text('false'), default=False, nullable=False)
-    applies_to_sales = db.Column(db.Boolean, server_default=db.text('false'), default=False, nullable=False)
-    description = db.Column(db.String(200), server_default='', default='', nullable=True)
-    is_active = db.Column(db.Boolean, server_default=db.text('false'), default=False, nullable=False)
-    is_predefined = db.Column(db.Boolean, server_default=db.text('false'), default=False, nullable=False)
+    applies_to_purchases = db.Column(
+        db.Boolean,
+        server_default=db.text("false"),
+        default=False,
+        nullable=False,
+    )
+    applies_to_sales = db.Column(
+        db.Boolean,
+        server_default=db.text("false"),
+        default=False,
+        nullable=False,
+    )
+    description = db.Column(
+        db.String(200), server_default="", default="", nullable=True
+    )
+    is_active = db.Column(
+        db.Boolean,
+        server_default=db.text("false"),
+        default=False,
+        nullable=False,
+    )
+    is_predefined = db.Column(
+        db.Boolean,
+        server_default=db.text("false"),
+        default=False,
+        nullable=False,
+    )
     net_amount_meta_field_id = db.Column(db.Integer, nullable=True)
-    predefined_tag = db.Column(db.String(100), server_default='', default='', nullable=False)
-    rate = db.Column(db.Numeric(), server_default='0', default=0, nullable=False)
-    tax_rate_group = db.Column(db.String(100), server_default='danish', default='danish', nullable=False)
+    predefined_tag = db.Column(
+        db.String(100), server_default="", default="", nullable=False
+    )
+    rate = db.Column(
+        db.Numeric(), server_default="0", default=0, nullable=False
+    )
+    tax_rate_group = db.Column(
+        db.String(100),
+        server_default="danish",
+        default="danish",
+        nullable=False,
+    )
+
+    accounts: Mapped[list["Account"]] = relationship(
+        "Account", back_populates="tax_rate"
+    )
 
     def __repr__(self):
-        return '<TaxRate {}, organization_id{}>'.format(self.id, self.organization_id)
+        return "<TaxRate {}, organization_id{}>".format(
+            self.id, self.organization_id
+        )

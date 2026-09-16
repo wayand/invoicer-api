@@ -1,14 +1,17 @@
-from app.models import ma, TaxRate
-from marshmallow import (
-    fields,
-    validate,
-    post_dump
-)
+from flask_marshmallow import Marshmallow
+from marshmallow import fields, post_dump, validate
+
+from .tax_rate import TaxRate
+
+ma = Marshmallow()
+
 
 class TaxRateSchema(ma.SQLAlchemySchema):
     id = fields.Integer(dump_only=True)
     organization_id = fields.Integer()
-    name = fields.String(required=True, validate=[validate.Length(min=1, max=100)])
+    name = fields.String(
+        required=True, validate=[validate.Length(min=1, max=100)]
+    )
     abbreviation = fields.String(required=True)
     applies_to_purchases = fields.Boolean()
     applies_to_sales = fields.Boolean()
@@ -25,12 +28,13 @@ class TaxRateSchema(ma.SQLAlchemySchema):
 
     @post_dump()
     def convert_decimal(self, data, many):
-        data['rate'] = float(data.get('rate')) if data.get('rate') else None
+        data["rate"] = float(data.get("rate")) if data.get("rate") else None
         return data
 
     class Meta:
         model = TaxRate
         include_fk = True
+
 
 taxrate_schema = TaxRateSchema()
 taxrates_schema = TaxRateSchema(many=True)

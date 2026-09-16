@@ -1,9 +1,10 @@
-from app.models import db, BaseModel
+from .base import BaseModel, db
+
 
 class Product(BaseModel):
-    __tablename__ = 'products'
+    __tablename__ = "products"
 
-    id_seq = db.Sequence(__tablename__+'_id_seq')
+    id_seq = db.Sequence(__tablename__ + "_id_seq")
 
     id = db.Column(
         db.Integer,
@@ -12,17 +13,32 @@ class Product(BaseModel):
         autoincrement=True,
         primary_key=False,
         unique=True,
-        nullable=False)
+        nullable=False,
+    )
 
     """
     Primary keys: organization_id, name
     """
 
-    organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), primary_key=True, nullable=False)
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organizations.id"),
+        primary_key=True,
+        nullable=False,
+    )
     name = db.Column(db.String(100), primary_key=True, nullable=False)
-    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=True)
+    account_id = db.Column(
+        db.Integer, db.ForeignKey("accounts.id"), nullable=True
+    )
     description = db.Column(db.String(255), nullable=True)
-    unit_price = db.Column(db.Numeric(10,3), server_default='0.00', default=0.00, nullable=False)
-    archived = db.Column(db.Boolean, server_default=db.text('false'), default=False, nullable=False)
+    unit_price = db.Column(
+        db.Numeric(10, 3), server_default="0.00", default=0.00, nullable=False
+    )
+    archived = db.Column(
+        db.Boolean,
+        server_default=db.text("false"),
+        default=False,
+        nullable=False,
+    )
 
     account = db.relationship("Account", backref="products")
