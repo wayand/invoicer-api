@@ -7,7 +7,9 @@ from app import mail
 
 
 def send_email(subject, sender, recipients, text_body, html_body):
-    msg = Message(subject, sender=("The Invoicer", sender), recipients=recipients)
+    msg = Message(
+        subject, sender=("The Invoicer", sender), recipients=recipients
+    )
     msg.body = text_body
     msg.html = html_body
     mail.send(msg)
@@ -41,17 +43,25 @@ def send_password_reset_email(user):
         "[Invoicer App] Reset Your Password",
         sender=current_app.config["MAIL_DEFAULT_SENDER"],
         recipients=[user.email],
-        text_body=render_template("email/reset_password.txt", user=user, token=token),
-        html_body=render_template("email/reset_password.html", user=user, token=token),
+        text_body=render_template(
+            "email/reset_password.txt", user=user, token=token
+        ),
+        html_body=render_template(
+            "email/reset_password.html", user=user, token=token
+        ),
     )
 
 
 def send_confirm_mail(user_email, token):
-    confirm_url = f"{current_app.config['SITE_DOMAIN']}/confirm-email/{quote(token)}"
+    confirm_url = (
+        f"{current_app.config['SITE_DOMAIN']}/confirm-email/{quote(token)}"
+    )
     send_email(
         "Please confirm your email",
         sender=current_app.config["MAIL_DEFAULT_SENDER"],
         recipients=[user_email],
         text_body="Text body",
-        html_body=render_template("email/email_confirm.html", confirm_url=confirm_url),
+        html_body=render_template(
+            "email/email_confirm.html", confirm_url=confirm_url
+        ),
     )
