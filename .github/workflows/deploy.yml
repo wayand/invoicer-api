@@ -67,16 +67,48 @@ jobs:
           - name: Run tests
             run: uv run pytest -vs
 
+    build-and-push:
+        name: Build and push Docker image
+        runs-on: ubuntu-latest
+        needs: [lint, test]
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        permissions:
+            contents: read
+            packages: write
+        outputs:
+            short_sha: ${{ steps.short_sha.outputs.value }}
+
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+
+          - name: Set short SHA
+            id: short_sha
+            run: echo "value=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+          - name: Log in to GitHub Container Registry
+            uses: docker/login-action@v3
+            with:
+              registry: ghcr.io
+              username: ${{ github.actor }}
+              password: ${{ secrets.GITHUB_TOKEN }}
+
+          - name: Build and push
+            uses: docker/build-push-action@v6
+            with:
+              context: .
+              push: true
+              tags: |
+                ghcr.io/wayand/invoicer-api:latest
+                ghcr.io/wayand/invoicer-api:${{ steps.short_sha.outputs.value }}
+
     deploy:
         name: Deploy to invoicer-api.wayand.dk
         runs-on: ubuntu-latest
-        needs: [lint, test]   # ensures deploy only runs if lint and tests pass
+        needs: [lint, test, build-and-push]   # ensures deploy only runs if lint, tests pass and the image was built
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
         steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
         - name: Set up SSH
           run: |
             mkdir -p ~/.ssh
@@ -84,12 +116,5 @@ jobs:
             chmod 600 ~/.ssh/id_ed25519
             ssh-keyscan -H ${{ secrets.HETZNER_IP_ADDRESS }} >> ~/.ssh/known_hosts
 
-        - name: Copy files via rsync
-          run:  |
-            rsync -avz --delete \
-              --exclude='__pycache__/' \
-              --exclude='*.pyc' \
-              ./* www-data@${{ secrets.HETZNER_IP_ADDRESS }}:/srv/docker/invoicer/invoicer-api/
-
         - name: Run deploy script
-          run: ssh www-data@${{ secrets.HETZNER_IP_ADDRESS }} "bash /srv/docker/invoicer/deploy.sh"
+          run: ssh www-data@${{ secrets.HETZNER_IP_ADDRESS }} "IMAGE_TAG=${{ needs.build-and-push.outputs.short_sha }} bash /srv/docker/invoicer/deploy.sh"
