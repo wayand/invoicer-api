@@ -36,13 +36,11 @@ def update_invoice_setting():
         ).scalar()
         if not invoice_setting:
             """ no invoice setting, so create one with values from json_data """
+            invoice_setting_data["organization_id"] = organization_id
             invoice_setting = InvoiceSetting(**invoice_setting_data)
             invoice_setting.save()
         else:
             """ Invoice setting are there, so we update them """
-            invoice_setting.organization_id = invoice_setting_data.get(
-                "organization_id", invoice_setting.organization_id
-            )
             invoice_setting.default_account_id = invoice_setting_data.get(
                 "default_account_id", invoice_setting.default_account_id
             )  # 1, # Salg af varer/ydelser m/moms

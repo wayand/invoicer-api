@@ -3,12 +3,14 @@ from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import and_, exc, not_
 
 from app.models.base import db
+from app.models.contact import Contact
 from app.models.invoice import Invoice
 from app.models.invoice_schema import invoice_schema_with_lines, invoices_schema
 from app.models.invoice_setting import InvoiceSetting
 from app.models.invoiceline import InvoiceLine
 from app.models.product import Product
 from app.routes import bp
+from app.routes.authz import org_member_required
 
 
 @bp.patch("/invoices/<int:invoice_id>/mark-as-sent")
@@ -56,6 +58,7 @@ def get_invoice(invoice_id):
 
 @bp.post("/organizations/<int:organization_id>/invoices")
 @jwt_required()
+@org_member_required
 def create_invoice(organization_id):
     try:
         invoice_data = request.get_json()
@@ -70,6 +73,16 @@ def create_invoice(organization_id):
 
     try:
         invoice_loaded = invoice_schema_with_lines.load(invoice_data)
+        invoice_loaded["organization_id"] = organization_id
+        if not _contact_in_org(organization_id, invoice_loaded["contact_id"]):
+            return {
+                "error": f"Contact with id {invoice_loaded['contact_id']} not found!"
+            }, 404
+        for line in invoice_loaded["lines"]:
+            if not _product_in_org(organization_id, line.get("product_id")):
+                return {
+                    "error": f"Product with id {line.get('product_id')} not found!"
+                }, 404
         duplicate_check = Invoice.query.filter_by(
             organization_id=organization_id,
             invoice_no=invoice_loaded.get("invoice_no"),
@@ -104,6 +117,18 @@ def create_invoice(organization_id):
         return {"error": str(e)}, 400
 
 
+def _contact_in_org(organization_id, contact_id):
+    return Contact.query.filter_by(
+        organization_id=organization_id, id=contact_id
+    ).first()
+
+
+def _product_in_org(organization_id, product_id):
+    return Product.query.filter_by(
+        organization_id=organization_id, id=product_id
+    ).first()
+
+
 def _invoice_no_exists(id, organization_id, invoice_no):
     return (
         db.session.query(Invoice)
@@ -124,6 +149,7 @@ def _invoice_no_exists(id, organization_id, invoice_no):
 
 @bp.put("/organizations/<int:organization_id>/invoices/<int:invoice_id>")
 @jwt_required()
+@org_member_required
 def update_invoice(organization_id, invoice_id):
     invoice = Invoice.query.filter_by(
         organization_id=organization_id, id=invoice_id
@@ -142,6 +168,10 @@ def update_invoice(organization_id, invoice_id):
 
     try:
         data = invoice_schema_with_lines.load(json_data)
+        if not _contact_in_org(organization_id, data["contact_id"]):
+            return {
+                "error": f"Contact with id {data['contact_id']} not found!"
+            }, 404
         if _invoice_no_exists(
             invoice_id, organization_id, data.get("invoice_no")
         ):
@@ -219,6 +249,7 @@ def update_invoice(organization_id, invoice_id):
 
 @bp.delete("/organizations/<int:organization_id>/invoices/<int:invoice_id>")
 @jwt_required()
+@org_member_required
 def delete_invoice(organization_id, invoice_id):
     invoice = Invoice.query.filter_by(
         organization_id=organization_id, id=invoice_id

@@ -6,10 +6,12 @@ from app.models.base import db
 from app.models.contact import Contact
 from app.models.contact_schema import contact_schema, contacts_schema
 from app.routes import bp
+from app.routes.authz import org_member_required
 
 
 @bp.get("/organizations/<int:organization_id>/contacts")
 @jwt_required()
+@org_member_required
 def get_contacts(organization_id):
     contacts = Contact.query.filter_by(organization_id=organization_id)
     return contacts_schema.jsonify(contacts)
@@ -17,6 +19,7 @@ def get_contacts(organization_id):
 
 @bp.get("/organizations/<int:organization_id>/contacts/<int:contact_id>")
 @jwt_required()
+@org_member_required
 def get_contact(organization_id, contact_id):
     contact = Contact.query.filter_by(
         organization_id=organization_id, id=contact_id
@@ -28,6 +31,7 @@ def get_contact(organization_id, contact_id):
 
 @bp.delete("/organizations/<int:organization_id>/contacts/<int:contact_id>")
 @jwt_required()
+@org_member_required
 def delete_contact(organization_id, contact_id):
     contact = Contact.query.filter_by(
         organization_id=organization_id, id=contact_id
@@ -49,6 +53,7 @@ def delete_contact(organization_id, contact_id):
 
 @bp.post("/organizations/<int:organization_id>/contacts")
 @jwt_required()
+@org_member_required
 def create_contact(organization_id):
     try:
         json_data = request.get_json()
@@ -69,6 +74,7 @@ def create_contact(organization_id):
                 f"Contact name ({duplicate_check.name}) already exists"
             )
 
+        contact_data["organization_id"] = organization_id
         contact = Contact(**contact_data)
         contact.save()
 
@@ -83,6 +89,7 @@ def create_contact(organization_id):
 
 @bp.put("/organizations/<int:organization_id>/contacts/<int:contact_id>")
 @jwt_required()
+@org_member_required
 def update_contact(organization_id, contact_id):
     contact = Contact.query.filter_by(
         organization_id=organization_id, id=contact_id

@@ -72,6 +72,7 @@ def create_product():
                 f"Product name ({duplicate_check.name}) already exists"
             )
 
+        product_data["organization_id"] = organization_id
         product = Product(**product_data)
         product.save()
 
