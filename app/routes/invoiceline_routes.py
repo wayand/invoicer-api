@@ -8,12 +8,14 @@ from app.models.invoiceline_schema import (
     invoicelines_schema,
 )
 from app.routes import bp
+from app.routes.authz import org_member_required
 
 
 @bp.get(
     "/organizations/<int:organization_id>/invoices/<int:invoice_id>/invoice-lines"
 )
 @jwt_required()
+@org_member_required
 def get_invoicelines(organization_id, invoice_id):
     invoicelines = (
         InvoiceLine.query.filter_by(invoice_id=invoice_id)
@@ -32,6 +34,7 @@ def get_invoicelines(organization_id, invoice_id):
     "/organizations/<int:organization_id>/invoices/<int:invoice_id>/invoice-lines/<int:line_id>"
 )
 @jwt_required()
+@org_member_required
 def get_invoiceline(organization_id, invoice_id, line_id):
     invoiceline = (
         InvoiceLine.query.filter_by(invoice_id=invoice_id, id=line_id)
@@ -53,6 +56,7 @@ def get_invoiceline(organization_id, invoice_id, line_id):
     "/organizations/<int:organization_id>/invoices/<int:invoice_id>/invoice-lines/<int:line_id>"
 )
 @jwt_required()
+@org_member_required
 def delete_invoiceline(organization_id, invoice_id, line_id):
     invoiceline = (
         InvoiceLine.query.filter_by(invoice_id=invoice_id, id=line_id)

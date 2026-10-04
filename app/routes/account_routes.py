@@ -139,6 +139,7 @@ def create_account():
                 f"Account name ({duplicate_check.name}) already exists"
             )
 
+        account_data["organization_id"] = organization_id
         account = Account(**account_data)
         account.save()
 
