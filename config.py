@@ -29,6 +29,13 @@ class Config:
 
     SECURITY_PASSWORD_SALT = os.environ.get("SECURITY_PASSWORD_SALT")
 
+    RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
+    RATELIMIT_STRATEGY = "moving-window"
+    RATELIMIT_HEADERS_ENABLED = True
+    # Number of reverse proxies in front of the app whose X-Forwarded-For we
+    # trust. 0 = trust none (client IP is the direct peer).
+    TRUSTED_PROXY_COUNT = int(os.environ.get("TRUSTED_PROXY_COUNT", "0"))
+
     UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER")
     MAX_CONTENT_LENGTH = 1024 * 2048
     ALLOWED_UPLOAD_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}

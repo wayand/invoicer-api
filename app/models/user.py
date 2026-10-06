@@ -1,4 +1,6 @@
 import base64
+import hashlib
+import hmac
 import os
 import urllib.parse
 from time import time
@@ -9,6 +11,8 @@ from flask import current_app
 from passlib.hash import pbkdf2_sha256 as sha256
 
 from .base import BaseModel, db
+
+_DUMMY_PASSWORD_HASH = sha256.hash(base64.b64encode(os.urandom(16)).decode())
 
 
 class User(BaseModel):
@@ -92,6 +96,15 @@ class User(BaseModel):
     def verify_hash(password, hash_):
         return sha256.verify(password, hash_)
 
+    @staticmethod
+    def check_login_password(user, password):
+        """Unknown users cost the same hash as known ones, so response time
+        doesn't reveal which emails have accounts."""
+        ok = User.verify_hash(
+            password, user.password_hash if user else _DUMMY_PASSWORD_HASH
+        )
+        return user is not None and ok
+
     def get_totp_uri(self):
         return f"otpauth://totp/invoicer-app:{urllib.parse.quote(self.email)}?secret={self.otp_secret_temp}&issuer=invoicer-app"
 
@@ -114,21 +127,50 @@ class User(BaseModel):
         return onetimepass.valid_totp(token, self.otp_secret_temp)
 
     ##### Password reset ########
+    @staticmethod
+    def _reset_signing_key():
+        """Key derived from the app secret, so a reset token can never be
+        mistaken for (or forged into) an access token."""
+        secret = (
+            current_app.config.get("JWT_SECRET_KEY") or current_app.secret_key
+        )
+        return hmac.new(
+            secret.encode(), b"invoicer:password-reset", hashlib.sha256
+        ).digest()
+
+    def _password_fingerprint(self):
+        return hashlib.sha256(self.password_hash.encode()).hexdigest()[:32]
+
     def get_reset_password_token(self, expires_in=3600):
+        """Bound to the current password hash: as soon as the password
+        changes (including by using this very token), the token is dead."""
         return jwt.encode(
-            {"reset_password": self.id, "exp": time() + expires_in},
-            current_app.config["JWT_SECRET_KEY"],
+            {
+                "purpose": "reset_password",
+                "reset_password": self.id,
+                "pwd": self._password_fingerprint(),
+                "exp": time() + expires_in,
+            },
+            self._reset_signing_key(),
             algorithm="HS256",
         )
 
     @staticmethod
     def verify_reset_password_token(token):
         try:
-            id = jwt.decode(
+            payload = jwt.decode(
                 token,
-                current_app.config["JWT_SECRET_KEY"],
+                User._reset_signing_key(),
                 algorithms=["HS256"],
-            )["reset_password"]
-        except Exception as e:
-            print("reset_password_verify_error", e)
-        return User.query.get(id)
+                options={"require": ["exp"]},
+            )
+        except jwt.PyJWTError:
+            return None
+        if payload.get("purpose") != "reset_password":
+            return None
+        user = User.query.filter_by(id=payload.get("reset_password")).first()
+        if user is None or not hmac.compare_digest(
+            str(payload.get("pwd", "")), user._password_fingerprint()
+        ):
+            return None
+        return user
