@@ -12,12 +12,13 @@ from flask_jwt_extended import (
     get_jwt_identity,
     jwt_required,
 )
+from flask_limiter.util import get_remote_address
 from itsdangerous import URLSafeTimedSerializer
 
-from app import jwt
+from app import jwt, limiter
 from app.email import (
+    queue_password_reset_email,
     send_confirm_mail,
-    send_password_reset_email,
     send_totp_code_email,
 )
 from app.models.organization import Organization
@@ -32,8 +33,28 @@ from app.models.user_schema import (
     usertotpsetup_schema,
     usertotpsetupdelete_schema,
 )
+from app.ratelimit import (
+    email_key,
+    login_in_progress_key,
+    not_ok,
+    user_key,
+)
 
 from . import bp
+
+# Password-checking endpoints for logged-in users share one bucket, so a
+# stolen access token can't be used as an unlimited password-guessing oracle.
+password_reauth_limit = limiter.limit(
+    "5 per 15 minutes",
+    key_func=user_key,
+    deduct_when=not_ok,
+    scope="password-reauth",
+)
+
+
+def _server_error(error):
+    current_app.logger.exception("unhandled error in auth route: %s", error)
+    return {"error": "Something went wrong. Please try again."}, 500
 
 
 @jwt.user_lookup_loader
@@ -72,6 +93,7 @@ def qrcode():
 
 
 @bp.delete("/auth/totp-setup")
+@password_reauth_limit
 @jwt_required()
 def delete_totp_auth():
     try:
@@ -98,10 +120,11 @@ def delete_totp_auth():
             return {"errors": {"password": "Invalid password entered"}}, 422
 
     except Exception as e:
-        return {"error": str(e)}, 500
+        return _server_error(e)
 
 
 @bp.post("/auth/totp-setup")
+@password_reauth_limit
 @jwt_required()
 def totp_setup():
     try:
@@ -131,7 +154,7 @@ def totp_setup():
             return {"errors": {"password": "Invalid password entered"}}, 422
 
     except Exception as e:
-        return {"error": str(e)}, 500
+        return _server_error(e)
 
 
 def generate_token(email):
@@ -181,23 +204,25 @@ def confirm_email(token):
 
 
 @bp.post("/auth/resend-totp-email")
+@limiter.limit(
+    "5 per hour", key_func=login_in_progress_key, scope="resend-totp-email"
+)
+@limiter.limit(
+    "30 per hour", key_func=get_remote_address, scope="resend-totp-email-ip"
+)
 @jwt_required(optional=True)
 def resend_totp_email():
     identity = get_jwt_identity()
     if identity:
         return {
             "error": ["Can't send totp for an already authenticated user!"],
-            "ses": session.get("logging_in_user"),
         }, 400
     else:
         user = User.find_by(email=session.get("logging_in_user"))
         if not user:
             return {"error": ["not found user"]}, 400
         send_totp_code_email(user)
-        return {
-            "message": "A new TOTP email has been sent.",
-            "ses": session.get("logging_in_user"),
-        }
+        return {"message": "A new TOTP email has been sent."}
 
 
 @bp.post("/auth/resend-confirmation-email")
@@ -212,6 +237,12 @@ def resend_confirmation_email():
 
 @swag_from("../../swags/auth/reset_password.yaml")
 @bp.post("/auth/reset-password")
+@limiter.limit(
+    "10 per 15 minutes",
+    key_func=get_remote_address,
+    deduct_when=not_ok,
+    scope="reset-password",
+)
 def reset_password():
     try:
         json_data = request.get_json()
@@ -225,7 +256,9 @@ def reset_password():
         data = reset_password_schema.load(json_data)
         user = User.verify_reset_password_token(data.get("reset_code"))
         if not user:
-            return {"error": {"resetCode": "Reset code is wrong!"}}
+            return {
+                "errors": {"resetCode": "Reset code is invalid or has expired."}
+            }, 400
 
         user.password_hash = User.generate_hash(data.get("new_password"))
         user.update()
@@ -233,10 +266,14 @@ def reset_password():
         return {"message": "Password Successfully reseted..."}
 
     except Exception as e:
-        return {"error": str(e)}, 500
+        return _server_error(e)
 
 
 @bp.post("/auth/send-reset-mail")
+@limiter.limit("3 per hour", key_func=email_key, scope="send-reset-mail")
+@limiter.limit(
+    "20 per hour", key_func=get_remote_address, scope="send-reset-mail-ip"
+)
 def send_reset_mail():
     """
     Send Reset Email
@@ -255,20 +292,18 @@ def send_reset_mail():
         email = useremail_schema.load(json_data).get("email")
         user = User.find_by(email=email)
         if user:
-            send_password_reset_email(user)
-            return {
-                "message": "Check your email for the instructions to reset your password."
-            }
-        else:
-            return {
-                "errors": {"email": "We Couldn't find entered email address"}
-            }, 422
+            queue_password_reset_email(user)
+        # Same answer whether or not the account exists.
+        return {
+            "message": "If an account exists for that email address, we have sent instructions to reset the password."
+        }
 
     except Exception as e:
-        return {"error": str(e)}, 500
+        return _server_error(e)
 
 
 @bp.post("/auth/change-password")
+@password_reauth_limit
 @jwt_required()
 def change_password():
     try:
@@ -291,7 +326,7 @@ def change_password():
         else:
             return {"error": "Old password is wrong"}, 422
     except Exception as e:
-        return {"error": str(e)}, 500
+        return _server_error(e)
 
 
 @bp.get("/is-authorized")
@@ -309,18 +344,27 @@ def auth_user():
 
 
 @bp.post("/auth/token")
+@limiter.limit(
+    "10 per 15 minutes",
+    key_func=email_key,
+    deduct_when=not_ok,
+    scope="login-account",
+)
+@limiter.limit(
+    "60 per 15 minutes",
+    key_func=get_remote_address,
+    deduct_when=not_ok,
+    scope="login-ip",
+)
 def get_token():
     """
     Get Auth Token
     ---
     description: Get Auth Token
     """
-    try:
-        json_data = request.get_json()
-        if not json_data:
-            return {"error": ["No input data provided"]}, 400
-    except Exception as e:
-        return {"error": str(e)}, 500
+    json_data = request.get_json(silent=True)
+    if not json_data:
+        return {"error": ["No input data provided"]}, 400
 
     errors = usertoken_schema.validate(json_data)
     if errors:
@@ -329,16 +373,12 @@ def get_token():
     try:
         session.pop("logging_in_user", None)
         user_data = usertoken_schema.load(json_data)
-        # Searching user by username
         user = User.find_by(email=user_data["email"])
-        if not user:
-            return {
-                "error": f"User by email '{user_data['email']}' not found!"
-            }, 404
+        # Unknown email and wrong password must be indistinguishable.
+        if not User.check_login_password(user, user_data["password_hash"]):
+            return {"error": "Wrong credentials"}, 422
         organization = Organization.find_by(id=user.organization_id)
         if not organization:
-            return {"error": "not found organization"}, 404
-        if not User.verify_hash(user_data["password_hash"], user.password_hash):
             return {"error": "Wrong credentials"}, 422
         if not user.is_two_factor_auth:
             return {"error": "Wrong 2fa method"}, 422
@@ -352,7 +392,6 @@ def get_token():
             return {
                 "message": "2fa_otp",
                 "twoFactorType": user.two_factor_auth_type,
-                "ses": session.get("logging_in_user"),
             }, 206
 
         expire_in_sec = (
@@ -383,7 +422,7 @@ def get_token():
             return {"error": "2FA is wrong, please try again:"}, 422
 
     except Exception as e:
-        return {"error": str(e)}, 500
+        return _server_error(e)
 
 
 # We are using the `refresh=True` options in jwt_required to only allow

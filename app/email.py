@@ -1,9 +1,29 @@
+import threading
 from urllib.parse import quote
 
 from flask import current_app, render_template
 from flask_mail import Message
 
 from app import mail
+
+
+def run_in_background(fn, *args):
+    """Run fn(*args) in an app context off the request thread, so response
+    time doesn't depend on whether (or how slowly) an email is sent.
+    Synchronous under test, so tests stay deterministic."""
+    app = current_app._get_current_object()
+
+    def target():
+        with app.app_context():
+            try:
+                fn(*args)
+            except Exception:
+                app.logger.exception("background task %s failed", fn.__name__)
+
+    if app.testing:
+        target()
+    else:
+        threading.Thread(target=target, daemon=True).start()
 
 
 def send_email(subject, sender, recipients, text_body, html_body):
@@ -50,6 +70,18 @@ def send_password_reset_email(user):
             "email/reset_password.html", user=user, token=token
         ),
     )
+
+
+def _send_password_reset_email_by_id(user_id):
+    from app.models.user import User
+
+    user = User.query.filter_by(id=user_id).first()
+    if user:
+        send_password_reset_email(user)
+
+
+def queue_password_reset_email(user):
+    run_in_background(_send_password_reset_email_by_id, user.id)
 
 
 def send_confirm_mail(user_email, token):

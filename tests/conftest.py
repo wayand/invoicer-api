@@ -8,7 +8,7 @@ from flask_migrate import upgrade as db_upgrade
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
-from app import create_app
+from app import create_app, limiter
 from app.models.base import db
 from app.models.country import Country
 from app.models.organization import Organization
@@ -80,6 +80,12 @@ def app() -> Generator[Flask, None, None]:
 
         db.session.remove()
         drop_test_db()
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limits(app: Flask) -> None:
+    """Rate limiting stays on in tests; every test starts with fresh counters."""
+    limiter.reset()
 
 
 @pytest.fixture

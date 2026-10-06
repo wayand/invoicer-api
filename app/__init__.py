@@ -4,11 +4,15 @@ import sys
 from logging.handlers import TimedRotatingFileHandler
 
 from flasgger import Swagger
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_limiter import Limiter
+from flask_limiter.errors import RateLimitExceeded
+from flask_limiter.util import get_remote_address
 from flask_mail import Mail
 from flask_migrate import Migrate
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # from app.routes import page_not_found
 
@@ -16,11 +20,25 @@ mail = Mail()
 migrate = Migrate()
 jwt = JWTManager()
 swagger = Swagger()
+limiter = Limiter(key_func=get_remote_address)
 
 
 def create_app(config_class):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    proxies = app.config.get("TRUSTED_PROXY_COUNT", 0)
+    if proxies:
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=proxies)
+
+    limiter.init_app(app)
+
+    @app.errorhandler(RateLimitExceeded)
+    def too_many_attempts(_error):
+        response = jsonify(error="Too many attempts. Please try again later.")
+        response.status_code = 429
+        return response
+
     CORS(
         app,
         origins=[
