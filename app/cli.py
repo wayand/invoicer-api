@@ -322,6 +322,23 @@ def seed():
                                         )
 
 
+@click.command("user-reset-2fa")
+@click.argument("email")
+@with_appcontext
+def user_reset_2fa(email):
+    """Recovery: put EMAIL back on email codes (drops the authenticator app
+    and all backup codes). For when both the phone and the codes are lost."""
+    user = User.find_by(email=email)
+    if user is None:
+        raise click.ClickException(f"No user with email {email}")
+    user.reset_two_factor()
+    click.echo(
+        f"Two-factor reset for {email}: email codes, no backup codes, "
+        "new secret."
+    )
+
+
 def register_commands(app):
     """Register CLI commands."""
     app.cli.add_command(seed)
+    app.cli.add_command(user_reset_2fa)

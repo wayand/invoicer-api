@@ -29,6 +29,9 @@ class Config:
 
     SECURITY_PASSWORD_SALT = os.environ.get("SECURITY_PASSWORD_SALT")
 
+    # Public address of the Vue app, used for links in emails.
+    SITE_DOMAIN = os.environ.get("SITE_DOMAIN", "http://localhost:8080")
+
     RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
     RATELIMIT_STRATEGY = "moving-window"
     RATELIMIT_HEADERS_ENABLED = True
@@ -59,7 +62,6 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SITE_DOMAIN = os.environ.get("SITE_DOMAIN")
     ENV = "development"
     DEVELOPMENT = True
     SQLALCHEMY_ECHO = False

@@ -17,6 +17,7 @@ from itsdangerous import URLSafeTimedSerializer
 
 from app import jwt, limiter
 from app.email import (
+    queue_backup_code_used_email,
     queue_password_reset_email,
     send_confirm_mail,
     send_totp_code_email,
@@ -29,6 +30,7 @@ from app.models.user_schema import (
     user_schema,
     userchangepassword_schema,
     useremail_schema,
+    userpassword_schema,
     usertoken_schema,
     usertotpsetup_schema,
     usertotpsetupdelete_schema,
@@ -114,6 +116,7 @@ def delete_totp_auth():
             user.otp_secret_temp = ""
             user.is_two_factor_auth = True
             user.two_factor_auth_type = "2fa_otp_email"
+            user.totp_last_used_step = None
             user.save()
             return {"message": "successfully totp deleted"}
         else:
@@ -343,6 +346,54 @@ def auth_user():
     return user_schema.jsonify(user)
 
 
+def _second_factor_ok(user, code):
+    """The code typed at login: a backup code (10 characters) or the code for
+    the account's own method (6 digits)."""
+    code = str(code).strip()
+    if User.looks_like_backup_code(code):
+        if not user.consume_backup_code(code):
+            return False
+        queue_backup_code_used_email(user)
+        return True
+    if user.two_factor_auth_type == "2fa_mobile_app":
+        return user.verify_totp_app(code)
+    return user.verify_email_otp(code)
+
+
+@bp.get("/auth/backup-codes")
+@jwt_required()
+def backup_codes_status():
+    return {"remaining": current_user.remaining_backup_codes()}
+
+
+@bp.post("/auth/backup-codes")
+@password_reauth_limit
+@jwt_required()
+def regenerate_backup_codes():
+    """Replace all backup codes. The plaintext is shown here, once."""
+    try:
+        json_data = request.get_json(silent=True)
+        if not json_data:
+            return {"error": ["No password provided"]}, 400
+
+        errors = userpassword_schema.validate(json_data)
+        if errors:
+            return {"errors": errors}, 422
+
+        password = userpassword_schema.load(json_data).get("password_hash")
+        if not User.verify_hash(password, current_user.password_hash):
+            return {"errors": {"password": "Invalid password entered"}}, 422
+
+        codes = current_user.generate_backup_codes()
+        return (
+            {"codes": codes},
+            200,
+            {"Cache-Control": "no-store", "Pragma": "no-cache"},
+        )
+    except Exception as e:
+        return _server_error(e)
+
+
 @bp.post("/auth/token")
 @limiter.limit(
     "10 per 15 minutes",
@@ -394,10 +445,7 @@ def get_token():
                 "twoFactorType": user.two_factor_auth_type,
             }, 206
 
-        expire_in_sec = (
-            30 if user.two_factor_auth_type == "2fa_mobile_app" else 3600
-        )
-        if user.verify_totp(two_factor_code, expire_in_sec=expire_in_sec):
+        if _second_factor_ok(user, two_factor_code):
             session.pop("logging_in_user", None)
             access_token = create_access_token(
                 identity=user.email,
