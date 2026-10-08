@@ -13,17 +13,22 @@ def run_in_background(fn, *args):
     Synchronous under test, so tests stay deterministic."""
     app = current_app._get_current_object()
 
-    def target():
+    def run():
+        try:
+            fn(*args)
+        except Exception:
+            app.logger.exception("background task %s failed", fn.__name__)
+
+    def in_new_context():
         with app.app_context():
-            try:
-                fn(*args)
-            except Exception:
-                app.logger.exception("background task %s failed", fn.__name__)
+            run()
 
     if app.testing:
-        target()
+        # Inline, in the caller's context: a nested app context would close
+        # the request's database session on teardown.
+        run()
     else:
-        threading.Thread(target=target, daemon=True).start()
+        threading.Thread(target=in_new_context, daemon=True).start()
 
 
 def send_email(subject, sender, recipients, text_body, html_body):
@@ -37,7 +42,7 @@ def send_email(subject, sender, recipients, text_body, html_body):
 
 def send_totp_code_email(user):
     html_title = "Two-factor Code"
-    totp_code = user.get_totp_code(expire_in_sec=3600)
+    totp_code = user.issue_email_otp()
     user_name = user.name
     send_email(
         "Your OTP code",
@@ -55,6 +60,35 @@ def send_totp_code_email(user):
             totp_code=totp_code,
         ),
     )
+
+
+def send_backup_code_used_email(user, remaining):
+    send_email(
+        "[Invoicer App] A backup code was used on your account",
+        sender=current_app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[user.email],
+        text_body=render_template(
+            "email/backup_code_used.txt", user=user, remaining=remaining
+        ),
+        html_body=render_template(
+            "email/backup_code_used.html",
+            html_title="Backup code used",
+            user=user,
+            remaining=remaining,
+        ),
+    )
+
+
+def _send_backup_code_used_email_by_id(user_id):
+    from app.models.user import User
+
+    user = User.query.filter_by(id=user_id).first()
+    if user:
+        send_backup_code_used_email(user, user.remaining_backup_codes())
+
+
+def queue_backup_code_used_email(user):
+    run_in_background(_send_backup_code_used_email_by_id, user.id)
 
 
 def send_password_reset_email(user):

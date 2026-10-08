@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Generator
 
 import pytest
@@ -8,7 +9,7 @@ from flask_migrate import upgrade as db_upgrade
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
-from app import create_app, limiter
+from app import create_app, limiter, mail
 from app.models.base import db
 from app.models.country import Country
 from app.models.organization import Organization
@@ -172,8 +173,13 @@ def test_user(db_session, organization: Organization) -> User:
 
 @pytest.fixture
 def tokens(client: FlaskClient, test_user):
-    otp = test_user.get_totp_code(expire_in_sec=3600)
-    assert test_user.verify_totp(otp, expire_in_sec=3600)
+    with mail.record_messages() as outbox:
+        step_one = client.post(
+            "/auth/token",
+            json={"email": "test@example.com", "password": "password123"},
+        )
+    assert step_one.status_code == 206
+    otp = re.search(r"\b(\d{6})\b", outbox[-1].body).group(1)
 
     payload = {
         "email": "test@example.com",

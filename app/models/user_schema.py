@@ -63,6 +63,12 @@ class UserTOTPSetupDeleteSchema(UserBaseSchema):
     )
 
 
+class UserPasswordSchema(UserBaseSchema):
+    password_hash = fields.String(
+        required=True, load_only=True, data_key="password"
+    )
+
+
 class UserSchema(UserBaseSchema):
     name = fields.String(
         required=True, validate=[validate.Length(min=1, max=100)]
@@ -76,6 +82,7 @@ reset_password_schema = ResetPasswordSchema()
 userchangepassword_schema = UserChangePasswordSchema()
 usertotpsetup_schema = UserTOTPSetupSchema()
 usertotpsetupdelete_schema = UserTOTPSetupDeleteSchema()
+userpassword_schema = UserPasswordSchema()
 usertoken_schema = UserTokenSchema()
 useremail_schema = UserEmailSchema()
 user_schema = UserSchema()

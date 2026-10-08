@@ -1,0 +1,11 @@
+{% extends "email/base.html" %}
+
+{% block content %}
+    <h1>Hi <span>{{user.name}}!</span> </h1>
+    <td>A backup code was just used to sign in to your Invoicer account.</td>
+
+    <p>You have <b>{{remaining}}</b> backup code(s) left.</p>
+
+    <p>If this was you, no action is needed. If it wasn't, change your password
+    now and generate new backup codes under Settings, Authentication.</p>
+{% endblock %}

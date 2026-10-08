@@ -1,0 +1,10 @@
+Hi {{user.name}},
+
+A backup code was just used to sign in to your Invoicer account.
+You have {{remaining}} backup code(s) left.
+
+If this was you, no action is needed. If it wasn't, change your password now
+and generate new backup codes under Settings, Authentication.
+
+BR
+Invoicer Team
