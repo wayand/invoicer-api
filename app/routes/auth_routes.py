@@ -8,12 +8,14 @@ from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
     current_user,
+    decode_token,
     get_jwt,
     get_jwt_identity,
     jwt_required,
 )
 from flask_limiter.util import get_remote_address
 from itsdangerous import URLSafeTimedSerializer
+from jwt import PyJWTError
 
 from app import jwt, limiter
 from app.email import (
@@ -22,6 +24,7 @@ from app.email import (
     send_confirm_mail,
     send_totp_code_email,
 )
+from app.models.base import db
 from app.models.organization import Organization
 from app.models.revoked_token import RevokedToken
 from app.models.user import User
@@ -61,8 +64,35 @@ def _server_error(error):
 
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
-    identity = jwt_data["sub"]
-    return User.query.filter_by(email=identity).one_or_none()
+    """The token's user, unless the user's sessions were ended since it was
+    issued. Tokens from before token_version existed count as version 0."""
+    user = User.query.filter_by(email=jwt_data["sub"]).one_or_none()
+    if user is None or jwt_data.get("tv", 0) != user.token_version:
+        return None
+    return user
+
+
+def _access_token(user, organization):
+    return create_access_token(
+        identity=user.email,
+        additional_claims={
+            "aud": "wayand.dk",
+            "name": user.name,
+            "email": user.email,
+            "isEmailConfirmed": user.email_is_confirmed,
+            "isTwoFactorAuth": user.is_two_factor_auth,
+            "twoFactorAuthType": user.two_factor_auth_type,
+            "organizationId": user.organization_id,
+            "organizationSlug": organization.slug,
+            "tv": user.token_version,
+        },
+    )
+
+
+def _refresh_token(user):
+    return create_refresh_token(
+        identity=user.email, additional_claims={"tv": user.token_version}
+    )
 
 
 # Checking that token is in blacklist or not
@@ -264,6 +294,7 @@ def reset_password():
             }, 400
 
         user.password_hash = User.generate_hash(data.get("new_password"))
+        user.token_version += 1
         user.update()
 
         return {"message": "Password Successfully reseted..."}
@@ -324,8 +355,15 @@ def change_password():
         new_password = user_data.get("new_password")
         if User.verify_hash(old_password, user.password_hash):
             user.password_hash = User.generate_hash(new_password)
+            # Ends every session, this one included; the caller gets a new one.
+            user.token_version += 1
             user.save()
-            return {"message": "Password successfully changed"}, 200
+            organization = Organization.find_by(id=user.organization_id)
+            return {
+                "message": "Password successfully changed",
+                "accessToken": _access_token(user, organization),
+                "refreshToken": _refresh_token(user),
+            }, 200
         else:
             return {"error": "Old password is wrong"}, 422
     except Exception as e:
@@ -447,20 +485,8 @@ def get_token():
 
         if _second_factor_ok(user, two_factor_code):
             session.pop("logging_in_user", None)
-            access_token = create_access_token(
-                identity=user.email,
-                additional_claims={
-                    "aud": "wayand.dk",
-                    "name": user.name,
-                    "email": user.email,
-                    "isEmailConfirmed": user.email_is_confirmed,
-                    "isTwoFactorAuth": user.is_two_factor_auth,
-                    "twoFactorAuthType": user.two_factor_auth_type,
-                    "organizationId": user.organization_id,
-                    "organizationSlug": organization.slug,
-                },
-            )
-            refresh_token = create_refresh_token(identity=user.email)
+            access_token = _access_token(user, organization)
+            refresh_token = _refresh_token(user)
 
             return {
                 "accessToken": access_token,
@@ -487,32 +513,15 @@ def refresh_token():
     if organization is None:
         raise ValueError("Organization not found")
 
-    identity = get_jwt_identity()
-    access_token = create_access_token(
-        identity=identity,
-        additional_claims={
-            "aud": "wayand.dk",
-            "name": current_user.name,
-            "email": current_user.email,
-            "isEmailConfirmed": current_user.email_is_confirmed,
-            "isTwoFactorAuth": current_user.is_two_factor_auth,
-            "twoFactorAuthType": current_user.two_factor_auth_type,
-            "organizationId": current_user.organization_id,
-            "organizationSlug": organization.slug,
-        },
-    )
+    access_token = _access_token(current_user, organization)
     return {"accessToken": access_token}
 
 
 @bp.post("/auth/revoke-access-token")
 @jwt_required()
 def revoke_access_token():
-    jti = get_jwt()["jti"]
-
     try:
-        revoked_token = RevokedToken()
-        revoked_token.jti = jti
-        revoked_token.save()
+        RevokedToken.revoke(get_jwt())
         return {"message": "Access token has been revoked"}, 200
     except Exception as e:
         abort(500, e)
@@ -521,12 +530,49 @@ def revoke_access_token():
 @bp.post("/auth/revoke-refresh-token")
 @jwt_required(refresh=True)
 def revoke_refresh_token():
-    jti = get_jwt()["jti"]
-
     try:
-        revoked_token = RevokedToken()
-        revoked_token.jti = jti
-        revoked_token.save()
+        RevokedToken.revoke(get_jwt())
         return {"message": "Refresh token has been revoked"}, 200
     except Exception as e:
         abort(500, e)
+
+
+@bp.post("/auth/logout")
+@jwt_required()
+def logout():
+    """Ends this session: revokes the access token that made the request and
+    the refresh token sent along with it, if any."""
+    json_data = request.get_json(silent=True)
+    refresh_token = (
+        json_data.get("refresh_token") if isinstance(json_data, dict) else None
+    )
+    refresh_claims = None
+    if refresh_token is not None:
+        refresh_claims = _own_refresh_claims(refresh_token)
+        if refresh_claims is None:
+            return {"error": "Invalid refresh token"}, 400
+
+    try:
+        RevokedToken.revoke(get_jwt(), commit=False)
+        if refresh_claims is not None:
+            RevokedToken.revoke(refresh_claims, commit=False)
+        RevokedToken.purge_expired(commit=False)
+        db.session.commit()
+        return {"message": "Logged out"}, 200
+    except Exception as e:
+        db.session.rollback()
+        return _server_error(e)
+
+
+def _own_refresh_claims(token):
+    """The claims of a valid refresh token that belongs to the current user,
+    otherwise None."""
+    if not isinstance(token, str):
+        return None
+    try:
+        claims = decode_token(token)
+    except PyJWTError:
+        return None
+    if claims.get("type") != "refresh" or claims["sub"] != current_user.email:
+        return None
+    return claims
