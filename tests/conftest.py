@@ -10,8 +10,10 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
 from app import create_app, limiter, mail
+from app.models.account import Account, AccountGroup, AccountType
 from app.models.base import db
 from app.models.country import Country
+from app.models.invoice_setting import InvoiceSetting
 from app.models.organization import Organization
 from app.models.user import User
 from config import TestingConfig
@@ -108,8 +110,14 @@ def db_session(app: Flask) -> Generator[Session, None, None]:
     connection = db.engine.connect()
     transaction = connection.begin()
 
+    # Savepoints make commit() durable for the rest of the test and let a
+    # rollback() undo only uncommitted work, like the real app. Without this,
+    # an app-level rollback wipes the whole test transaction.
     session_factory = sessionmaker(
-        bind=connection, autoflush=False, future=True
+        bind=connection,
+        autoflush=False,
+        future=True,
+        join_transaction_mode="create_savepoint",
     )
     sessionRegistry = scoped_session(session_factory)
 
@@ -154,6 +162,57 @@ def organization(db_session, country: Country):
     db_session.add(org)
     db_session.commit()
     return org
+
+
+@pytest.fixture
+def make_invoice_setting(db_session):
+    """Factory: give an organization the invoice settings (and the account
+    they point at) that creating an invoice requires."""
+
+    def make(org: Organization) -> InvoiceSetting:
+        account_type = AccountType(
+            organization_id=org.id,
+            name="Revenue",
+            normal_balance="credit",
+            report_type="income",
+        )
+        db_session.add(account_type)
+        db_session.flush()
+        group = AccountGroup(
+            organization_id=org.id,
+            account_type_id=account_type.id,
+            name="Sales",
+            number=1,
+            interval_start=1000,
+            interval_end=1999,
+        )
+        db_session.add(group)
+        db_session.flush()
+        account = Account(
+            organization_id=org.id,
+            account_type_id=account_type.id,
+            account_group_id=group.id,
+            name="Sales of services",
+            number=1000,
+        )
+        db_session.add(account)
+        db_session.flush()
+        setting = InvoiceSetting(
+            organization_id=org.id,
+            default_account_id=account.id,
+            default_deposit_account_id=account.id,
+            next_invoice_no=1,
+        )
+        db_session.add(setting)
+        db_session.commit()
+        return setting
+
+    return make
+
+
+@pytest.fixture
+def invoice_setting(make_invoice_setting, organization) -> InvoiceSetting:
+    return make_invoice_setting(organization)
 
 
 @pytest.fixture
