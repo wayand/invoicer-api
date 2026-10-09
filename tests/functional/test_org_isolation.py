@@ -9,7 +9,6 @@ from datetime import date
 import pytest
 from flask_jwt_extended import create_access_token
 
-from app.models.account import Account, AccountGroup, AccountType
 from app.models.contact import Contact
 from app.models.invoice import Invoice
 from app.models.invoice_setting import InvoiceSetting
@@ -75,53 +74,14 @@ def product_b(db_session, org_b) -> Product:
     return product
 
 
-def make_invoice_setting(db_session, org: Organization) -> InvoiceSetting:
-    account_type = AccountType(
-        organization_id=org.id,
-        name="Revenue",
-        normal_balance="credit",
-        report_type="income",
-    )
-    db_session.add(account_type)
-    db_session.flush()
-    group = AccountGroup(
-        organization_id=org.id,
-        account_type_id=account_type.id,
-        name="Sales",
-        number=1,
-        interval_start=1000,
-        interval_end=1999,
-    )
-    db_session.add(group)
-    db_session.flush()
-    account = Account(
-        organization_id=org.id,
-        account_type_id=account_type.id,
-        account_group_id=group.id,
-        name="Sales of services",
-        number=1000,
-    )
-    db_session.add(account)
-    db_session.flush()
-    setting = InvoiceSetting(
-        organization_id=org.id,
-        default_account_id=account.id,
-        default_deposit_account_id=account.id,
-        next_invoice_no=1,
-    )
-    db_session.add(setting)
-    db_session.commit()
-    return setting
+@pytest.fixture
+def invoice_setting_a(make_invoice_setting, organization) -> InvoiceSetting:
+    return make_invoice_setting(organization)
 
 
 @pytest.fixture
-def invoice_setting_a(db_session, organization) -> InvoiceSetting:
-    return make_invoice_setting(db_session, organization)
-
-
-@pytest.fixture
-def invoice_setting_b(db_session, org_b) -> InvoiceSetting:
-    return make_invoice_setting(db_session, org_b)
+def invoice_setting_b(make_invoice_setting, org_b) -> InvoiceSetting:
+    return make_invoice_setting(org_b)
 
 
 @pytest.fixture
