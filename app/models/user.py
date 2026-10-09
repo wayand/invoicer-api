@@ -91,6 +91,10 @@ class User(BaseModel):
     )
     # Last accepted authenticator time step, so a code can't be replayed.
     totp_last_used_step = db.Column(db.BigInteger, nullable=True)
+    # Carried by every token. Bumping it ends all of the user's sessions.
+    token_version = db.Column(
+        db.Integer, server_default="0", default=0, nullable=False
+    )
 
     def __init__(
         self,
