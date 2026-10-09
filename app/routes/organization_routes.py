@@ -1,9 +1,9 @@
-import os
 from pathlib import Path
 
 from flask import current_app, request, send_from_directory
 from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc, not_, or_
+from werkzeug.exceptions import NotFound
 from werkzeug.utils import secure_filename
 
 from app.models.base import db
@@ -24,17 +24,21 @@ def allowed_file(filename):
     )
 
 
+def _logo_dir(slug):
+    """UPLOAD_FOLDER/organizations/<slug>/logo, where logos are stored and
+    served from. UPLOAD_FOLDER is relative to the working directory (as in
+    production, ./uploads) or absolute."""
+    upload_folder = Path(current_app.config["UPLOAD_FOLDER"]).resolve()
+    return upload_folder / "organizations" / slug / "logo"
+
+
 def url_for_logo(slug, logo):
-    logo_file = os.path.join(f"organizations/{slug}/logo", logo)
-    check_file = os.path.join(current_app.config["UPLOAD_FOLDER"], logo_file)
-    if os.path.exists(check_file):
-        return send_from_directory(
-            "." + current_app.config["UPLOAD_FOLDER"],
-            logo_file,
-            as_attachment=False,
-        )
-    else:
-        return {"error": "file not found: " + logo_file}
+    if slug in (".", ".."):
+        return {"error": "Logo not found"}, 404
+    try:
+        return send_from_directory(_logo_dir(slug), logo)
+    except NotFound:
+        return {"error": "Logo not found"}, 404
 
 
 @bp.post("/organizations/<int:organization_id>/upload-logo")
@@ -55,12 +59,9 @@ def upload_logo(organization_id):
         file = request.files["file"]
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            upload_folder = os.path.join(
-                current_app.config["UPLOAD_FOLDER"],
-                f"organizations/{organization.slug}/logo/",
-            )
-            Path(upload_folder).mkdir(parents=True, exist_ok=True)
-            file.save(os.path.join(upload_folder, filename))
+            logo_dir = _logo_dir(organization.slug)
+            logo_dir.mkdir(parents=True, exist_ok=True)
+            file.save(logo_dir / filename)
 
             organization.logo = filename
             organization.update()
