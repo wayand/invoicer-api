@@ -137,3 +137,69 @@ def test_upload_requires_authentication(client, organization, upload_folder):
     )
 
     assert res.status_code == 401
+
+
+ALLOWED_TYPES_MESSAGE = "gif, jpeg, jpg, png"
+
+
+@pytest.mark.parametrize(
+    "name", ["notes.txt", "script.php", "logo.png.exe", "logo", "logo."]
+)
+def test_upload_of_a_disallowed_file_type_is_rejected(
+    client, db_session, test_user, organization, upload_folder, name
+):
+    res = upload(client, test_user, organization, name=name)
+
+    assert res.status_code == 400
+    assert ALLOWED_TYPES_MESSAGE in res.get_json()["error"]
+    assert not upload_folder.exists()
+    db_session.refresh(organization)
+    assert organization.logo == ""
+
+
+def test_rejected_upload_keeps_the_existing_logo(
+    client, db_session, test_user, organization, upload_folder
+):
+    assert upload(client, test_user, organization).status_code == 200
+
+    res = upload(client, test_user, organization, name="notes.txt")
+
+    assert res.status_code == 400
+    db_session.refresh(organization)
+    assert organization.logo == "logo.png"
+    assert client.get(logo_url(organization)).data == PNG
+
+
+def test_upload_with_no_file_chosen_is_rejected(
+    client, test_user, organization, upload_folder
+):
+    res = upload(client, test_user, organization, name="")
+
+    assert res.status_code == 400
+    assert not upload_folder.exists()
+
+
+def test_upload_whose_name_loses_its_extension_is_rejected(
+    client, db_session, test_user, organization, upload_folder
+):
+    """secure_filename turns this into "png", a file with no extension."""
+    res = upload(client, test_user, organization, name="日本.png")
+
+    assert res.status_code == 400
+    assert not upload_folder.exists()
+    db_session.refresh(organization)
+    assert organization.logo == ""
+
+
+@pytest.mark.parametrize(
+    "name", ["logo.png", "logo.jpg", "logo.jpeg", "logo.gif", "LOGO.PNG"]
+)
+def test_upload_accepts_every_allowed_type_in_any_case(
+    client, db_session, test_user, organization, upload_folder, name
+):
+    res = upload(client, test_user, organization, name=name)
+
+    assert res.status_code == 200
+    db_session.refresh(organization)
+    assert organization.logo == name
+    assert (upload_folder / "organizations/demo-aps/logo" / name).exists()
