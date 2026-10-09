@@ -129,6 +129,7 @@ def update_contact(organization_id, contact_id):
             "registration_no", contact.registration_no
         )
         contact.type = contact_data.get("type", contact.type)
+        contact.is_company = contact_data.get("is_company", contact.is_company)
         contact.phone = contact_data.get("phone", contact.phone)
         contact.street = contact_data.get("street", contact.street)
         contact.zipcode = contact_data.get("zipcode", contact.zipcode)
