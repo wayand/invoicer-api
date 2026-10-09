@@ -34,6 +34,10 @@ uv run flask run             # dev server
 - Never read `.env`. Use `.env.sample`.
 - Branches come off an up-to-date `master`. Ask before committing or pushing; see `.claude/rules/git-and-security.md`.
 
+## UI testing (isolated)
+
+`.claude/launch.json` → `invoicer-api-ui-test` starts a throwaway API on `localhost:5001` with its own Postgres container (port 5433, removed on exit), only the demo seed org and a mail sink that prints emails (login 2FA codes) to the server log. It ignores `.env`. Needs Docker. Demo login is in `app/seed/orgs/demo.json`. Then start the UI from `invoicer-vue`.
+
 ## Personal overrides
 
 `CLAUDE.local.md` and `.claude/settings.local.json` are git-ignored.
