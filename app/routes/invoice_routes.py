@@ -74,6 +74,15 @@ def create_invoice(organization_id):
     try:
         invoice_loaded = invoice_schema_with_lines.load(invoice_data)
         invoice_loaded["organization_id"] = organization_id
+        invoice_setting = InvoiceSetting.query.filter_by(
+            organization_id=organization_id
+        ).first()
+        if invoice_setting is None:
+            return {
+                "error": "Invoice settings are missing for this organization. "
+                "Set them up under Settings, Invoicing before creating "
+                "invoices."
+            }, 409
         if not _contact_in_org(organization_id, invoice_loaded["contact_id"]):
             return {
                 "error": f"Contact with id {invoice_loaded['contact_id']} not found!"
@@ -95,26 +104,25 @@ def create_invoice(organization_id):
         invoice = Invoice(
             **invoice_loaded, lines=[InvoiceLine(**line) for line in lines]
         )
-        invoice.save()
+        invoice.save(commit=False)
 
-        """
-        Now update the Organization.invoiceSetting.next_invoice_no +1
-        """
-        invoice_setting = InvoiceSetting.query.filter_by(
-            organization_id=current_user.organization_id
-        ).first_or_404(
-            description=f'invoice-setting with organization_id: {current_user.organization_id} not found! so didnt update "InvoiceSetting.next_invoice_no"'
-        )
-        invoice_setting.next_invoice_no = int(invoice.invoice_no) + 1
-        invoice_setting.update()
-        # the_organization = Organization.query.filter_by(id=current_user.organization_id).first_or_404(description=f'Organization with id {current_user.organization_id} not found! so didnt update "Organization.next_invoice_no"')
-        # the_organization.next_invoice_no = int(invoice.invoice_no) + 1
-        # the_organization.update()
+        next_invoice_no = _following_invoice_no(invoice.invoice_no)
+        if next_invoice_no is not None:
+            invoice_setting.next_invoice_no = next_invoice_no
+        db.session.commit()
 
         return invoice_schema_with_lines.dump(invoice), 201
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
+
+
+def _following_invoice_no(invoice_no):
+    """The number after a plain numeric one; None for manual numbers such as
+    "INV-7", which don't move the sequence."""
+    if invoice_no.isascii() and invoice_no.isdecimal():
+        return int(invoice_no) + 1
+    return None
 
 
 def _contact_in_org(organization_id, contact_id):
