@@ -57,14 +57,23 @@ def upload_logo(organization_id):
             return {"error": "no file found !"}, 400
 
         file = request.files["file"]
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            logo_dir = _logo_dir(organization.slug)
-            logo_dir.mkdir(parents=True, exist_ok=True)
-            file.save(logo_dir / filename)
+        if not file.filename:
+            return {"error": "no file selected !"}, 400
+        # secure_filename can strip a name down to its extension alone
+        # ("日本.png" becomes "png"), so check the name that gets stored.
+        filename = secure_filename(file.filename)
+        if not allowed_file(filename):
+            allowed = ", ".join(
+                sorted(current_app.config["ALLOWED_UPLOAD_EXTENSIONS"])
+            )
+            return {"error": f"file type not allowed, use: {allowed}"}, 400
 
-            organization.logo = filename
-            organization.update()
+        logo_dir = _logo_dir(organization.slug)
+        logo_dir.mkdir(parents=True, exist_ok=True)
+        file.save(logo_dir / filename)
+
+        organization.logo = filename
+        organization.update()
         return {"message": "logo uploaded successfully"}, 200
     except Exception as e:
         return {"error": str(e)}, 500
