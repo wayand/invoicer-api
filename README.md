@@ -84,6 +84,17 @@ gunicorn --bind 0.0.0.0:5000 wsgi:app
 
 Configure Nginx to forward requests to your Gunicorn server.
 
+## Claude Code
+
+The repo ships a shared [Claude Code](https://claude.com/claude-code) setup:
+
+- `CLAUDE.md`: project overview, `uv run` commands, layout and working rules.
+- `.claude/rules/`: short Do/Don't lists that load only for matching files (Python code, tests, dependencies) plus always-on git and security rules.
+- `.claude/skills/`: `/check` (the CI steps), `/commit <work-item-id>` and `/pr-description`.
+- `.claude/settings.json`: shared permissions (what is allowed, asks first, or is denied) and attribution off.
+
+Personal settings go in `.claude/settings.local.json` and `CLAUDE.local.md`. Both are git-ignored.
+
 ## Contributing
 
 Contributions are welcome! To contribute to this project:
