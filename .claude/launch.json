@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "invoicer-api-ui-test",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [".claude/scripts/ui-test-api.sh"],
+      "port": 5001
+    }
+  ]
+}
