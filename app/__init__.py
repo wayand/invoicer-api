@@ -24,6 +24,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 
 def create_app(config_class):
+    config_class.validate()
     app = Flask(__name__)
     app.config.from_object(config_class)
 
