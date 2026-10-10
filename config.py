@@ -40,7 +40,6 @@ class Config:
     REMEMBER_COOKIE_SECURE = False
 
     CSRF_ENABLED = True
-    CSRF_SESSION_KEY = os.environ.get("CSRF_SESSION_KEY")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
