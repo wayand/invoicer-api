@@ -6,11 +6,31 @@ from dotenv import load_dotenv
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
 
+# Only for development and tests. Production has no fallback.
+DEV_SECRET_KEY = "dev-only-secret-key-not-for-production"
+
+# Values that have appeared in sample files or tutorials, compared in lower case.
+KNOWN_PLACEHOLDERS = {
+    "you-will-never-guess",
+    "some_very_secure_key",
+    "csrf_session_key_here",
+    "super-secret",
+    "salt-for-email-confirmation",
+    "change-me-change-me-change-me-change-me",
+    DEV_SECRET_KEY,
+}
+MIN_KEY_LENGTH = 32
+MIN_SALT_LENGTH = 16
+
+
+class ConfigError(RuntimeError):
+    """The configuration is not safe to run with."""
+
 
 class Config:
     DEBUG = False
     TESTING = False
-    SECRET_KEY = os.environ.get("SECRET_KEY") or "you-will-never-guess"
+    SECRET_KEY = os.environ.get("SECRET_KEY")
 
     SESSION_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_HTTPONLY = True
@@ -50,6 +70,10 @@ class Config:
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER")
 
+    @classmethod
+    def validate(cls):
+        """Raise ConfigError if the configuration is not safe to run with."""
+
 
 class ProductionConfig(Config):
     DEBUG = False
@@ -59,8 +83,42 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SECURE = True
     REMEMBER_COOKIE_SECURE = True
 
+    @classmethod
+    def validate(cls):
+        """Refuse to start with a missing, short or well-known secret, so a
+        misconfigured server fails loudly instead of signing tokens with a key
+        anyone can guess. Reports every problem, never a value."""
+        checks = {
+            "SECRET_KEY": MIN_KEY_LENGTH,
+            "JWT_SECRET_KEY": MIN_KEY_LENGTH,
+            "SECURITY_PASSWORD_SALT": MIN_SALT_LENGTH,
+            "SQLALCHEMY_DATABASE_URI": None,
+        }
+        problems = []
+        for name, minimum in checks.items():
+            value = (getattr(cls, name, None) or "").strip()
+            if not value:
+                problems.append(f"{name} is missing")
+            elif minimum is None:
+                continue
+            elif value.lower() in KNOWN_PLACEHOLDERS:
+                problems.append(f"{name} is a well-known placeholder value")
+            elif len(value) < minimum:
+                problems.append(
+                    f"{name} is too short ({len(value)} characters, "
+                    f"need at least {minimum})"
+                )
+        if problems:
+            raise ConfigError(
+                "Refusing to start with an insecure configuration: "
+                + "; ".join(problems)
+                + ". Generate secrets with: python -c "
+                '"import secrets; print(secrets.token_urlsafe(48))"'
+            )
+
 
 class DevelopmentConfig(Config):
+    SECRET_KEY = os.environ.get("SECRET_KEY") or DEV_SECRET_KEY
     DEBUG = True
     ENV = "development"
     DEVELOPMENT = True
@@ -69,5 +127,6 @@ class DevelopmentConfig(Config):
 
 
 class TestingConfig(Config):
+    SECRET_KEY = os.environ.get("SECRET_KEY") or DEV_SECRET_KEY
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URL")
