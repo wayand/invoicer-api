@@ -7,7 +7,6 @@ dependencies = [
     "apispec>=6.10.0",
     "blinker~=1.9.0",
     "click~=8.3.0",
-    "flasgger~=0.9.7.1",
     "flask~=3.1.0",
     "flask-cors~=6.0.0",
     "flask-jwt-extended~=4.7.1",

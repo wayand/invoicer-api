@@ -3,7 +3,6 @@ import os
 import sys
 from logging.handlers import TimedRotatingFileHandler
 
-from flasgger import Swagger
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -19,7 +18,6 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 mail = Mail()
 migrate = Migrate()
 jwt = JWTManager()
-swagger = Swagger()
 limiter = Limiter(key_func=get_remote_address)
 
 
@@ -52,7 +50,6 @@ def create_app(config_class):
     )
 
     mail.init_app(app)
-    swagger.init_app(app)
 
     from app.models.base import db
     from app.routes import bp as routes_bp
