@@ -117,4 +117,4 @@ jobs:
             ssh-keyscan -H ${{ secrets.HETZNER_IP_ADDRESS }} >> ~/.ssh/known_hosts
 
         - name: Run deploy script
-          run: ssh www-data@${{ secrets.HETZNER_IP_ADDRESS }} "IMAGE_TAG=${{ needs.build-and-push.outputs.short_sha }} bash /srv/docker/invoicer/deploy.sh"
+          run: ssh www-data@${{ secrets.HETZNER_IP_ADDRESS }} "IMAGE_TAG=${{ needs.build-and-push.outputs.short_sha }} bash /srv/docker/invoicer/deploy.sh api"
