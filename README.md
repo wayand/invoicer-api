@@ -12,7 +12,6 @@ This backend service is designed to handle all server-side operations related to
 - **Database**: PostgreSQL
 - **ORM**: SQLAlchemy
 - **Authentication**: JWT and OAuth 2.0
-- **API Documentation**: Swagger/OpenAPI
 
 ## Features
 

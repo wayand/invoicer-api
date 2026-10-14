@@ -2,7 +2,6 @@ from datetime import datetime
 from io import BytesIO
 
 import pyqrcode
-from flasgger.utils import swag_from
 from flask import abort, current_app, jsonify, request, session
 from flask_jwt_extended import (
     create_access_token,
@@ -268,7 +267,6 @@ def resend_confirmation_email():
     return {"message": "A new confirmation email has been sent."}
 
 
-@swag_from("../../swags/auth/reset_password.yaml")
 @bp.post("/auth/reset-password")
 @limiter.limit(
     "10 per 15 minutes",
