@@ -10,14 +10,25 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 import onetimepass
+from argon2 import PasswordHasher, Type
+from argon2.exceptions import VerificationError
 from flask import current_app
-from passlib.hash import pbkdf2_sha256 as sha256
+from passlib.hash import pbkdf2_sha256
 from sqlalchemy.orm import validates
 
 from .backup_code import BackupCode
 from .base import BaseModel, db
 
-_DUMMY_PASSWORD_HASH = sha256.hash(base64.b64encode(os.urandom(16)).decode())
+# New hashes are argon2id with the RFC 9106 low-memory profile (64 MiB, 3
+# passes, 4 lanes). Hashes made with the older PBKDF2 scheme still verify (via
+# passlib, which is only used for that) and are replaced at the next login. The
+# parameters are stored in each hash, so changing them later upgrades accounts
+# the same way.
+_argon2 = PasswordHasher(
+    type=Type.ID, memory_cost=65536, time_cost=3, parallelism=4
+)
+
+_DUMMY_PASSWORD_HASH = _argon2.hash(base64.b64encode(os.urandom(16)).decode())
 
 TOTP_STEP_SECONDS = 30
 EMAIL_OTP_TTL = timedelta(minutes=10)
@@ -147,11 +158,28 @@ class User(BaseModel):
 
     @staticmethod
     def generate_hash(password):
-        return sha256.hash(password)
+        return _argon2.hash(password)
+
+    @staticmethod
+    def _is_argon2(hash_):
+        return hash_.startswith("$argon2")
 
     @staticmethod
     def verify_hash(password, hash_):
-        return sha256.verify(password, hash_)
+        if not User._is_argon2(hash_):
+            return pbkdf2_sha256.verify(password, hash_)
+        try:
+            return _argon2.verify(hash_, password)
+        except VerificationError:
+            return False
+
+    def upgrade_password_hash(self, password):
+        """Re-hash with the current scheme and parameters if the stored hash
+        is out of date. Only call this after the password has been verified."""
+        stored = self.password_hash
+        if not self._is_argon2(stored) or _argon2.check_needs_rehash(stored):
+            self.password_hash = self.generate_hash(password)
+            self.update()
 
     @staticmethod
     def check_login_password(user, password):

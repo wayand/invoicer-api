@@ -5,6 +5,7 @@ requires-python = ">=3.14"
 dependencies = [
     "alembic~=1.17.0",
     "apispec>=6.10.0",
+    "argon2-cffi>=25.1.0",
     "blinker~=1.9.0",
     "click~=8.3.0",
     "flask~=3.1.0",
