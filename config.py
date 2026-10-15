@@ -6,8 +6,9 @@ from dotenv import load_dotenv
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
 
-# Only for development and tests. Production has no fallback.
+# Only for development and tests, so they need no .env. Production has no fallback.
 DEV_SECRET_KEY = "dev-only-secret-key-not-for-production"
+DEV_SALT = "dev-only-salt-not-for-production"
 
 # Values that have appeared in sample files or tutorials, compared in lower case.
 KNOWN_PLACEHOLDERS = {
@@ -18,6 +19,7 @@ KNOWN_PLACEHOLDERS = {
     "salt-for-email-confirmation",
     "change-me-change-me-change-me-change-me",
     DEV_SECRET_KEY,
+    DEV_SALT,
 }
 MIN_KEY_LENGTH = 32
 MIN_SALT_LENGTH = 16
@@ -118,6 +120,10 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     SECRET_KEY = os.environ.get("SECRET_KEY") or DEV_SECRET_KEY
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or DEV_SECRET_KEY
+    SECURITY_PASSWORD_SALT = (
+        os.environ.get("SECURITY_PASSWORD_SALT") or DEV_SALT
+    )
     DEBUG = True
     ENV = "development"
     DEVELOPMENT = True
@@ -127,5 +133,9 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     SECRET_KEY = os.environ.get("SECRET_KEY") or DEV_SECRET_KEY
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or DEV_SECRET_KEY
+    SECURITY_PASSWORD_SALT = (
+        os.environ.get("SECURITY_PASSWORD_SALT") or DEV_SALT
+    )
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URL")
