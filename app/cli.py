@@ -328,7 +328,7 @@ def seed():
 def user_reset_2fa(email):
     """Recovery: put EMAIL back on email codes (drops the authenticator app
     and all backup codes). For when both the phone and the codes are lost."""
-    user = User.find_by(email=email)
+    user = User.find_by_email(email)
     if user is None:
         raise click.ClickException(f"No user with email {email}")
     user.reset_two_factor()

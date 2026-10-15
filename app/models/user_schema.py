@@ -1,5 +1,5 @@
 from flask_marshmallow import Marshmallow
-from marshmallow import INCLUDE, fields, validate
+from marshmallow import INCLUDE, fields, pre_load, validate
 
 from .user import User
 
@@ -12,6 +12,14 @@ class UserBaseSchema(ma.SQLAlchemySchema):
     email = fields.Email(required=False)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+
+    @pre_load
+    def normalize_email(self, data, **kwargs):
+        """Strip and lowercase the address before it is validated."""
+        email = data.get("email") if isinstance(data, dict) else None
+        if isinstance(email, str):
+            data = {**data, "email": User.normalize_email(email)}
+        return data
 
     class Meta:
         model = User

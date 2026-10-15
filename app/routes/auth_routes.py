@@ -65,7 +65,7 @@ def _server_error(error):
 def user_lookup_callback(_jwt_header, jwt_data):
     """The token's user, unless the user's sessions were ended since it was
     issued. Tokens from before token_version existed count as version 0."""
-    user = User.query.filter_by(email=jwt_data["sub"]).one_or_none()
+    user = User.find_by_email(jwt_data["sub"])
     if user is None or jwt_data.get("tv", 0) != user.token_version:
         return None
     return user
@@ -224,7 +224,7 @@ def confirm_email(token):
         return {"error": ["Account email already confirmed."]}, 400
     email = confirm_token(token)
     user = User.query.filter_by(email=current_user.email).first_or_404()
-    if user.email == email:
+    if user.email == User.normalize_email(email):
         user.email_is_confirmed = True
         user.email_confirmed_on = datetime.now()
         user.update()
@@ -322,7 +322,7 @@ def send_reset_mail():
             return {"errors": errors}, 422
 
         email = useremail_schema.load(json_data).get("email")
-        user = User.find_by(email=email)
+        user = User.find_by_email(email)
         if user:
             queue_password_reset_email(user)
         # Same answer whether or not the account exists.
@@ -377,9 +377,7 @@ def is_authorized():
 @bp.get("/auth/user")
 @jwt_required()
 def auth_user():
-    user_email = get_jwt_identity()
-    user = User.find_by(email=user_email)
-    return user_schema.jsonify(user)
+    return user_schema.jsonify(current_user)
 
 
 def _second_factor_ok(user, code):
@@ -460,7 +458,7 @@ def get_token():
     try:
         session.pop("logging_in_user", None)
         user_data = usertoken_schema.load(json_data)
-        user = User.find_by(email=user_data["email"])
+        user = User.find_by_email(user_data["email"])
         # Unknown email and wrong password must be indistinguishable.
         if not User.check_login_password(user, user_data["password_hash"]):
             return {"error": "Wrong credentials"}, 422

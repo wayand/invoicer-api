@@ -81,6 +81,8 @@ def test_production_accepts_a_secret_of_exactly_the_minimum_length(
         "super-secret",
         "salt-for-email-confirmation",
         "CHANGE-ME-CHANGE-ME-CHANGE-ME-CHANGE-ME",
+        "dev-only-secret-key-not-for-production",
+        "dev-only-salt-not-for-production",
     ],
 )
 @pytest.mark.parametrize(
@@ -158,3 +160,45 @@ def test_env_sample_holds_no_usable_secrets():
 
     for name in ("SECRET_KEY", "JWT_SECRET_KEY", "SECURITY_PASSWORD_SALT"):
         assert values.get(name, "") == "", f"{name} has a value in .env.sample"
+
+
+def test_testing_config_works_with_no_secrets_in_the_environment():
+    """CI has no .env: nothing but TEST_DATABASE_URL is set there. Run in a
+    subprocess with the secrets removed and .env loading turned off, so this
+    fails the same way on any machine."""
+    import os
+    import subprocess
+    import sys
+
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key not in ("SECRET_KEY", "JWT_SECRET_KEY", "SECURITY_PASSWORD_SALT")
+    }
+    # Never connected to: app creation only needs some URL to be configured
+    env.setdefault("DATABASE_URL", "postgresql+psycopg://u:p@localhost/db")
+    env.setdefault("TEST_DATABASE_URL", "postgresql+psycopg://u:p@localhost")
+    code = (
+        "import dotenv\n"
+        "dotenv.load_dotenv = lambda *a, **k: False\n"
+        "from app import create_app\n"
+        "from app.routes.auth_routes import confirm_token, generate_token\n"
+        "from config import DevelopmentConfig, TestingConfig\n"
+        "for cls in (TestingConfig, DevelopmentConfig):\n"
+        "    app = create_app(cls)\n"
+        "    with app.app_context():\n"
+        "        assert confirm_token(generate_token('a@b.dk')) == 'a@b.dk'\n"
+        "print('ok')\n"
+    )
+
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        cwd=config.basedir,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+    assert result.returncode == 0, result.stderr[-1500:]
+    assert result.stdout.strip() == "ok"
