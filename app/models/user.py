@@ -12,6 +12,7 @@ import jwt
 import onetimepass
 from flask import current_app
 from passlib.hash import pbkdf2_sha256 as sha256
+from sqlalchemy.orm import validates
 
 from .backup_code import BackupCode
 from .base import BaseModel, db
@@ -38,6 +39,12 @@ def _utcnow():
 
 class User(BaseModel):
     __tablename__ = "users"
+    __table_args__ = (
+        # Addresses are stored lowercase; see normalize_email.
+        db.CheckConstraint(
+            "email = lower(email)", name="ck_users_email_lowercase"
+        ),
+    )
 
     id_seq = db.Sequence(__tablename__ + "_id_seq")
 
@@ -121,6 +128,22 @@ class User(BaseModel):
 
     def __repr__(self):
         return f"<User {self.name}>"
+
+    @staticmethod
+    def normalize_email(email):
+        """The one spelling an address is stored and looked up by; None for
+        anything that is not a string."""
+        return email.strip().lower() if isinstance(email, str) else None
+
+    @validates("email")
+    def _store_email_normalized(self, _key, value):
+        return User.normalize_email(value) if isinstance(value, str) else value
+
+    @classmethod
+    def find_by_email(cls, email):
+        """The user with this address, whatever its case or padding."""
+        email = cls.normalize_email(email)
+        return cls.query.filter_by(email=email).first() if email else None
 
     @staticmethod
     def generate_hash(password):
