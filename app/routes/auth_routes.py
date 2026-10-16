@@ -462,6 +462,7 @@ def get_token():
         # Unknown email and wrong password must be indistinguishable.
         if not User.check_login_password(user, user_data["password_hash"]):
             return {"error": "Wrong credentials"}, 422
+        user.upgrade_password_hash(user_data["password_hash"])
         organization = Organization.find_by(id=user.organization_id)
         if not organization:
             return {"error": "Wrong credentials"}, 422
