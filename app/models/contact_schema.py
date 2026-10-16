@@ -13,18 +13,20 @@ class ContactSchema(ma.SQLAlchemySchema):
     name = fields.String(
         required=True, validate=[validate.Length(min=1, max=100)]
     )
-    logo = fields.String()
-    registration_no = fields.String()
+    # The optional text columns are nullable and come back as null when never
+    # filled in, so null must be accepted when a form sends the contact back.
+    logo = fields.String(allow_none=True)
+    registration_no = fields.String()  # part of the primary key: never null
     type = fields.String()
     is_company = fields.Boolean()
-    phone = fields.String()
-    street = fields.String()
-    zipcode = fields.String()
-    city = fields.String()
+    phone = fields.String(allow_none=True)
+    street = fields.String(allow_none=True)
+    zipcode = fields.String(allow_none=True)
+    city = fields.String(allow_none=True)
     email = fields.Email(required=True)
     archived = fields.Boolean()
-    contactperson_name = fields.String()
-    contactperson_email = fields.Email(required=False)
+    contactperson_name = fields.String(allow_none=True)
+    contactperson_email = fields.Email(required=False, allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
