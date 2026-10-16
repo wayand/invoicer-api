@@ -11,19 +11,16 @@ from datetime import datetime, timedelta, timezone
 import jwt
 import onetimepass
 from argon2 import PasswordHasher, Type
-from argon2.exceptions import VerificationError
+from argon2.exceptions import InvalidHashError, VerificationError
 from flask import current_app
-from passlib.hash import pbkdf2_sha256
 from sqlalchemy.orm import validates
 
 from .backup_code import BackupCode
 from .base import BaseModel, db
 
-# New hashes are argon2id with the RFC 9106 low-memory profile (64 MiB, 3
-# passes, 4 lanes). Hashes made with the older PBKDF2 scheme still verify (via
-# passlib, which is only used for that) and are replaced at the next login. The
-# parameters are stored in each hash, so changing them later upgrades accounts
-# the same way.
+# Passwords are hashed with argon2id, the RFC 9106 low-memory profile (64 MiB, 3
+# passes, 4 lanes). The parameters are stored in each hash, so changing them
+# later moves accounts over at their next login (see upgrade_password_hash).
 _argon2 = PasswordHasher(
     type=Type.ID, memory_cost=65536, time_cost=3, parallelism=4
 )
@@ -161,23 +158,19 @@ class User(BaseModel):
         return _argon2.hash(password)
 
     @staticmethod
-    def _is_argon2(hash_):
-        return hash_.startswith("$argon2")
-
-    @staticmethod
     def verify_hash(password, hash_):
-        if not User._is_argon2(hash_):
-            return pbkdf2_sha256.verify(password, hash_)
+        """False for a wrong password, and for a hash that is not argon2 (such
+        as the PBKDF2 ones used before): that account is refused like a wrong
+        password until "forgot password" gives it a new hash."""
         try:
             return _argon2.verify(hash_, password)
-        except VerificationError:
+        except VerificationError, InvalidHashError:
             return False
 
     def upgrade_password_hash(self, password):
-        """Re-hash with the current scheme and parameters if the stored hash
-        is out of date. Only call this after the password has been verified."""
-        stored = self.password_hash
-        if not self._is_argon2(stored) or _argon2.check_needs_rehash(stored):
+        """Re-hash with the current parameters if the stored hash was made with
+        older ones. Only call this after the password has been verified."""
+        if _argon2.check_needs_rehash(self.password_hash):
             self.password_hash = self.generate_hash(password)
             self.update()
 

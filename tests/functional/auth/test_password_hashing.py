@@ -1,6 +1,8 @@
 """
-Passwords are hashed with argon2id. Accounts still holding an old PBKDF2
-hash keep working and are moved to argon2id the next time they log in.
+Passwords are hashed with argon2id, and a hash is moved to the current
+parameters at the next login when they have changed. A hash in any other
+format (such as the PBKDF2 ones this app used before argon2) never verifies:
+the account is refused like a wrong password, and "forgot password" fixes it.
 """
 
 import re
@@ -8,7 +10,6 @@ import re
 import pytest
 from argon2 import PasswordHasher, Type
 from flask_jwt_extended import create_access_token
-from passlib.hash import pbkdf2_sha256
 
 from app import mail
 from app.models import user as user_module
@@ -16,10 +17,8 @@ from app.models.user import User
 
 PASSWORD = "password123"
 NEW_PASSWORD = "brand-new-pass-1"
-
-
-def legacy_hash(password=PASSWORD) -> str:
-    return pbkdf2_sha256.hash(password)
+# A real PBKDF2 hash of PASSWORD, as written before argon2
+OLD_FORMAT_HASH = "$pbkdf2-sha256$29000$KuVcay0lpPT.X6v1njMmhA$fg8K3nc489kPdp1SSDm5RGoBnkN14ga.8uEHPFOT9go"
 
 
 def bearer(user) -> dict:
@@ -42,14 +41,6 @@ def login(client, email, password=PASSWORD):
         "/auth/token",
         json={"email": email, "password": password, "otp_2fa": code},
     )
-
-
-@pytest.fixture
-def legacy_user(db_session, test_user) -> User:
-    """test_user as an account created before argon2: a PBKDF2 hash."""
-    test_user.password_hash = legacy_hash()
-    db_session.commit()
-    return test_user
 
 
 # ------------------------------------------------------------ new hashes
@@ -80,35 +71,63 @@ def test_the_dummy_hash_for_unknown_emails_is_argon2id_too():
 # ------------------------------------------------------------ verifying
 
 
-@pytest.mark.parametrize(
-    "make_hash", [User.generate_hash, lambda pw: legacy_hash(pw)]
-)
-def test_verify_hash_accepts_both_kinds_of_hash(make_hash):
-    hashed = make_hash(PASSWORD)
+def test_verify_hash_accepts_the_right_password_only():
+    hashed = User.generate_hash(PASSWORD)
 
     assert User.verify_hash(PASSWORD, hashed)
     assert not User.verify_hash("wrong-password", hashed)
 
 
-def test_a_legacy_account_can_still_log_in(client, legacy_user):
-    res = login(client, legacy_user.email)
+@pytest.mark.parametrize(
+    "not_argon2", [OLD_FORMAT_HASH, "", "garbage", "$argon2id$truncated"]
+)
+def test_a_hash_that_is_not_argon2_never_verifies(not_argon2):
+    assert User.verify_hash(PASSWORD, not_argon2) is False
 
-    assert res.status_code == 200
-    assert "accessToken" in res.get_json()
+
+def test_login_with_an_old_format_hash_is_refused_like_a_wrong_password(
+    client, db_session, test_user
+):
+    test_user.password_hash = OLD_FORMAT_HASH
+    db_session.commit()
+
+    res = login(client, test_user.email)
+    wrong = login(client, "nobody@example.com", "wrong-password")
+
+    assert res.status_code == wrong.status_code == 422
+    assert res.get_json() == wrong.get_json()
+
+
+def test_forgot_password_recovers_an_account_with_an_old_format_hash(
+    client, db_session, test_user
+):
+    test_user.password_hash = OLD_FORMAT_HASH
+    db_session.commit()
+
+    reset = client.post(
+        "/auth/reset-password",
+        json={
+            "reset_code": test_user.get_reset_password_token(),
+            "new_password": NEW_PASSWORD,
+        },
+    )
+
+    assert reset.status_code == 200
+    assert login(client, test_user.email, NEW_PASSWORD).status_code == 200
 
 
 @pytest.mark.parametrize(
     "path,method",
     [("/auth/backup-codes", "post"), ("/auth/totp-setup", "delete")],
 )
-def test_password_checks_elsewhere_accept_a_legacy_hash(
-    client, legacy_user, path, method
+def test_password_checks_elsewhere_verify_argon2_hashes(
+    client, test_user, path, method
 ):
     ok = getattr(client, method)(
-        path, json={"password": PASSWORD}, headers=bearer(legacy_user)
+        path, json={"password": PASSWORD}, headers=bearer(test_user)
     )
     wrong = getattr(client, method)(
-        path, json={"password": "wrong-password"}, headers=bearer(legacy_user)
+        path, json={"password": "wrong-password"}, headers=bearer(test_user)
     )
 
     assert ok.status_code == 200
@@ -116,22 +135,6 @@ def test_password_checks_elsewhere_accept_a_legacy_hash(
 
 
 # ----------------------------------------------------- upgrade at login
-
-
-def test_logging_in_upgrades_a_legacy_hash_to_argon2id(
-    client, db_session, legacy_user
-):
-    assert login(client, legacy_user.email).status_code == 200
-
-    db_session.refresh(legacy_user)
-    assert legacy_user.password_hash.startswith("$argon2id$")
-    assert User.verify_hash(PASSWORD, legacy_user.password_hash)
-
-
-def test_the_upgraded_account_keeps_logging_in(client, db_session, legacy_user):
-    login(client, legacy_user.email)
-
-    assert login(client, legacy_user.email).status_code == 200
 
 
 def test_an_argon2_hash_is_not_rewritten_on_every_login(
@@ -145,7 +148,7 @@ def test_an_argon2_hash_is_not_rewritten_on_every_login(
     assert test_user.password_hash == before
 
 
-def test_an_argon2_hash_with_weaker_parameters_is_upgraded_too(
+def test_an_argon2_hash_with_weaker_parameters_is_upgraded_at_login(
     client, db_session, test_user
 ):
     """Raising the parameters later moves accounts over the same way."""
@@ -160,78 +163,55 @@ def test_an_argon2_hash_with_weaker_parameters_is_upgraded_too(
     db_session.refresh(test_user)
     assert test_user.password_hash != weak
     assert "m=65536,t=3,p=4" in test_user.password_hash
+    assert login(client, test_user.email).status_code == 200
 
 
 def test_a_wrong_password_does_not_upgrade_the_hash(
-    client, db_session, legacy_user
+    client, db_session, test_user
 ):
-    before = legacy_user.password_hash
+    weak = PasswordHasher(
+        type=Type.ID, time_cost=1, memory_cost=8 * 1024, parallelism=1
+    ).hash(PASSWORD)
+    test_user.password_hash = weak
+    db_session.commit()
 
-    res = login(client, legacy_user.email, "wrong-password")
+    res = login(client, test_user.email, "wrong-password")
 
     assert res.status_code == 422
-    db_session.refresh(legacy_user)
-    assert legacy_user.password_hash == before
-
-
-def test_the_upgrade_happens_at_the_password_step_of_login(
-    client, db_session, legacy_user
-):
-    """Step one (password, then a code is sent) already proves the password."""
-    client.post(
-        "/auth/token",
-        json={"email": legacy_user.email, "password": PASSWORD},
-    )
-
-    db_session.refresh(legacy_user)
-    assert legacy_user.password_hash.startswith("$argon2id$")
-
-
-def test_a_reset_link_issued_before_the_upgrade_stops_working(
-    client, db_session, legacy_user
-):
-    """Reset links are bound to the password hash, so the upgrade ends them."""
-    link_token = legacy_user.get_reset_password_token()
-    login(client, legacy_user.email)
-
-    res = client.post(
-        "/auth/reset-password",
-        json={"reset_code": link_token, "new_password": NEW_PASSWORD},
-    )
-
-    assert res.status_code == 400
+    db_session.refresh(test_user)
+    assert test_user.password_hash == weak
 
 
 # ------------------------------------------------ changing the password
 
 
 def test_changing_the_password_stores_an_argon2id_hash(
-    client, db_session, legacy_user
+    client, db_session, test_user
 ):
     res = client.post(
         "/auth/change-password",
         json={"password": PASSWORD, "new_password": NEW_PASSWORD},
-        headers=bearer(legacy_user),
+        headers=bearer(test_user),
     )
 
     assert res.status_code == 200
-    db_session.refresh(legacy_user)
-    assert legacy_user.password_hash.startswith("$argon2id$")
-    assert User.verify_hash(NEW_PASSWORD, legacy_user.password_hash)
+    db_session.refresh(test_user)
+    assert test_user.password_hash.startswith("$argon2id$")
+    assert User.verify_hash(NEW_PASSWORD, test_user.password_hash)
 
 
 def test_resetting_the_password_stores_an_argon2id_hash(
-    client, db_session, legacy_user
+    client, db_session, test_user
 ):
     res = client.post(
         "/auth/reset-password",
         json={
-            "reset_code": legacy_user.get_reset_password_token(),
+            "reset_code": test_user.get_reset_password_token(),
             "new_password": NEW_PASSWORD,
         },
     )
 
     assert res.status_code == 200
-    db_session.refresh(legacy_user)
-    assert legacy_user.password_hash.startswith("$argon2id$")
-    assert User.verify_hash(NEW_PASSWORD, legacy_user.password_hash)
+    db_session.refresh(test_user)
+    assert test_user.password_hash.startswith("$argon2id$")
+    assert User.verify_hash(NEW_PASSWORD, test_user.password_hash)
