@@ -262,6 +262,10 @@ def delete_invoice(organization_id, invoice_id):
     invoice = Invoice.query.filter_by(
         organization_id=organization_id, id=invoice_id
     ).first_or_404(description=f"Invoice with id {invoice_id} not found!")
+    # Once approved, sent or paid an invoice is part of the books: deleting it
+    # would leave a gap in the numbering.
+    if invoice.state != "draft" or invoice.is_sent or invoice.is_paid:
+        return {"error": "Only draft invoices can be deleted"}, 409
     try:
         invoice.delete()
         return {
