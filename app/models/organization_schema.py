@@ -8,17 +8,19 @@ ma = Marshmallow()
 
 class OrganizationSchema(ma.SQLAlchemySchema):
     id = fields.Integer(dump_only=True)
-    registration_no = fields.String()
+    # The optional text columns are nullable and come back as null when never
+    # filled in, so null must be accepted when the form sends them back.
+    registration_no = fields.String(allow_none=True)
     slug = fields.String()
     email = fields.Email(required=True)
     name = fields.String(
         required=True, validate=[validate.Length(min=5, max=100)]
     )
-    logo = fields.String()
-    phone = fields.String()
-    street = fields.String()
-    zipcode = fields.String()
-    city = fields.String()
+    logo = fields.String(allow_none=True)
+    phone = fields.String(allow_none=True)
+    street = fields.String(allow_none=True)
+    zipcode = fields.String(allow_none=True)
+    city = fields.String(allow_none=True)
     country_id = fields.Integer(required=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
