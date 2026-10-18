@@ -41,10 +41,10 @@ def url_for_logo(slug, logo):
         return {"error": "Logo not found"}, 404
 
 
-@bp.post("/organizations/<int:organization_id>/upload-logo")
-@jwt_required()
-def upload_logo(organization_id):
-    organization = (
+def _member_organization_or_404(organization_id):
+    """The organization, if the current user belongs to it. Anyone else gets
+    404, as if it did not exist."""
+    return (
         Organization.query.filter_by(id=organization_id)
         .join(Organization.users)
         .filter(User.email == current_user.email)
@@ -52,6 +52,12 @@ def upload_logo(organization_id):
             description=f"Organization with id {organization_id} not found!"
         )
     )
+
+
+@bp.post("/organizations/<int:organization_id>/upload-logo")
+@jwt_required()
+def upload_logo(organization_id):
+    organization = _member_organization_or_404(organization_id)
     try:
         if "file" not in request.files:
             return {"error": "no file found !"}, 400
@@ -98,28 +104,14 @@ def get_organizations():
 @bp.get("/organizations/<int:organization_id>")
 @jwt_required()
 def get_organization(organization_id):
-    organization = (
-        Organization.query.filter_by(id=organization_id)
-        .join(Organization.users)
-        .filter(User.email == current_user.email)
-        .first_or_404(
-            description=f"Organization with id {organization_id} not found!"
-        )
-    )
+    organization = _member_organization_or_404(organization_id)
     return organization_schema.jsonify(organization)
 
 
 @bp.delete("/organizations/<int:organization_id>")
 @jwt_required()
 def delete_organization(organization_id):
-    organization = (
-        Organization.query.filter_by(id=organization_id)
-        .join(Organization.users)
-        .filter(User.email == current_user.email)
-        .first_or_404(
-            description=f"Organization with id {organization_id} not found!"
-        )
-    )
+    organization = _member_organization_or_404(organization_id)
     try:
         organization.delete()
         return {
@@ -173,11 +165,7 @@ def create_organization():
 @bp.put("/organizations/<int:organization_id>")
 @jwt_required()
 def update_organization(organization_id):
-    organization = Organization.query.filter_by(
-        id=organization_id
-    ).first_or_404(
-        description=f"Organization with id {organization_id} not found!"
-    )
+    organization = _member_organization_or_404(organization_id)
 
     try:
         json_data = request.get_json()
