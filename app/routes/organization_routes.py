@@ -125,43 +125,6 @@ def delete_organization(organization_id):
         return {"error": str(e)}, 400
 
 
-@bp.post("/organizations")
-@jwt_required()
-def create_organization():
-    try:
-        json_data = request.get_json()
-    except Exception as e:
-        return {"error": str(e)}, 400
-
-    errors = organization_schema.validate(json_data)
-    if errors:
-        return {"errors": errors}, 422
-
-    try:
-        organization_data = organization_schema.load(json_data)
-        duplicate_check = Organization.query.filter(
-            or_(
-                Organization.name == organization_data.get("name"),
-                Organization.slug == organization_data.get("slug"),
-            )
-        ).first()
-        if duplicate_check:
-            raise Exception(
-                f"Organization name ({duplicate_check.name}) and slug ({duplicate_check.slug}) already exists"
-            )
-
-        organization = Organization(**organization_data)
-        organization.save()
-
-        return organization_schema.jsonify(organization), 201
-    except exc.IntegrityError:
-        return {
-            "error": f"This Email address is already in use ({organization.email})"
-        }, 202
-    except Exception as e:
-        return {"error": str(e)}, 400
-
-
 @bp.put("/organizations/<int:organization_id>")
 @jwt_required()
 def update_organization(organization_id):

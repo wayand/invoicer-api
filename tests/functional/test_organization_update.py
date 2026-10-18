@@ -88,25 +88,6 @@ def test_update_accepts_null_for_an_optional_field_and_clears_it(
     assert getattr(stored(organization), field) is None
 
 
-@pytest.mark.parametrize("field", OPTIONAL_FIELDS)
-def test_create_accepts_null_for_an_optional_field(
-    client, test_user, country, field
-):
-    res = client.post(
-        "/organizations",
-        json={
-            "name": "Brand New ApS",
-            "slug": "brand-new-aps",
-            "email": "new@example.com",
-            "country_id": country.id,
-            field: None,
-        },
-        headers=auth_headers(test_user),
-    )
-
-    assert res.status_code == 201, res.get_json()
-
-
 @pytest.mark.parametrize("field", ["name", "email", "country_id"])
 def test_required_fields_still_reject_null(
     client, test_user, organization, field
