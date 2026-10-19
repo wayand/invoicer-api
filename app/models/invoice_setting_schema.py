@@ -26,10 +26,10 @@ class InvoiceSettingSchema(ma.SQLAlchemySchema):
     @post_dump()
     def convert_decimal(self, data, many):
         if data:
+            fee = data.get("default_reminder_fee")
+            # A fee of 0 is a value; only a missing fee is null
             data["default_reminder_fee"] = (
-                float(data.get("default_reminder_fee"))
-                if data.get("default_reminder_fee")
-                else None
+                float(fee) if fee is not None else None
             )
         return data
 
