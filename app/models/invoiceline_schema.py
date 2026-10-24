@@ -2,10 +2,11 @@ from flask_marshmallow import Marshmallow
 from marshmallow import (
     ValidationError,
     fields,
-    post_dump,
     pre_load,
     validate,
 )
+
+from app.money import MAX_FACTOR, DecimalNumber
 
 from .invoiceline import InvoiceLine
 
@@ -20,9 +21,18 @@ class InvoiceLineSchema(ma.SQLAlchemySchema):
     id = fields.Integer()
     product_id = fields.Integer(required=True)
     invoice_id = fields.Integer(required=False)
-    quantity = fields.Decimal(required=True, places=2)
-    amount = fields.Decimal(required=True, places=2)
-    unit_price = fields.Decimal(required=True, places=2)
+    quantity = DecimalNumber(
+        places=3,
+        required=True,
+        validate=validate.Range(min=-MAX_FACTOR, max=MAX_FACTOR),
+    )
+    unit_price = DecimalNumber(
+        places=3,
+        required=True,
+        validate=validate.Range(min=-MAX_FACTOR, max=MAX_FACTOR),
+    )
+    # Computed by the server: quantity x unit price (docs/money-rules.md)
+    amount = DecimalNumber(places=2, dump_only=True)
     description = fields.String(
         required=True, validate=[validate.Length(min=2, max=100)]
     )
@@ -39,12 +49,10 @@ class InvoiceLineSchema(ma.SQLAlchemySchema):
         return data
 
     @pre_load
-    def check_line_amount_type(self, data, **kwargs):
-        check_amount_type = isinstance(data.get("amount"), (float, int))
-        if not check_amount_type:
-            raise ValidationError(
-                "Invalid type. Expected Number but got String.", "amount"
-            )
+    def drop_computed_fields(self, data, **kwargs):
+        """The server computes the amount, so whatever is sent is ignored."""
+        if isinstance(data, dict):
+            return {k: v for k, v in data.items() if k != "amount"}
         return data
 
     @pre_load
@@ -54,21 +62,6 @@ class InvoiceLineSchema(ma.SQLAlchemySchema):
             raise ValidationError(
                 "Invalid type. Expected Number but got String.", "unit_price"
             )
-        return data
-
-    @post_dump()
-    def convert_decimal(self, data, many, **kwargs):
-        data["quantity"] = (
-            float(data.get("quantity")) if data.get("quantity") >= 0 else None
-        )
-        data["amount"] = (
-            float(data.get("amount")) if data.get("amount") >= 0 else None
-        )
-        data["unit_price"] = (
-            float(data.get("unit_price"))
-            if data.get("unit_price") >= 0
-            else None
-        )
         return data
 
     class Meta:

@@ -1,0 +1,95 @@
+{
+    "about": "Shared test cases for the money rules (docs/money-rules.md). The invoicer-vue repo keeps a copy: change both together. Each case: lines are [quantity, unit price]; every number is a string so that no float is involved.",
+    "cases": [
+        {
+            "name": "a domestic invoice",
+            "lines": [["1", "100"], ["2", "100"]],
+            "rate": "0.25",
+            "line_amounts": ["100.00", "200.00"],
+            "amount": "300.00",
+            "vat_amount": "75.00",
+            "gross_amount": "375.00"
+        },
+        {
+            "name": "a line that rounds half up",
+            "lines": [["3", "0.335"]],
+            "rate": "0.25",
+            "line_amounts": ["1.01"],
+            "amount": "1.01",
+            "vat_amount": "0.25",
+            "gross_amount": "1.26"
+        },
+        {
+            "name": "VAT that rounds half up",
+            "lines": [["1", "0.10"]],
+            "rate": "0.25",
+            "line_amounts": ["0.10"],
+            "amount": "0.10",
+            "vat_amount": "0.03",
+            "gross_amount": "0.13"
+        },
+        {
+            "name": "each line is rounded before the lines are added",
+            "lines": [["1", "0.005"], ["1", "0.005"], ["1", "0.005"], ["1", "0.005"], ["1", "0.005"], ["1", "0.005"], ["1", "0.005"], ["1", "0.005"], ["1", "0.005"], ["1", "0.005"]],
+            "rate": "0.25",
+            "line_amounts": ["0.01", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01"],
+            "amount": "0.10",
+            "vat_amount": "0.03",
+            "gross_amount": "0.13"
+        },
+        {
+            "name": "a fractional quantity",
+            "lines": [["0.25", "99.99"]],
+            "rate": "0.25",
+            "line_amounts": ["25.00"],
+            "amount": "25.00",
+            "vat_amount": "6.25",
+            "gross_amount": "31.25"
+        },
+        {
+            "name": "a unit price with three decimals",
+            "lines": [["1000", "0.125"]],
+            "rate": "0.25",
+            "line_amounts": ["125.00"],
+            "amount": "125.00",
+            "vat_amount": "31.25",
+            "gross_amount": "156.25"
+        },
+        {
+            "name": "no lines",
+            "lines": [],
+            "rate": "0.25",
+            "line_amounts": [],
+            "amount": "0.00",
+            "vat_amount": "0.00",
+            "gross_amount": "0.00"
+        },
+        {
+            "name": "a zero rate",
+            "lines": [["2", "10"]],
+            "rate": "0",
+            "line_amounts": ["20.00"],
+            "amount": "20.00",
+            "vat_amount": "0.00",
+            "gross_amount": "20.00"
+        },
+        {
+            "name": "a negative line rounds away from zero",
+            "lines": [["1", "-2.675"]],
+            "rate": "0.25",
+            "line_amounts": ["-2.68"],
+            "amount": "-2.68",
+            "vat_amount": "-0.67",
+            "gross_amount": "-3.35"
+        },
+        {
+            "name": "a credit line against a charge",
+            "lines": [["1", "100"], ["1", "-40"]],
+            "rate": "0.25",
+            "line_amounts": ["100.00", "-40.00"],
+            "amount": "60.00",
+            "vat_amount": "15.00",
+            "gross_amount": "75.00"
+        }
+    ]
+}

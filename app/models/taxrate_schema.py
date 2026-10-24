@@ -1,5 +1,7 @@
 from flask_marshmallow import Marshmallow
-from marshmallow import fields, post_dump, validate
+from marshmallow import fields, validate
+
+from app.money import DecimalNumber
 
 from .tax_rate import TaxRate
 
@@ -20,16 +22,13 @@ class TaxRateSchema(ma.SQLAlchemySchema):
     is_predefined = fields.Boolean()
     net_amount_meta_field_id = fields.Integer()
     predefined_tag = fields.String()
-    rate = fields.Decimal(required=True)
+    rate = DecimalNumber(
+        places=4, required=True, validate=validate.Range(min=0, max=1)
+    )
     tax_rate_group = fields.String()
 
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
-
-    @post_dump()
-    def convert_decimal(self, data, many):
-        data["rate"] = float(data.get("rate")) if data.get("rate") else None
-        return data
 
     class Meta:
         model = TaxRate

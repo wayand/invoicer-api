@@ -152,7 +152,8 @@ with an accountant.
 
 1. **Plan in the repo** (this document).
 2. **Fix `template_id`** in `update_invoice`, with a regression test.
-3. **Money rules.** One rule, documented and tested, used by the server and the app:
+3. **Money rules.** One rule, documented and tested, used by the server and the app (specified in
+   [money-rules.md](money-rules.md)):
    - A line amount is `quantity x unit price`, rounded to 2 decimals (half up).
    - The net total is the sum of the line amounts.
    - VAT is the net total times the rate, rounded to 2 decimals (half up). Until VAT codes arrive in
