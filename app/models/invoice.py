@@ -34,13 +34,13 @@ class Invoice(BaseModel):
     invoice_date = db.Column(db.Date, default=None, nullable=False)
     duedate = db.Column(db.Date, default=None, nullable=False)
     amount = db.Column(
-        db.Numeric(10, 3), server_default="0.00", default=0.00, nullable=False
+        db.Numeric(14, 2), server_default="0.00", default=0.00, nullable=False
     )
     gross_amount = db.Column(
-        db.Numeric(10, 3), server_default="0.00", default=0.00, nullable=False
+        db.Numeric(14, 2), server_default="0.00", default=0.00, nullable=False
     )
     vat_amount = db.Column(
-        db.Numeric(10, 3), server_default="0.00", default=0.00, nullable=False
+        db.Numeric(14, 2), server_default="0.00", default=0.00, nullable=False
     )
     is_paid = db.Column(
         db.Boolean,
@@ -62,9 +62,6 @@ class Invoice(BaseModel):
     )
     template_id = db.Column(
         db.String(100), server_default="1", default="1", nullable=False
-    )
-    excluding_vat = db.Column(
-        db.Boolean, server_default=db.text("true"), default=True, nullable=False
     )
 
     contact = db.relationship("Contact", backref="invoices")

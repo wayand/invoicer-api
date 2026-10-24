@@ -9,6 +9,8 @@ from app.models.invoice_schema import invoice_schema_with_lines, invoices_schema
 from app.models.invoice_setting import InvoiceSetting
 from app.models.invoiceline import InvoiceLine
 from app.models.product import Product
+from app.models.tax_rate import TaxRate
+from app.money import MoneyError, invoice_totals
 from app.routes import bp
 from app.routes.authz import org_member_required
 
@@ -83,6 +85,9 @@ def create_invoice(organization_id):
                 "Set them up under Settings, Invoicing before creating "
                 "invoices."
             }, 409
+        vat_rate = _sales_vat_rate(organization_id)
+        if vat_rate is None:
+            return NO_VAT_RATE, 409
         if not _contact_in_org(organization_id, invoice_loaded["contact_id"]):
             return {
                 "error": f"Contact with id {invoice_loaded['contact_id']} not found!"
@@ -104,6 +109,7 @@ def create_invoice(organization_id):
         invoice = Invoice(
             **invoice_loaded, lines=[InvoiceLine(**line) for line in lines]
         )
+        _apply_totals(invoice, invoice.lines, vat_rate)
         invoice.save(commit=False)
 
         next_invoice_no = _following_invoice_no(invoice.invoice_no)
@@ -112,9 +118,44 @@ def create_invoice(organization_id):
         db.session.commit()
 
         return invoice_schema_with_lines.dump(invoice), 201
+    except MoneyError as e:
+        db.session.rollback()
+        return {"error": str(e)}, 422
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
+
+
+def _sales_vat_rate(organization_id):
+    """The organization's one active sales tax rate (0.25 for 25%), or None
+    if it has none or several. Until invoice lines carry their own VAT code,
+    every invoice is calculated with it."""
+    rates = TaxRate.query.filter_by(
+        organization_id=organization_id,
+        applies_to_sales=True,
+        is_active=True,
+    ).all()
+    return rates[0].rate if len(rates) == 1 else None
+
+
+NO_VAT_RATE = {
+    "error": "VAT cannot be calculated: the organization needs exactly one "
+    "active sales tax rate."
+}
+
+
+def _apply_totals(invoice, lines, vat_rate):
+    """Set the amount of every line and the totals of the invoice from the
+    quantities and unit prices (docs/money-rules.md). Whatever amounts the
+    client sent are not used."""
+    totals = invoice_totals(
+        [(line.quantity, line.unit_price) for line in lines], vat_rate
+    )
+    for line, amount in zip(lines, totals.lines):
+        line.amount = amount
+    invoice.amount = totals.amount
+    invoice.vat_amount = totals.vat_amount
+    invoice.gross_amount = totals.gross_amount
 
 
 def _following_invoice_no(invoice_no):
@@ -176,6 +217,9 @@ def update_invoice(organization_id, invoice_id):
 
     try:
         data = invoice_schema_with_lines.load(json_data)
+        vat_rate = _sales_vat_rate(organization_id)
+        if vat_rate is None:
+            return NO_VAT_RATE, 409
         if not _contact_in_org(organization_id, data["contact_id"]):
             return {
                 "error": f"Contact with id {data['contact_id']} not found!"
@@ -197,15 +241,11 @@ def update_invoice(organization_id, invoice_id):
         invoice.invoice_no = data.get("invoice_no", invoice.invoice_no)
         invoice.invoice_date = data.get("invoice_date", invoice.invoice_date)
         invoice.duedate = data.get("duedate", invoice.duedate)
-        invoice.amount = data.get("amount", invoice.amount)
-        invoice.gross_amount = data.get("gross_amount", invoice.gross_amount)
-        invoice.vat_amount = data.get("vat_amount", invoice.vat_amount)
         invoice.is_paid = data.get("is_paid", invoice.is_paid)
         invoice.is_sent = data.get("is_sent", invoice.is_sent)
         invoice.state = data.get("state", invoice.state)
         invoice.currency_id = data.get("currency_id", invoice.currency_id)
         invoice.template_id = data.get("template_id", invoice.template_id)
-        invoice.excluding_vat = data.get("excluding_vat", invoice.excluding_vat)
 
         # delete lines that are removed
         to_be_deleted = [line.get("id") for line in lines if line.get("id")]
@@ -231,7 +271,6 @@ def update_invoice(organization_id, invoice_id):
                 invoiceline.quantity = line.get(
                     "quantity", invoiceline.quantity
                 )
-                invoiceline.amount = line.get("amount", invoiceline.amount)
                 invoiceline.unit_price = line.get(
                     "unit_price", invoiceline.unit_price
                 )
@@ -246,8 +285,19 @@ def update_invoice(organization_id, invoice_id):
                     description=f"Product with id {line.get('product_id')} not found!"
                 )
                 invoice.lines.append(InvoiceLine(**line))
+
+        db.session.flush()
+        saved_lines = (
+            InvoiceLine.query.filter_by(invoice_id=invoice.id)
+            .order_by(InvoiceLine.id)
+            .all()
+        )
+        _apply_totals(invoice, saved_lines, vat_rate)
         invoice.update()
         return invoice_schema_with_lines.dump(invoice), 200
+    except MoneyError as e:
+        db.session.rollback()
+        return {"error": str(e)}, 422
     except exc.IntegrityError as e:
         db.session.rollback()
         return {"error": str(e)}, 202

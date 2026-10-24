@@ -68,7 +68,7 @@ class TaxRate(BaseModel):
         db.String(100), server_default="", default="", nullable=False
     )
     rate = db.Column(
-        db.Numeric(), server_default="0", default=0, nullable=False
+        db.Numeric(6, 4), server_default="0", default=0, nullable=False
     )
     tax_rate_group = db.Column(
         db.String(100),

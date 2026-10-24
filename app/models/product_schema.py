@@ -1,5 +1,7 @@
 from flask_marshmallow import Marshmallow
-from marshmallow import fields, post_dump, validate
+from marshmallow import fields, validate
+
+from app.money import MAX_FACTOR, DecimalNumber
 
 from .product import Product
 
@@ -16,20 +18,15 @@ class ProductSchema(ma.SQLAlchemySchema):
     description = fields.String(
         required=True, validate=[validate.Length(min=2, max=100)]
     )
-    unit_price = fields.Decimal(required=True, places=2)
+    unit_price = DecimalNumber(
+        places=3,
+        required=True,
+        validate=validate.Range(min=-MAX_FACTOR, max=MAX_FACTOR),
+    )
     archived = fields.Boolean(required=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     account = fields.Nested("AccountSchema", dump_only=True)
-
-    @post_dump()
-    def convert_decimal(self, data, many, **kwargs):
-        data["unit_price"] = (
-            float(data.get("unit_price"))
-            if data.get("unit_price") >= 0
-            else None
-        )
-        return data
 
     class Meta:
         model = Product

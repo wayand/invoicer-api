@@ -1,9 +1,13 @@
 from flask_marshmallow import Marshmallow
-from marshmallow import ValidationError, fields, post_dump, pre_load
+from marshmallow import fields, pre_load
+
+from app.money import DecimalNumber
 
 from .invoice import Invoice
 
 ma = Marshmallow()
+
+IGNORED_INPUT = {"amount", "vat_amount", "gross_amount", "excluding_vat"}
 
 
 class InvoiceSchema(ma.SQLAlchemySchema):
@@ -16,12 +20,12 @@ class InvoiceSchema(ma.SQLAlchemySchema):
     is_sent = fields.Boolean()
     state = fields.String(required=True)
     template_id = fields.Str()
-    excluding_vat = fields.Boolean()
     invoice_date = fields.Date()  # format='%Y-%m-%d'
     duedate = fields.Date()  # format='%Y-%m-%d'
-    amount = fields.Decimal(required=True, places=2)
-    vat_amount = fields.Decimal(required=True, places=2)
-    gross_amount = fields.Decimal(required=True, places=2)
+    # Computed by the server from the lines (docs/money-rules.md)
+    amount = DecimalNumber(places=2, dump_only=True)
+    vat_amount = DecimalNumber(places=2, dump_only=True)
+    gross_amount = DecimalNumber(places=2, dump_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     contact = fields.Nested(
@@ -32,51 +36,11 @@ class InvoiceSchema(ma.SQLAlchemySchema):
     )
 
     @pre_load
-    def check_amount_type(self, data, **kwargs):
-        check_amount_type = isinstance(data.get("amount"), (float, int))
-        if not check_amount_type:
-            raise ValidationError(
-                f"Invalid type. Expected Number but got String.({type(data.get('amount'))})",
-                "amount",
-            )
-        return data
-
-    @pre_load
-    def check_gross_amount_type(self, data, **kwargs):
-        check_gross_amount_type = isinstance(
-            data.get("gross_amount"), (float, int)
-        )
-        if not check_gross_amount_type:
-            raise ValidationError(
-                "Invalid type. Expected Number but got String.", "gross_amount"
-            )
-        return data
-
-    @pre_load
-    def check_vat_amount_type(self, data, **kwargs):
-        check_vat_amount_type = isinstance(data.get("amount"), (float, int))
-        if not check_vat_amount_type:
-            raise ValidationError(
-                "Invalid type. Expected Number but got String.", "vat_amount"
-            )
-        return data
-
-    @post_dump
-    def convert_types(self, data, many, **kwargs):
-        if data:
-            data["amount"] = (
-                float(data.get("amount")) if data.get("amount") >= 0 else None
-            )
-            data["gross_amount"] = (
-                float(data.get("gross_amount"))
-                if data.get("gross_amount") >= 0
-                else None
-            )
-            data["vat_amount"] = (
-                float(data.get("vat_amount"))
-                if data.get("vat_amount") >= 0
-                else None
-            )
+    def drop_computed_fields(self, data, **kwargs):
+        """The app used to send the totals (and excluding_vat, which nothing
+        used). The server computes the totals, so whatever is sent is ignored."""
+        if isinstance(data, dict):
+            return {k: v for k, v in data.items() if k not in IGNORED_INPUT}
         return data
 
     class Meta:

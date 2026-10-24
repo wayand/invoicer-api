@@ -51,7 +51,7 @@ class InvoiceSetting(BaseModel):
         db.Integer, server_default="0", default=0, nullable=False
     )
     default_reminder_fee = db.Column(
-        db.Numeric(), server_default="0", default=0, nullable=False
+        db.Numeric(14, 2), server_default="0", default=0, nullable=False
     )
 
     organization: Mapped["Organization"] = relationship(

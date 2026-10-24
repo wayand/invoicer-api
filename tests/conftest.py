@@ -1,5 +1,6 @@
 import os
 import re
+from decimal import Decimal
 from typing import Generator
 
 import pytest
@@ -15,6 +16,7 @@ from app.models.base import db
 from app.models.country import Country
 from app.models.invoice_setting import InvoiceSetting
 from app.models.organization import Organization
+from app.models.tax_rate import TaxRate
 from app.models.user import User
 from config import TestingConfig
 
@@ -167,7 +169,7 @@ def organization(db_session, country: Country):
 @pytest.fixture
 def make_invoice_setting(db_session):
     """Factory: give an organization the invoice settings (and the account
-    they point at) that creating an invoice requires."""
+    they point at) and the sales tax rate that creating an invoice requires."""
 
     def make(org: Organization) -> InvoiceSetting:
         account_type = AccountType(
@@ -197,6 +199,16 @@ def make_invoice_setting(db_session):
         )
         db_session.add(account)
         db_session.flush()
+        db_session.add(
+            TaxRate(
+                organization_id=org.id,
+                name="Salgsmoms",
+                abbreviation="S",
+                applies_to_sales=True,
+                is_active=True,
+                rate=Decimal("0.25"),
+            )
+        )
         setting = InvoiceSetting(
             organization_id=org.id,
             default_account_id=account.id,

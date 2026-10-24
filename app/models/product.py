@@ -32,7 +32,7 @@ class Product(BaseModel):
     )
     description = db.Column(db.String(255), nullable=True)
     unit_price = db.Column(
-        db.Numeric(10, 3), server_default="0.00", default=0.00, nullable=False
+        db.Numeric(14, 3), server_default="0.00", default=0.00, nullable=False
     )
     archived = db.Column(
         db.Boolean,
