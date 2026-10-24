@@ -204,7 +204,7 @@ def update_invoice(organization_id, invoice_id):
         invoice.is_sent = data.get("is_sent", invoice.is_sent)
         invoice.state = data.get("state", invoice.state)
         invoice.currency_id = data.get("currency_id", invoice.currency_id)
-        invoice.template_id = data.get("is_sent", invoice.template_id)
+        invoice.template_id = data.get("template_id", invoice.template_id)
         invoice.excluding_vat = data.get("excluding_vat", invoice.excluding_vat)
 
         # delete lines that are removed
