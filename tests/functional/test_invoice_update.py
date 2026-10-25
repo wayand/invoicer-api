@@ -50,9 +50,6 @@ def body(organization, contact, product, **overrides) -> dict:
         "invoice_no": "1001",
         "currency_id": "DKK",
         "state": "draft",
-        "amount": 100,
-        "vat_amount": 25,
-        "gross_amount": 125,
         "invoice_date": date(2026, 1, 1).isoformat(),
         "duedate": date(2026, 1, 15).isoformat(),
         "lines": [
@@ -61,7 +58,6 @@ def body(organization, contact, product, **overrides) -> dict:
                 "description": "Work",
                 "quantity": 1,
                 "unit_price": 100,
-                "amount": 100,
             }
         ],
     }
@@ -84,11 +80,12 @@ def invoice(
 
 
 def update(client, user, organization, invoice, contact, product, **overrides):
-    # As the app sends it: the line as returned, without its timestamps
+    # As the app sends it: the line as returned, without its timestamps and
+    # amount (the server calculates it)
     line = {
         key: value
         for key, value in invoice["lines"][0].items()
-        if key not in ("created_at", "updated_at")
+        if key not in ("created_at", "updated_at", "amount")
     }
     line["description"] = "Changed"
     return client.put(

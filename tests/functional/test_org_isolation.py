@@ -131,9 +131,6 @@ def invoice_payload(organization_id: int, contact_id: int, product_id: int):
         "invoice_no": "5000",
         "currency_id": "DKK",
         "state": "draft",
-        "amount": 100,
-        "vat_amount": 25,
-        "gross_amount": 125,
         "invoice_date": "2026-01-01",
         "duedate": "2026-01-15",
         "lines": [
@@ -142,7 +139,6 @@ def invoice_payload(organization_id: int, contact_id: int, product_id: int):
                 "description": "Work",
                 "quantity": 1,
                 "unit_price": 100,
-                "amount": 100,
             }
         ],
     }

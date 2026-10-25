@@ -49,13 +49,6 @@ class InvoiceLineSchema(ma.SQLAlchemySchema):
         return data
 
     @pre_load
-    def drop_computed_fields(self, data, **kwargs):
-        """The server computes the amount, so whatever is sent is ignored."""
-        if isinstance(data, dict):
-            return {k: v for k, v in data.items() if k != "amount"}
-        return data
-
-    @pre_load
     def check_line_unit_price_type(self, data, **kwargs):
         check_unit_price_type = isinstance(data.get("unit_price"), (float, int))
         if not check_unit_price_type:

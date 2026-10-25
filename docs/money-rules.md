@@ -56,8 +56,8 @@ none or more than one, creating or saving an invoice returns 409 instead of gues
 ## The API
 
 - `amount`, `vat_amount` and `gross_amount` on an invoice, and `amount` on a line, are output only.
-  If a client still sends them (the app used to), they are ignored, as is `excluding_vat`, a flag
-  that nothing used and that no longer exists.
+  A request that sends one of them is refused with 422 and nothing is saved, as is one that sends
+  `excluding_vat`, a flag that nothing used and that no longer exists. The app does not send them.
 - Money is returned as JSON numbers (`1250.5`), including negative numbers (credit lines).
 - `quantity` and `unit_price` must be JSON numbers with at most 3 decimals and fit their columns
   (below 100 billion); more decimals are rounded half up.
