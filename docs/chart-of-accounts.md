@@ -2,7 +2,7 @@
 
 The proposed chart of accounts and system accounts for the ledger (phase 1 of the
 [accounting plan](accounting-plan.md)). This is a document first: nothing here is in the code yet,
-and it has not been checked by an accountant.
+and an accountant has answered only part of it (see "Accountant's note" below).
 
 ## Status and what is verified
 
@@ -61,6 +61,7 @@ to the account (the official code list is covered below).
 | 1610 | Varekøb | `purchases` (the default for a bill line) | K1 |
 | 1630 | Varekøb udland, EU | | K-EU-V-1 |
 | 1650 | Varekøb udland, ikke-EU | | K-%EU-V-1 |
+| 1710 | Ydelseskøb udland, EU | | K-EU-Y-1 |
 | 1760 | Fragtomkostninger | | K1 |
 | 2720 | Øreafrunding/kassedifferencer | `rounding` (small differences, for example when matching bank payments in phase 5) | none |
 | 3470 | Renter fra banker | | none |
@@ -80,10 +81,10 @@ The common expense accounts (all detail accounts, with no sub-accounts, in the s
 | 2230 | Småanskaffelser under skattemæssig grænse for småaktiver | K1 |
 | 2310 | It-udstyr (hardware, software inkl. licenser og abonnementer) | K1 |
 | 2370 | Kontingenter | K1 |
-| 2390 | Porto og gebyrer | K1 |
+| 2390 | Porto og gebyrer | K0 (the note says postage and bank fees are exempt; check parcels) |
 | 2410 | Telefon og internet mv. (kun virksomhed) | K1 |
 | 2450 | Kontorartikler | K1 |
-| 2470 | Rejseomkostninger (administrationsomkostning) | K1 |
+| 2470 | Rejseomkostninger (administrationsomkostning) | K0 for train and flight tickets (exempt, per the note), K1 for the rest; check |
 | 2540 | Driftsomkostninger, personbiler | check |
 | 2650 | Øvrige forsikringer | none |
 | 2660 | Offentlige gebyrer og bøder (ej fradragsberettiget skattemæssigt) | none |
@@ -102,6 +103,7 @@ below.
 |---|---|---|---|
 | 6190 | Tilgodehavender fra salg og tjenesteydelser | `receivables` | Customers' open invoices (debitorer) |
 | 6320 | Tilgodehavende moms (omsætningsaktiv) | `vat_receivable` | When input VAT exceeds output VAT in a period |
+| 6481 | Skattekonto | `tax_account` | Our own account, not in the standard. Mapped to 6330 Øvrige tilgodehavender (omsætningsaktiv). See the accountant's note. |
 | 6480 | Bankkonto | `bank` | One account per bank account; the role marks the default. Payments and bank import post here. |
 | 7440 | Leverandører af varer og tjenesteydelser (kortfristet) | `payables` | 7450 is the sum account for the group, not for posting |
 | 7680 | Salgsmoms | `output_vat` | |
@@ -133,8 +135,8 @@ The same goes for how a sole proprietorship closes its result and withdrawals at
 ## System accounts and the posting rules
 
 The posting service needs these roles to exist for every organization: `receivables`, `payables`,
-`sales`, `purchases`, `output_vat`, `input_vat`, `vat_payable`, `vat_receivable`, `bank` and
-`rounding`. The equity roles in the table above depend on the company form. A role maps to
+`sales`, `purchases`, `output_vat`, `input_vat`, `vat_payable`, `vat_receivable`, `tax_account`,
+`bank` and `rounding`. The equity roles in the table above depend on the company form. A role maps to
 exactly one account per organization, and an account that holds a role cannot be deleted. The VAT
 roles are first used in phase 2.
 
@@ -149,11 +151,13 @@ All the examples use 25% VAT. "Dr" is debit and "Cr" is credit.
 | Pay the supplier 1,000 | 7440 Leverandører 1,000 | 6480 Bankkonto 1,000 |
 | EU goods bought for 800, fully deductible (reverse charge) | 1630 Varekøb udland, EU 800; 7740 Købsmoms 200 | 7440 Leverandører 800; 7700 Moms af varekøb udland 200 |
 | VAT settlement for the period (sales 250, purchases 200) | 7680 Salgsmoms 250 | 7740 Købsmoms 200; 7840 Skyldig moms 50 |
-| Pay the VAT (50) | 7840 Skyldig moms 50 | 6480 Bankkonto 50 |
+| Pay the VAT (50) to SKAT | 6481 Skattekonto 50 | 6480 Bankkonto 50 |
+| SKAT settles the VAT against the Skattekonto | 7840 Skyldig moms 50 | 6481 Skattekonto 50 |
 
 If input VAT is higher than output VAT, the settlement difference goes to 6320 Tilgodehavende moms
 instead of 7840. The standard chart has no account for VAT settlement itself, which is why the
-settlement above is posted through the two VAT accounts and 7840.
+settlement above is posted through the two VAT accounts and 7840. The payment goes through the
+Skattekonto, not straight against 7840, because SKAT covers the oldest claim first (see the note).
 
 An invoice never needs the rounding account: the money rules make its lines add up exactly to its
 totals ([money-rules.md](money-rules.md)).
@@ -203,20 +207,60 @@ current return still has to be checked on skat.dk before the VAT report is built
 - The account groups with number intervals in the seed are replaced by the standard's own
   headings.
 
-## Questions for the accountant
+## Accountant's note (received 2026-10-25)
+
+A note on year-end for sole proprietorships, VAT settlement and the Skattekonto
+(`regnskabsnotat_moms_og_aarsafslutning.md`; it names no author beyond "Dansk Revisor /
+Regnskabskonsulent"). The first versions used account numbers that are not in the official chart
+(for example 6410, 57130 and 2010). **The current version uses the official numbers: I checked every
+account in it against the file, and they exist with the names the note gives.** The advice is used
+as given:
+
+- **Year-end of a sole proprietorship.** All accounts of the income statement (1000-3810) are closed
+  and the result goes straight to equity on 6916 Årets resultat (kun klasse A). The standard's
+  4999 "Årets resultat" is a sum account, not one to post to. Equity from earlier years is 6915
+  Egenkapital primo. Private withdrawals, and B-skat paid privately, are posted during the year on
+  6923 Privat hævet and closed against 6915 at year end, so they start at 0 in the new year. The
+  same goes for deposits on 6924 Privat indskud. The company pays no company tax (the 37xx accounts
+  such as 3740 are for companies). The result goes on the owner's tax return. **B-skat is never an
+  expense of the business.**
+- **VAT settlement** moves the whole balance of the sales VAT (7680), input VAT (7740) and
+  acquisition VAT (7700, 7720) accounts to 7840 Skyldig moms at the end of the VAT period, which
+  freezes the period (see the posting examples above).
+- **A Skattekonto account is needed**, and the standard has none. The VAT payment goes from the bank
+  (6480) to the Skattekonto, and SKAT then draws the VAT from it, oldest claim first. Posting the
+  payment straight against the VAT debt would leave the books different from skat.dk when SKAT has
+  covered a reminder fee or interest first. The note's own account is **6481 Skattekonto**, next to
+  the bank. We map it to 6330 Øvrige tilgodehavender (omsætningsaktiv) in `standard_account`: a
+  credit balance with SKAT is a receivable, and a debt stays on 7840. Interest and fees from SKAT go
+  to 3675, which is not deductible.
+- **EU purchases.** Services from the EU are posted on 1710 Ydelseskøb udland, EU, with the VAT on
+  7740 and 7720. Goods from the EU are posted on 1630 Varekøb udland, EU, with the VAT on 7740 and
+  7700. This agrees with the posting examples above.
+- **Exempt purchases** (no VAT, `K0`): bank fees and postage (2390 Porto og gebyrer), insurance
+  (2650) and, in the earlier versions, passenger transport (train and flight tickets) and medical
+  care.
+
+The VAT code names in the note (`UBL`, `IVY`, `IVV`, "Momsfrit") are not the official ones. The
+official codes are `K1`, `K-EU-Y-1` (services from the EU), `K-EU-V-1` (goods from the EU) and `K0`.
+In Dinero's list `IVY` and `IVV` are purchases from outside the EU and `UBL` is not in it, so those
+names are not used. Their meaning (a domestic purchase at 25%, EU services and goods at 0% with 25%
+acquisition VAT reported in box A, exempt purchases) is the same as the official codes.
+
+## Still open for the accountant
 
 1. Is this starter chart enough for each business, and which expense accounts and default VAT
-   codes are missing or wrong? (The default VAT codes on the expense accounts are my guess.)
-2. For a sole proprietorship: are the "kun klasse A" accounts the right ones, and how is the result
-   for the year closed against owner's withdrawals and deposits (6916, 6923, 6924)? Does the
-   private share of costs (6920 and the like) need to be posted during the year?
-3. Settling VAT through 7680, 7740 and 7840 with payment from the bank: is it how it is usually
-   done? Do you also want a Skattekonto account, since VAT is paid and refunded through it?
-4. Reverse charge on EU purchases (7700, 7720 with 7740): right accounts and signs?
+   codes are missing or wrong? (The default VAT codes on the expense accounts are my guess, except
+   for the exempt ones in the note.)
+2. Sole proprietorship: the note treats the "kun klasse A" accounts as the ones for sole
+   proprietorships: please confirm. It puts private cash withdrawals and B-skat on 6923. Where does
+   the private share of mixed costs (telephone, car) go: on 6923 too, or on 6920-6922?
+3. Mapping the Skattekonto, our own 6481, to 6330 rather than to the bank account 6480: acceptable?
+4. Reverse charge on EU purchases (7700, 7720 with 7740): are these the right accounts and signs?
 5. Where do reminder fees and interest charged to customers go (3490 or 1010)? Is there VAT on
    them?
-6. Do 6935 and 6940 work as I described for an ApS, for the opening balance and the year-end
-   closing?
+6. ApS: do 6935 and 6940 work as described for the opening balance and the year-end closing, and
+   how are the company tax and the proposed dividend posted?
 7. Is the rounding rule (per line, then VAT on the net total) the one you want?
 
 ## Next
