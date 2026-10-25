@@ -83,8 +83,11 @@ Sources are linked; check the official text before relying on any of this.
   1 June, 1 September, 1 December and 1 March; half-yearly are 1 September and 1 March; monthly is
   around the 25th of the next month. Late filing means a provisional assessment with a fee. EU sales
   lists are monthly (quarterly on application).
-- **VAT codes** (Dinero's set, which matches the Danish return; see
-  [their list](https://dinero.dk/support/hvilke-momskoder-har-vi-dinero/)):
+- **VAT codes.** Erhvervsstyrelsen publishes an official list of 72 codes (`S1`, `S2`, `K1`,
+  `K-EU-V-1`, ...) next to the standard chart of accounts; phase 2 should use it (see
+  [chart-of-accounts.md](chart-of-accounts.md)). Dinero's set, which also matches the Danish return
+  (see [their list](https://dinero.dk/support/hvilke-momskoder-har-vi-dinero/)), is the model for how
+  the codes map to the boxes:
   - Sales: `U25` (domestic), `UEUV` / `UEUY` (EU goods / services, box B), `UVV` / `UVY` (exports,
     box C).
   - Purchases: `I25` (domestic), `IEUV` / `IEUY` (EU goods / services, box A), `IVV` / `IVY`
@@ -192,6 +195,7 @@ books the invoice, a booked invoice is read-only, and a credit note corrects it.
 - Fiscal year start, and the VAT settlement period (half-yearly or quarterly) for each organization.
 - Whether the rounding rule above (per line, then VAT on the net total) matches what the accountant
   wants, and whether to keep 3-decimal quantities and unit prices.
-- Which standard chart of accounts to adopt (not yet verified against Erhvervsstyrelsen's standard
-  chart).
+- The chart of accounts: [chart-of-accounts.md](chart-of-accounts.md) proposes Erhvervsstyrelsen's
+  standard chart, with a starter set of accounts. It needs an accountant's check and a check of the
+  numbers against the published file.
 - How far to take e-invoicing and direct VAT filing.
