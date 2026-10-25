@@ -52,9 +52,6 @@ def payload(organization, contact, product, invoice_no) -> dict:
         "invoice_no": invoice_no,
         "currency_id": "DKK",
         "state": "draft",
-        "amount": 100,
-        "vat_amount": 25,
-        "gross_amount": 125,
         "invoice_date": date(2026, 1, 1).isoformat(),
         "duedate": date(2026, 1, 15).isoformat(),
         "lines": [
@@ -63,7 +60,6 @@ def payload(organization, contact, product, invoice_no) -> dict:
                 "description": "Work",
                 "quantity": 1,
                 "unit_price": 100,
-                "amount": 100,
             }
         ],
     }

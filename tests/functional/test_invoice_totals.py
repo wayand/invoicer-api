@@ -100,11 +100,12 @@ def totals(response_json) -> tuple:
 
 
 def saved_line(db_line) -> dict:
-    """A line as the app sends it back: as returned, without timestamps."""
+    """A line as the app sends it back: as returned, without the timestamps
+    and the amount, which the server calculates."""
     return {
         key: value
         for key, value in db_line.items()
-        if key not in ("created_at", "updated_at")
+        if key not in ("created_at", "updated_at", "amount")
     }
 
 
@@ -137,7 +138,34 @@ def test_create_does_not_need_the_client_to_send_any_amounts(
     assert res.status_code == 201, res.get_json()
 
 
-def test_create_ignores_the_amounts_the_client_sends(
+@pytest.mark.parametrize(
+    "field", ["amount", "vat_amount", "gross_amount", "excluding_vat"]
+)
+def test_create_rejects_an_invoice_field_the_server_calculates(
+    client,
+    db_session,
+    test_user,
+    organization,
+    contact,
+    product,
+    invoice_setting,
+    field,
+):
+    res = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 100)],
+        **{field: 1},
+    )
+
+    assert res.status_code == 422, res.get_json()
+    assert field in res.get_json()["errors"]
+    assert Invoice.query.count() == 0
+
+
+def test_create_rejects_a_line_amount(
     client,
     db_session,
     test_user,
@@ -152,20 +180,10 @@ def test_create_ignores_the_amounts_the_client_sends(
         organization,
         contact,
         [line(product, 1, 100, amount=999)],
-        amount=1,
-        vat_amount=2,
-        gross_amount=3,
     )
 
-    assert res.status_code == 201, res.get_json()
-    assert totals(res.get_json()) == (100.0, 25.0, 125.0)
-    stored = Invoice.query.filter_by(id=res.get_json()["id"]).one()
-    assert (stored.amount, stored.vat_amount, stored.gross_amount) == (
-        Decimal("100.00"),
-        Decimal("25.00"),
-        Decimal("125.00"),
-    )
-    assert stored.lines[0].amount == Decimal("100.00")
+    assert res.status_code == 422, res.get_json()
+    assert Invoice.query.count() == 0
 
 
 def test_a_line_is_rounded_half_up(
@@ -242,16 +260,11 @@ def test_a_negative_line_is_not_turned_into_null(
     assert totals(res.get_json()) == (60.0, 15.0, 75.0)
 
 
-def test_excluding_vat_is_accepted_and_no_longer_returned(
+def test_excluding_vat_is_not_returned(
     client, test_user, organization, contact, product, invoice_setting
 ):
     res = create(
-        client,
-        test_user,
-        organization,
-        contact,
-        [line(product, 1, 100)],
-        excluding_vat=False,
+        client, test_user, organization, contact, [line(product, 1, 100)]
     )
 
     assert res.status_code == 201, res.get_json()
@@ -324,14 +337,58 @@ def test_update_recomputes_the_amounts(
         invoice,
         contact,
         [saved_line(invoice["lines"][0]) | {"quantity": 3}],
-        amount=1,
-        vat_amount=2,
-        gross_amount=3,
     )
 
     assert res.status_code == 200, res.get_json()
     assert totals(res.get_json()) == (300.0, 75.0, 375.0)
     assert res.get_json()["lines"][0]["amount"] == 300.0
+
+
+@pytest.mark.parametrize(
+    "field", ["amount", "vat_amount", "gross_amount", "excluding_vat"]
+)
+def test_update_rejects_an_invoice_field_the_server_calculates(
+    client, test_user, organization, contact, product, invoice_setting, field
+):
+    invoice = create(
+        client, test_user, organization, contact, [line(product, 1, 100)]
+    ).get_json()
+
+    res = update(
+        client,
+        test_user,
+        organization,
+        invoice,
+        contact,
+        [saved_line(invoice["lines"][0]) | {"quantity": 3}],
+        **{field: 1},
+    )
+
+    assert res.status_code == 422, res.get_json()
+    assert totals(
+        client.get(
+            f"/invoices/{invoice['id']}", headers=auth_headers(test_user)
+        ).get_json()
+    ) == (100.0, 25.0, 125.0)
+
+
+def test_update_rejects_a_line_amount(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    invoice = create(
+        client, test_user, organization, contact, [line(product, 1, 100)]
+    ).get_json()
+
+    res = update(
+        client,
+        test_user,
+        organization,
+        invoice,
+        contact,
+        [saved_line(invoice["lines"][0]) | {"quantity": 3, "amount": 999}],
+    )
+
+    assert res.status_code == 422, res.get_json()
 
 
 def test_update_adds_up_exactly_the_lines_that_are_saved(

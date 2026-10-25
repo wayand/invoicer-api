@@ -1,13 +1,11 @@
 from flask_marshmallow import Marshmallow
-from marshmallow import fields, pre_load
+from marshmallow import fields
 
 from app.money import DecimalNumber
 
 from .invoice import Invoice
 
 ma = Marshmallow()
-
-IGNORED_INPUT = {"amount", "vat_amount", "gross_amount", "excluding_vat"}
 
 
 class InvoiceSchema(ma.SQLAlchemySchema):
@@ -34,14 +32,6 @@ class InvoiceSchema(ma.SQLAlchemySchema):
     payment_methods = fields.Nested(
         "PaymentMethodSchema", dump_only=True, many=True, required=True
     )
-
-    @pre_load
-    def drop_computed_fields(self, data, **kwargs):
-        """The app used to send the totals (and excluding_vat, which nothing
-        used). The server computes the totals, so whatever is sent is ignored."""
-        if isinstance(data, dict):
-            return {k: v for k, v in data.items() if k not in IGNORED_INPUT}
-        return data
 
     class Meta:
         model = Invoice
