@@ -9,8 +9,17 @@ if TYPE_CHECKING:
     from .invoice_setting import InvoiceSetting
 
 
+COMPANY_FORMS = ("enkeltmandsvirksomhed", "aps")
+
+
 class Organization(BaseModel):
     __tablename__ = "organizations"
+    __table_args__ = (
+        db.CheckConstraint(
+            "company_form IN ('enkeltmandsvirksomhed', 'aps')",
+            name="ck_organizations_company_form",
+        ),
+    )
 
     id = db.Column(
         db.Integer, autoincrement=True, primary_key=True, nullable=False
@@ -26,6 +35,15 @@ class Organization(BaseModel):
     name = db.Column(db.String(100), unique=True, nullable=False)
     slug = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
+
+    # Decides the equity accounts and the year-end closing
+    # (docs/chart-of-accounts.md)
+    company_form = db.Column(
+        db.String(30),
+        server_default="enkeltmandsvirksomhed",
+        default="enkeltmandsvirksomhed",
+        nullable=False,
+    )
 
     logo = db.Column(db.String(255), nullable=True)
     phone = db.Column(db.String(20), nullable=True)

@@ -59,7 +59,10 @@ must be able to point at an account that is later renamed, so:
 - `system_role` (text, nullable): the role the posting service looks up (`receivables`, `bank`,
   ...). A unique index on `(organization_id, system_role)` where it is not null, so a role has one
   account. The roles are a fixed list in code, with a check constraint in the database.
-- The account API returns both new fields, read only. Changing them comes with the seed.
+- The account API does **not** return the new fields yet. The app's account form sends the whole
+  account back when it saves, and the API refuses fields it does not know, so exposing them would
+  break editing an account until the form is changed. They are exposed in PR 2, together with the
+  seed and that change in the app.
 - `account_types` and `account_groups` keep their current shape and keys. They have the same
   name-in-the-key problem, but nothing points at them by anything other than `id`, so it can wait.
 
@@ -85,11 +88,13 @@ year only sets `status`: it does not delete or change anything else.
 | `organization_id`, `fiscal_year_id` | foreign keys |
 | `voucher_no` | integer; unique `(organization_id, voucher_no)` |
 | `entry_date` | the date the entry is for (must be inside the fiscal year: checked in PR 3) |
+| fiscal year | foreign key `(fiscal_year_id, organization_id)` to `fiscal_years`, so the year is the organization's own |
 | `description` | text |
 | `source_type`, `source_id` | what produced it: `manual`, later `invoice`, `payment`, `vat_settlement` |
 | `reverses_entry_id` | nullable foreign key to another entry; unique, so an entry is reversed once |
 | `created_by` | foreign key to the user |
 | `created_at` | no `updated_at`: an entry is never updated |
+| `created_txid` | the PostgreSQL transaction that posted the entry (default `txid_current()`): see section 7 |
 
 **Voucher numbers** are one running sequence per organization (1, 2, 3, ...), never restarting
 and never with a gap. Danish bookkeeping law requires every booked transaction to have a unique,
@@ -110,8 +115,9 @@ failed posting rolls the counter back and no number is lost.
 |---|---|
 | `id` | primary key |
 | `journal_entry_id` | foreign key |
+| `organization_id` | foreign key. With the two keys below it makes a line unable to use an entry or an account of another organization |
 | `line_no` | position in the entry; unique `(journal_entry_id, line_no)` |
-| `account_id` | foreign key to `accounts.id`; an account that has lines cannot be deleted |
+| `account_id` | foreign key `(account_id, organization_id)` to `accounts`; an account that has lines cannot be deleted |
 | `debit`, `credit` | `NUMERIC(14,2)`, both at least 0 |
 | `description` | text, nullable |
 | `contact_id` | nullable foreign key: the customer or supplier the line is for |
@@ -131,7 +137,8 @@ manual SQL session can break them by accident:
    the transaction commits, that every touched entry has at least two lines and that the debits
    equal the credits. A broken entry makes the commit fail.
 2. **Append only.** Triggers refuse `UPDATE` and `DELETE` on `journal_entries` and `journal_lines`
-   (and `TRUNCATE`). A mistake is corrected with a reversal entry, which is a new entry that points
+   (and `TRUNCATE`). A line can only be inserted in the transaction that posted its entry
+   (`created_txid`), so a posted entry cannot grow a balanced pair of extra lines later. A mistake is corrected with a reversal entry, which is a new entry that points
    at the old one and swaps debit and credit. This is the "postings cannot be changed or deleted"
    requirement of BEK 205/2024 in the plan.
 

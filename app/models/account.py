@@ -9,6 +9,35 @@ if TYPE_CHECKING:
     from .tax_rate import TaxRate
 
 
+# The roles of the accounts the posting service needs (docs/chart-of-accounts.md).
+# The check constraint in the database and the migration list the same values.
+SYSTEM_ROLES = (
+    "receivables",
+    "payables",
+    "sales",
+    "sales_eu_goods",
+    "sales_eu_services",
+    "sales_non_eu_goods",
+    "sales_non_eu_services",
+    "purchases",
+    "output_vat",
+    "input_vat",
+    "vat_eu_goods",
+    "vat_eu_services",
+    "vat_payable",
+    "vat_receivable",
+    "tax_account",
+    "bank",
+    "rounding",
+    "owner_capital",
+    "owner_withdrawals",
+    "owner_deposits",
+    "annual_result",
+    "share_capital",
+    "retained_earnings",
+)
+
+
 class AccountType(BaseModel):
     __tablename__ = "account_types"
 
@@ -76,6 +105,32 @@ class AccountGroup(BaseModel):
 
 class Account(BaseModel):
     __tablename__ = "accounts"
+    __table_args__ = (
+        # The account is looked up by number and by name, so neither may be
+        # used twice. Journal lines refer to it by id, so it can be renamed.
+        db.UniqueConstraint(
+            "organization_id", "number", name="uq_accounts_org_number"
+        ),
+        db.UniqueConstraint(
+            "organization_id", "name", name="uq_accounts_org_name"
+        ),
+        # Lets a journal line refer to (id, organization_id), so a line cannot
+        # use an account of another organization
+        db.UniqueConstraint("id", "organization_id", name="uq_accounts_id_org"),
+        db.Index(
+            "uq_accounts_org_system_role",
+            "organization_id",
+            "system_role",
+            unique=True,
+            postgresql_where=db.text("system_role IS NOT NULL"),
+        ),
+        db.CheckConstraint(
+            "system_role IN ("
+            + ", ".join(f"'{role}'" for role in SYSTEM_ROLES)
+            + ")",
+            name="ck_accounts_system_role",
+        ),
+    )
 
     id_seq = db.Sequence(__tablename__ + "_id_seq")
 
@@ -84,19 +139,13 @@ class Account(BaseModel):
         id_seq,
         server_default=id_seq.next_value(),
         autoincrement=True,
-        primary_key=False,
-        unique=True,
+        primary_key=True,
         nullable=False,
     )
-
-    """
-    primary keys: organization_id, name, number
-    """
 
     organization_id = db.Column(
         db.Integer,
         db.ForeignKey("organizations.id"),
-        primary_key=True,
         nullable=False,
     )
     account_type_id = db.Column(
@@ -116,11 +165,17 @@ class Account(BaseModel):
         "TaxRate", back_populates="accounts"
     )
 
-    name = db.Column(db.String(100), primary_key=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     description = db.Column(
         db.String(100), server_default="", default="", nullable=True
     )
-    number = db.Column(db.Integer, primary_key=True, nullable=False)
+    number = db.Column(db.Integer, nullable=False)
+    # The number of the account of Erhvervsstyrelsen's standard chart that
+    # this account stands for (docs/chart-of-accounts.md)
+    standard_account = db.Column(db.Integer, nullable=True)
+    # The role the posting service looks the account up by (SYSTEM_ROLES).
+    # One account per role and organization.
+    system_role = db.Column(db.String(40), nullable=True)
     currency_id = db.Column(
         db.String(10), server_default="DKK", default="DKK", nullable=False
     )
