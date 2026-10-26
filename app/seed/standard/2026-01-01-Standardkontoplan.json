@@ -1,0 +1,3451 @@
+{
+    "File info": {
+        "Document name": "Standardkontoplan",
+        "Valid from date": "2026-01-01",
+        "csv source file": "2026-01-01 Standardkontoplan.csv"
+    },
+    "Kontoplan": [
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 1000,
+            "navn": "RESULTATOPGØRELSE"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 1001,
+            "navn": "Nettoomsætning",
+            "konti": [
+                {
+                    "kontonummer": 1010,
+                    "navn": "Salg af varer og ydelser "
+                },
+                {
+                    "kontonummer": 1050,
+                    "navn": "Salg af varer udland, EU"
+                },
+                {
+                    "kontonummer": 1100,
+                    "navn": "Salg af varer udland, ikke-EU"
+                },
+                {
+                    "kontonummer": 1150,
+                    "navn": "Salg af ydelser udland, EU"
+                },
+                {
+                    "kontonummer": 1200,
+                    "navn": "Salg af ydelser udland, ikke-EU"
+                },
+                {
+                    "kontonummer": 1210,
+                    "navn": "Salgsrabatter"
+                },
+                {
+                    "kontonummer": 1250,
+                    "navn": "Salgsfragt"
+                },
+                {
+                    "kontonummer": 1300,
+                    "navn": "Regulering igangværende arbejder"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 1400,
+            "navn": "Ændring i lagre af færdigvarer og varer under fremstilling",
+            "konti": [
+                {
+                    "kontonummer": 1410,
+                    "navn": "Varelagerregulering på lagre af færdigvarer og varer under fremstilling"
+                },
+                {
+                    "kontonummer": 1430,
+                    "navn": "Nedskrivning på lagre af færdigvarer og varer under fremstilling"
+                },
+                {
+                    "kontonummer": 1450,
+                    "navn": "Andel af nedskrivning på lagre af færdigvarer og varer under fremstilling (ej fradragsberettiget skattemæssigt)"
+                },
+                {
+                    "kontonummer": 1460,
+                    "navn": "Øvrige ændringer på lagre af færdigvarer og varer under fremstilling"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 1495,
+            "navn": "Arbejde udført for egen regning og opført under aktiver",
+            "konti": [
+                {
+                    "kontonummer": 1496,
+                    "navn": "Arbejde udført for egen regning og opført under aktiver"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 1500,
+            "navn": "Andre driftsindtægter",
+            "konti": [
+                {
+                    "kontonummer": 1510,
+                    "navn": "Gevinst ved salg af immaterielle anlægsaktiver"
+                },
+                {
+                    "kontonummer": 1530,
+                    "navn": "Gevinst ved salg af materielle anlægsaktiver"
+                },
+                {
+                    "kontonummer": 1545,
+                    "navn": "Offentlige tilskud"
+                },
+                {
+                    "kontonummer": 1550,
+                    "navn": "Øvrige andre driftsindtægter"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 1595,
+            "navn": "Eksterne omkostninger"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 1600,
+            "navn": "Omkostninger til råvarer og hjælpematerialer",
+            "konti": [
+                {
+                    "kontonummer": 1610,
+                    "navn": "Varekøb"
+                },
+                {
+                    "kontonummer": 1630,
+                    "navn": "Varekøb udland, EU"
+                },
+                {
+                    "kontonummer": 1650,
+                    "navn": "Varekøb udland, ikke-EU"
+                },
+                {
+                    "kontonummer": 1660,
+                    "navn": "Ydelseskøb"
+                },
+                {
+                    "kontonummer": 1710,
+                    "navn": "Ydelseskøb udland, EU"
+                },
+                {
+                    "kontonummer": 1740,
+                    "navn": "Ydelseskøb, udland, ikke-EU"
+                },
+                {
+                    "kontonummer": 1745,
+                    "navn": "Underleverandører (varer/ydelser leveret til kunder)"
+                },
+                {
+                    "kontonummer": 1760,
+                    "navn": "Fragtomkostninger"
+                },
+                {
+                    "kontonummer": 1770,
+                    "navn": "Varelagerregulering på lagre af råvarer og hjælpematerialer"
+                },
+                {
+                    "kontonummer": 1800,
+                    "navn": "Nedskrivning på varelager"
+                },
+                {
+                    "kontonummer": 1801,
+                    "navn": "Øvrige produktionsomkostninger"
+                },
+                {
+                    "kontonummer": 1805,
+                    "navn": "Andel af nedskrivning på varelager (ej fradragsberettiget skattemæssigt)"
+                },
+                {
+                    "kontonummer": 1807,
+                    "navn": "Værdi af eget vareforbrug (kun klasse A)"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 1820,
+            "navn": "Andre eksterne omkostninger"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 1821,
+            "navn": "Salgsomkostninger",
+            "konti": [
+                {
+                    "kontonummer": 1850,
+                    "navn": "Annoncering og reklame"
+                },
+                {
+                    "kontonummer": 1870,
+                    "navn": "Udstillinger og dekoration"
+                },
+                {
+                    "kontonummer": 1910,
+                    "navn": "Repræsentationsomkostninger, skattemæssigt begrænset fradrag"
+                },
+                {
+                    "kontonummer": 1930,
+                    "navn": "Repræsentationsomkostninger, fuld fradragsret skattemæssigt"
+                },
+                {
+                    "kontonummer": 1950,
+                    "navn": "Andre salgsomkostninger"
+                },
+                {
+                    "kontonummer": 1990,
+                    "navn": "Gaver og blomster"
+                },
+                {
+                    "kontonummer": 2000,
+                    "navn": "Rejseomkostninger (salgsomkostning)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 2020,
+            "navn": "Lokaleomkostninger",
+            "konti": [
+                {
+                    "kontonummer": 2030,
+                    "navn": "Husleje"
+                },
+                {
+                    "kontonummer": 2050,
+                    "navn": "El"
+                },
+                {
+                    "kontonummer": 2060,
+                    "navn": "Elafgift"
+                },
+                {
+                    "kontonummer": 2070,
+                    "navn": "Vand"
+                },
+                {
+                    "kontonummer": 2080,
+                    "navn": "Varme"
+                },
+                {
+                    "kontonummer": 2085,
+                    "navn": "Privat andel el, vand og varme (kun klasse A)"
+                },
+                {
+                    "kontonummer": 2090,
+                    "navn": "Vandafgift"
+                },
+                {
+                    "kontonummer": 2100,
+                    "navn": "Olie- og flaskegasafgift"
+                },
+                {
+                    "kontonummer": 2110,
+                    "navn": "Kulafgift "
+                },
+                {
+                    "kontonummer": 2120,
+                    "navn": "Naturgas- og bygasafgift"
+                },
+                {
+                    "kontonummer": 2130,
+                    "navn": "Co2-afgift "
+                },
+                {
+                    "kontonummer": 2140,
+                    "navn": "Øvrige afgifter"
+                },
+                {
+                    "kontonummer": 2150,
+                    "navn": "Rengøring og renovation (affaldshåndtering)"
+                },
+                {
+                    "kontonummer": 2160,
+                    "navn": "Reparation og vedligeholdelse"
+                },
+                {
+                    "kontonummer": 2170,
+                    "navn": "Reparation og vedligeholdelse, ejendom skattemæssigt afskrivningsberettiget, bygning 1"
+                },
+                {
+                    "kontonummer": 2180,
+                    "navn": "Forsikringer til lokaler og bygninger"
+                },
+                {
+                    "kontonummer": 2190,
+                    "navn": "Ejendomsskatter"
+                },
+                {
+                    "kontonummer": 2200,
+                    "navn": "Andre lokaleomkostninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 2220,
+            "navn": "Administrationsomkostninger",
+            "konti": [
+                {
+                    "kontonummer": 2230,
+                    "navn": "Småanskaffelser under skattemæssig grænse for småaktiver"
+                },
+                {
+                    "kontonummer": 2240,
+                    "navn": "Småanskaffelser over skattemæssig grænse for småaktiver"
+                },
+                {
+                    "kontonummer": 2255,
+                    "navn": "Forskningsomkostninger"
+                },
+                {
+                    "kontonummer": 2260,
+                    "navn": "Udviklingsomkostninger"
+                },
+                {
+                    "kontonummer": 2265,
+                    "navn": "Andel af forskningsomkostninger (berettiget til forhøjet skattemæssigt fradrag)"
+                },
+                {
+                    "kontonummer": 2266,
+                    "navn": "Andel af udviklingsomkostninger (berettiget til forhøjet skattemæssigt fradrag)"
+                },
+                {
+                    "kontonummer": 2280,
+                    "navn": "Tab på tilgodehavender fra salg og tjenesteydelser"
+                },
+                {
+                    "kontonummer": 2290,
+                    "navn": "Regulering af nedskrivning på tilgodehavender fra salg og tjenesteydelser"
+                },
+                {
+                    "kontonummer": 2295,
+                    "navn": "Andel af regulering af nedskrivning på tilgodehavender fra salg og tjenesteydelser  (ej fradragsberettiget skattemæssigt)"
+                },
+                {
+                    "kontonummer": 2310,
+                    "navn": "It-udstyr (hardware, software inkl. licenser og abonnementer)"
+                },
+                {
+                    "kontonummer": 2350,
+                    "navn": "Kantineomkostninger"
+                },
+                {
+                    "kontonummer": 2370,
+                    "navn": "Kontingenter"
+                },
+                {
+                    "kontonummer": 2375,
+                    "navn": "Aviser og blade"
+                },
+                {
+                    "kontonummer": 2380,
+                    "navn": "Faglitteratur"
+                },
+                {
+                    "kontonummer": 2390,
+                    "navn": "Porto og gebyrer"
+                },
+                {
+                    "kontonummer": 2410,
+                    "navn": "Telefon og internet mv. (kun virksomhed)"
+                },
+                {
+                    "kontonummer": 2430,
+                    "navn": "Privat andel / fri-telefon (kun klasse A) "
+                },
+                {
+                    "kontonummer": 2450,
+                    "navn": "Kontorartikler"
+                },
+                {
+                    "kontonummer": 2460,
+                    "navn": "Leje og operationelle leasingydelser (ekskl. husleje)"
+                },
+                {
+                    "kontonummer": 2470,
+                    "navn": "Rejseomkostninger (administrationsomkostning)"
+                },
+                {
+                    "kontonummer": 2480,
+                    "navn": "Vikarassistance"
+                },
+                {
+                    "kontonummer": 2510,
+                    "navn": "Konsulentydelser"
+                },
+                {
+                    "kontonummer": 2530,
+                    "navn": "Leasingomkostninger, personbiler"
+                },
+                {
+                    "kontonummer": 2540,
+                    "navn": "Driftsomkostninger, personbiler"
+                },
+                {
+                    "kontonummer": 2548,
+                    "navn": "Leasingomkostninger, blandet benyttet personbil (kun klasse A) "
+                },
+                {
+                    "kontonummer": 2550,
+                    "navn": "Privat andel af biludgifter (kun klasse A)"
+                },
+                {
+                    "kontonummer": 2560,
+                    "navn": "Driftsomkostninger, varebiler"
+                },
+                {
+                    "kontonummer": 2567,
+                    "navn": "Leasingomkostninger, blandet benyttet varebil (kun klasse A)"
+                },
+                {
+                    "kontonummer": 2569,
+                    "navn": "Leasingomkostninger, varebiler"
+                },
+                {
+                    "kontonummer": 2580,
+                    "navn": "Privat andel af blandet benyttet varebil (kun klasse A)"
+                },
+                {
+                    "kontonummer": 2620,
+                    "navn": "Parkeringsomkostninger"
+                },
+                {
+                    "kontonummer": 2650,
+                    "navn": "Øvrige forsikringer"
+                },
+                {
+                    "kontonummer": 2660,
+                    "navn": "Offentlige gebyrer og bøder (ej fradragsberettiget skattemæssigt)"
+                },
+                {
+                    "kontonummer": 2670,
+                    "navn": "Revision og regnskabsmæssig assistance"
+                },
+                {
+                    "kontonummer": 2680,
+                    "navn": "Advokatmæssig assistance"
+                },
+                {
+                    "kontonummer": 2690,
+                    "navn": "Øvrige rådgivningshonorarer"
+                },
+                {
+                    "kontonummer": 2700,
+                    "navn": "Ej skattemæssigt fradragsberettigede rådgivningshonorarer"
+                },
+                {
+                    "kontonummer": 2710,
+                    "navn": "Administrationsvederlag/management fee"
+                },
+                {
+                    "kontonummer": 2720,
+                    "navn": "Øreafrunding/kassedifferencer"
+                },
+                {
+                    "kontonummer": 2810,
+                    "navn": "Andre eksterne omkostninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 2841,
+            "navn": "Personaleomkostninger"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 2842,
+            "navn": "Lønninger",
+            "konti": [
+                {
+                    "kontonummer": 2845,
+                    "navn": "AM Bidragspligtig A-Indkomst"
+                },
+                {
+                    "kontonummer": 2846,
+                    "navn": "AM Bidragsfri A-Indkomst"
+                },
+                {
+                    "kontonummer": 2847,
+                    "navn": "B-honorar"
+                },
+                {
+                    "kontonummer": 2860,
+                    "navn": "Feriepenge og SH-tillæg"
+                },
+                {
+                    "kontonummer": 2865,
+                    "navn": "Ferietillæg"
+                },
+                {
+                    "kontonummer": 2866,
+                    "navn": "Feriepengeforpligtelse, regulering"
+                },
+                {
+                    "kontonummer": 2870,
+                    "navn": "Jubilæumsgratiale og fratrædelsesgodtgørelse "
+                },
+                {
+                    "kontonummer": 2880,
+                    "navn": "Bestyrelseshonorar"
+                },
+                {
+                    "kontonummer": 2885,
+                    "navn": "Lønrefusioner"
+                },
+                {
+                    "kontonummer": 2887,
+                    "navn": "Personalegoder"
+                },
+                {
+                    "kontonummer": 2888,
+                    "navn": "Fri bil"
+                },
+                {
+                    "kontonummer": 2895,
+                    "navn": "Skattefri rejse- og befordringsgodtgørelse "
+                },
+                {
+                    "kontonummer": 2896,
+                    "navn": "Kursusudgifter"
+                },
+                {
+                    "kontonummer": 2897,
+                    "navn": "ATP, medarbejder"
+                },
+                {
+                    "kontonummer": 2898,
+                    "navn": "ATP, arbejdsgiver"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 2906,
+            "navn": "Pensioner",
+            "konti": [
+                {
+                    "kontonummer": 2910,
+                    "navn": "Pensioner, arbejdsgiver"
+                },
+                {
+                    "kontonummer": 2920,
+                    "navn": "Vederlag til afløsning af pensionstilsagn "
+                },
+                {
+                    "kontonummer": 2925,
+                    "navn": "Øvrige pensionsomkostninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 2927,
+            "navn": "Andre omkostninger til social sikring",
+            "konti": [
+                {
+                    "kontonummer": 2930,
+                    "navn": "Øvrige omkostninger til social sikring"
+                },
+                {
+                    "kontonummer": 2946,
+                    "navn": "Lønsumsafgift"
+                },
+                {
+                    "kontonummer": 2947,
+                    "navn": "Arbejdsskadeforsikringer"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 2991,
+            "navn": "Af- og nedskrivninger af materielle og immaterielle anlægsaktiver ",
+            "konti": [
+                {
+                    "kontonummer": 3000,
+                    "navn": "Af- og nedskrivninger af erhvervede immaterielle anlægsaktiver"
+                },
+                {
+                    "kontonummer": 3010,
+                    "navn": "Af- og nedskrivninger af goodwill"
+                },
+                {
+                    "kontonummer": 3020,
+                    "navn": "Af- og nedskrivninger af grunde og bygninger"
+                },
+                {
+                    "kontonummer": 3030,
+                    "navn": "Af- og nedskrivninger af produktionsanlæg og maskiner"
+                },
+                {
+                    "kontonummer": 3040,
+                    "navn": "Af- og nedskrivninger af indretning af lejede lokaler"
+                },
+                {
+                    "kontonummer": 3050,
+                    "navn": "Af- og nedskrivninger af andre anlæg, driftsmateriel og inventar"
+                },
+                {
+                    "kontonummer": 3060,
+                    "navn": "Af- og nedskrivninger af software"
+                },
+                {
+                    "kontonummer": 3070,
+                    "navn": "Af- og nedskrivninger af finansielt leasede grunde og bygninger"
+                },
+                {
+                    "kontonummer": 3080,
+                    "navn": "Af- og nedskrivninger af finansielt leasede produktionsanlæg og maskiner"
+                },
+                {
+                    "kontonummer": 3090,
+                    "navn": "Af- og nedskrivninger af finansielt leasede andre anlæg, driftsmateriel og inventar"
+                },
+                {
+                    "kontonummer": 3095,
+                    "navn": "Privat andel af af- og nedskrivninger (kun klasse A)"
+                },
+                {
+                    "kontonummer": 3097,
+                    "navn": "Gevinst ved salg af andre anlæg, driftsmateriel og inventar blandet benyttet (kun klasse A)"
+                },
+                {
+                    "kontonummer": 3099,
+                    "navn": "Tab ved salg af andre anlæg, driftsmateriel og inventar blandet benyttet (kun klasse A)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3120,
+            "navn": "Nedskrivning af omsætningsaktiver, som overstiger normale nedskrivninger",
+            "konti": [
+                {
+                    "kontonummer": 3130,
+                    "navn": "Nedskrivning af omsætningsaktiver, som overstiger normale nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3150,
+            "navn": "Andre driftsomkostninger",
+            "konti": [
+                {
+                    "kontonummer": 3160,
+                    "navn": "Tab ved salg af immaterielle anlægsaktiver"
+                },
+                {
+                    "kontonummer": 3165,
+                    "navn": "Tab ved salg af materielle anlægsaktiver"
+                },
+                {
+                    "kontonummer": 3170,
+                    "navn": "Øvrige andre driftsomkostninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3180,
+            "navn": "Dagsværdiregulering af investeringsejendomme",
+            "konti": [
+                {
+                    "kontonummer": 3185,
+                    "navn": "Værdireguleringer af investeringsejendomme"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 3191,
+            "navn": "Indtægter af kapitalandele i tilknyttede og associerede virksomheder"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3192,
+            "navn": "Indtægter af kapitalandele i tilknyttede virksomheder",
+            "konti": [
+                {
+                    "kontonummer": 3193,
+                    "navn": "Modtagne udbytter fra tilknyttede virksomheder"
+                },
+                {
+                    "kontonummer": 3194,
+                    "navn": "Gevinst ved afhændelse af kapitalandele i tilknyttede virksomheder"
+                },
+                {
+                    "kontonummer": 3196,
+                    "navn": "Tab ved afhændelse af kapitalandele i tilknyttede virksomheder"
+                },
+                {
+                    "kontonummer": 3197,
+                    "navn": "Nedskrivning af kapitalandele i tilknyttede virksomheder"
+                },
+                {
+                    "kontonummer": 3198,
+                    "navn": "Tilbageførsel af nedskrivning af kapitalandele i tilknyttede virksomheder"
+                },
+                {
+                    "kontonummer": 3200,
+                    "navn": "Øvrige indtægter af kapitalandele i tilknyttede virksomheder"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3210,
+            "navn": "Indtægter af kapitalandele i associerede virksomheder",
+            "konti": [
+                {
+                    "kontonummer": 3211,
+                    "navn": "Modtagne udbytter fra associerede virksomheder"
+                },
+                {
+                    "kontonummer": 3212,
+                    "navn": "Gevinst ved afhændelse af kapitalandele i associerede virksomheder"
+                },
+                {
+                    "kontonummer": 3214,
+                    "navn": "Tab ved afhændelse af kapitalandele i associerede virksomheder"
+                },
+                {
+                    "kontonummer": 3215,
+                    "navn": "Nedskrivning af kapitalandele i associerede virksomheder"
+                },
+                {
+                    "kontonummer": 3216,
+                    "navn": "Tilbageførsel af nedskrivning af kapitalandele i associerede virksomheder"
+                },
+                {
+                    "kontonummer": 3217,
+                    "navn": "Øvrige indtægter af kapitalandele i associerede virksomheder"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3220,
+            "navn": "Indtægter af kapitalinteresser",
+            "konti": [
+                {
+                    "kontonummer": 3221,
+                    "navn": "Modtagne udbytter fra kapitalinteresser"
+                },
+                {
+                    "kontonummer": 3222,
+                    "navn": "Gevinst ved afhændelse af kapitalinteresser"
+                },
+                {
+                    "kontonummer": 3224,
+                    "navn": "Tab ved afhændelse af kapitalinteresser"
+                },
+                {
+                    "kontonummer": 3225,
+                    "navn": "Nedskrivning af kapitalinteresser"
+                },
+                {
+                    "kontonummer": 3226,
+                    "navn": "Tilbageførsel af nedskrivning af kapitalinteresser"
+                },
+                {
+                    "kontonummer": 3230,
+                    "navn": "Øvrige indtægter af kapitalinteresser"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3251,
+            "navn": "Resultatandele, der hidrører fra tilknyttede virksomheder",
+            "konti": [
+                {
+                    "kontonummer": 3252,
+                    "navn": "Resultatandele, der hidrører fra tilknyttede virksomheder"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3261,
+            "navn": "Resultatandele, der hidrører fra associerede virksomheder",
+            "konti": [
+                {
+                    "kontonummer": 3262,
+                    "navn": "Resultatandele, der hidrører fra associerede virksomheder"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3271,
+            "navn": "Resultatandele, der hidrører fra kapitalinteresser",
+            "konti": [
+                {
+                    "kontonummer": 3272,
+                    "navn": "Resultatandele, der hidrører fra kapitalinteresser"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3370,
+            "navn": "Indtægter af andre kapitalandele, værdipapirer og tilgodehavender, der er anlægsaktiver",
+            "konti": [
+                {
+                    "kontonummer": 3380,
+                    "navn": "Udbytte fra unoterede porteføljeaktier (bruttoudbytte)"
+                },
+                {
+                    "kontonummer": 3385,
+                    "navn": "Kursgevinster af andre kapitalandele, værdipapirer og tilgodehavender, der er anlægsaktiver"
+                },
+                {
+                    "kontonummer": 3390,
+                    "navn": "Renteindtægter af andre kapitalandele, værdipapirer og tilgodehavender, der er anlægsaktiver"
+                },
+                {
+                    "kontonummer": 3395,
+                    "navn": "Værdiregulering af andre kapitalandele og værdipaprer, der er anlægsaktiver"
+                },
+                {
+                    "kontonummer": 3400,
+                    "navn": "Øvrige indtægter af andre kapitalandele, værdipapirer og tilgodehavender, der er anlægsaktiver"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3411,
+            "navn": "Andre finansielle indtægter fra tilknyttede virksomheder ",
+            "konti": [
+                {
+                    "kontonummer": 3440,
+                    "navn": "Andre finansielle indtægter fra tilknyttede virksomheder"
+                },
+                {
+                    "kontonummer": 3445,
+                    "navn": "Renteindtægter fra tilknyttede virksomheder"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3451,
+            "navn": "Andre finansielle indtægter",
+            "konti": [
+                {
+                    "kontonummer": 3470,
+                    "navn": "Renter fra banker"
+                },
+                {
+                    "kontonummer": 3490,
+                    "navn": "Renter vedr. tilgodehavende fra salg af varer og tjenesteydelser"
+                },
+                {
+                    "kontonummer": 3510,
+                    "navn": "Rentetillæg mv. fra det offentlige (ej skattepligtig)"
+                },
+                {
+                    "kontonummer": 3530,
+                    "navn": "Øvrige finansielle indtægter"
+                },
+                {
+                    "kontonummer": 3535,
+                    "navn": "Valutakursregulering (gevinst)"
+                },
+                {
+                    "kontonummer": 3536,
+                    "navn": "Værdiregulering af børsnoterede værdipapirer, der er omsætningsaktiver"
+                },
+                {
+                    "kontonummer": 3537,
+                    "navn": "Værdiregulering af andre kapitalandele og værdipaprer, der er omsætningsaktiver"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3541,
+            "navn": "Nedskrivning af finansielle aktiver",
+            "konti": [
+                {
+                    "kontonummer": 3560,
+                    "navn": "Nedskrivning af finansielle anlægs- og omsætningsaktiver"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 3571,
+            "navn": "Øvrige finansielle omkostninger"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3572,
+            "navn": "Finansielle omkostninger, der hidrører fra tilknyttede virksomheder",
+            "konti": [
+                {
+                    "kontonummer": 3590,
+                    "navn": "Finansielle omkostninger, der hidrører fra tilknyttede virksomheder"
+                },
+                {
+                    "kontonummer": 3596,
+                    "navn": "Valutakursreguleringer, udenlandske dattervirksomheder"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3601,
+            "navn": "Andre finansielle omkostninger",
+            "konti": [
+                {
+                    "kontonummer": 3610,
+                    "navn": "Valutakursregulering (tab)"
+                },
+                {
+                    "kontonummer": 3630,
+                    "navn": "Kurstab på likvider, bankgæld og prioritetsgæld"
+                },
+                {
+                    "kontonummer": 3640,
+                    "navn": "Renter på finansiel leasinggæld "
+                },
+                {
+                    "kontonummer": 3650,
+                    "navn": "Renter vedr. leverandører af varer og tjenesteydelser"
+                },
+                {
+                    "kontonummer": 3670,
+                    "navn": "Renter til banker og realkreditinstitutter"
+                },
+                {
+                    "kontonummer": 3675,
+                    "navn": "Renter til det offentlige (ej fradragsberettiget skattemæssigt)"
+                },
+                {
+                    "kontonummer": 3690,
+                    "navn": "Øvrige finansielle omkostninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3703,
+            "navn": "Skat af årets resultat",
+            "konti": [
+                {
+                    "kontonummer": 3740,
+                    "navn": "Årets skat (skat af årets skattepligtige indkomst)"
+                },
+                {
+                    "kontonummer": 3760,
+                    "navn": "Årets regulering af udskudt skat"
+                },
+                {
+                    "kontonummer": 3780,
+                    "navn": "Regulering af skat vedrørende tidligere år"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 3791,
+            "navn": "Andre skatter",
+            "konti": [
+                {
+                    "kontonummer": 3810,
+                    "navn": "Andre skatter"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 5000,
+            "navn": "BALANCE"
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 5001,
+            "navn": "AKTIVER"
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 5002,
+            "navn": "Anlægsaktiver"
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 5003,
+            "navn": "Immaterielle anlægsaktiver"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5004,
+            "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter",
+            "konti": [
+                {
+                    "kontonummer": 5010,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, Kostpris primo"
+                },
+                {
+                    "kontonummer": 5011,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, Årets tilgange"
+                },
+                {
+                    "kontonummer": 5012,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, Årets afgange"
+                },
+                {
+                    "kontonummer": 5015,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, Intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 5020,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, opskrivninger primo"
+                },
+                {
+                    "kontonummer": 5021,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, Årets opskrivninger"
+                },
+                {
+                    "kontonummer": 5022,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, årets tilbageførsler af tidligere års opskrivninger"
+                },
+                {
+                    "kontonummer": 5030,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, Af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5031,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, Årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5032,
+                    "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter, Tilbageførte af- og nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5041,
+            "navn": "Erhvervede immaterielle anlægsaktiver",
+            "konti": [
+                {
+                    "kontonummer": 5042,
+                    "navn": "Erhvervede immaterielle anlægsaktiver, kostpris primo"
+                },
+                {
+                    "kontonummer": 5043,
+                    "navn": "Erhvervede immaterielle anlægsaktiver, årets tilgange"
+                },
+                {
+                    "kontonummer": 5044,
+                    "navn": "Erhvervede immaterielle anlægsaktiver, årets afgange"
+                },
+                {
+                    "kontonummer": 5050,
+                    "navn": "Erhvervede immaterielle anlægsaktiver, Opskrivninger primo"
+                },
+                {
+                    "kontonummer": 5051,
+                    "navn": "Erhvervede immaterielle anlægsaktiver, Årets opskrivninger"
+                },
+                {
+                    "kontonummer": 5052,
+                    "navn": "Erhvervede immaterielle anlægsaktiver, Tilbageførte opskrivninger fra tidligere år"
+                },
+                {
+                    "kontonummer": 5055,
+                    "navn": "Erhvervede immaterielle anlægsaktiver, Af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5056,
+                    "navn": "Erhvervede immaterielle anlægsaktiver, årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5057,
+                    "navn": "Erhvervede immaterielle anlægsaktiver, tilbageførte af- og nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5061,
+            "navn": "Goodwill",
+            "konti": [
+                {
+                    "kontonummer": 5062,
+                    "navn": "Goodwill, kostpris primo"
+                },
+                {
+                    "kontonummer": 5063,
+                    "navn": "Goodwill, årets tilgange"
+                },
+                {
+                    "kontonummer": 5064,
+                    "navn": "Goodwill, årets afgange"
+                },
+                {
+                    "kontonummer": 5075,
+                    "navn": "Goodwill, af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5076,
+                    "navn": "Goodwill, årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5077,
+                    "navn": "Goodwill, tilbageførte afskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5080,
+            "navn": "Udviklingsprojekter under udførelse og forudbetalinger for immaterielle anlægsaktiver",
+            "konti": [
+                {
+                    "kontonummer": 5085,
+                    "navn": "Udviklingsprojekter under udførelse og forudbetalinger for immaterielle anlægsaktiver, Kostpris primo"
+                },
+                {
+                    "kontonummer": 5090,
+                    "navn": "Udviklingsprojekter under udførelse og forudbetalinger for immaterielle anlægsaktiver, Årets tilgange"
+                },
+                {
+                    "kontonummer": 5095,
+                    "navn": "Udviklingsprojekter under udførelse og forudbetalinger for immaterielle anlægsaktiver, Årets afgange"
+                },
+                {
+                    "kontonummer": 5100,
+                    "navn": "Udviklingsprojekter under udførelse og forudbetalinger for immaterielle anlægsaktiver, Intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 5110,
+                    "navn": "Udviklingsprojekter under udførelse og forudbetalinger for immaterielle anlægsaktiver, Af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5111,
+                    "navn": "Udviklingsprojekter under udførelse og forudbetalinger for immaterielle anlægsaktiver, Årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5112,
+                    "navn": "Udviklingsprojekter under udførelse og forudbetalinger for immaterielle anlægsaktiver, Tilbageførte af- og nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 5142,
+            "navn": "Materielle anlægsaktiver"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5150,
+            "navn": "Investeringsejendomme",
+            "konti": [
+                {
+                    "kontonummer": 5160,
+                    "navn": "Investeringsejendomme, kostpris primo"
+                },
+                {
+                    "kontonummer": 5170,
+                    "navn": "Investeringsejendomme, årets tilgange "
+                },
+                {
+                    "kontonummer": 5180,
+                    "navn": "Investeringsejendomme, årets afgange "
+                },
+                {
+                    "kontonummer": 5185,
+                    "navn": "Investeringsejendomme, intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 5190,
+                    "navn": "Investeringsejendomme, årets forbedringer"
+                },
+                {
+                    "kontonummer": 5200,
+                    "navn": "Investeringsejendomme, værdireguleringer primo"
+                },
+                {
+                    "kontonummer": 5201,
+                    "navn": "Investeringsejendomme, årets værdireguleringer"
+                },
+                {
+                    "kontonummer": 5205,
+                    "navn": "Investeringsejendomme, Af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5210,
+                    "navn": "Investeringsejendomme, årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5220,
+                    "navn": "Investeringsejendomme, tilbageførte af- og nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5231,
+            "navn": "Investeringsejendomme under opførelse",
+            "konti": [
+                {
+                    "kontonummer": 5240,
+                    "navn": "Investeringsejendomme under opførelse, kostpris primo"
+                },
+                {
+                    "kontonummer": 5250,
+                    "navn": "Investeringsejendomme under opførelse, årets tilgange "
+                },
+                {
+                    "kontonummer": 5260,
+                    "navn": "Investeringsejendomme under opførelse, årets afgange "
+                },
+                {
+                    "kontonummer": 5265,
+                    "navn": "Investeringsejendomme, intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 5280,
+                    "navn": "Investeringsejendomme under opførelse, øvrige værdireguleringer primo"
+                },
+                {
+                    "kontonummer": 5281,
+                    "navn": "Investeringsejendomme under opførelse, årets værdireguleringer"
+                },
+                {
+                    "kontonummer": 5282,
+                    "navn": "Investeringsejendomme under opførelse, nedskrivninger, primo"
+                },
+                {
+                    "kontonummer": 5290,
+                    "navn": "Investeringsejendomme under opførelse, årets nedskrivninger"
+                },
+                {
+                    "kontonummer": 5300,
+                    "navn": "Investeringsejendomme under opførelse, tilbageførte nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5311,
+            "navn": "Grunde og bygninger",
+            "konti": [
+                {
+                    "kontonummer": 5320,
+                    "navn": "Grunde og bygninger, kostpris primo"
+                },
+                {
+                    "kontonummer": 5330,
+                    "navn": "Grunde og bygninger, årets tilgange "
+                },
+                {
+                    "kontonummer": 5340,
+                    "navn": "Grunde og bygninger, årets afgange "
+                },
+                {
+                    "kontonummer": 5350,
+                    "navn": "Grunde og bygninger, årets forbedringer"
+                },
+                {
+                    "kontonummer": 5370,
+                    "navn": "Grunde og bygninger, værdireguleringer primo"
+                },
+                {
+                    "kontonummer": 5371,
+                    "navn": "Grunde og bygninger, årets værdireguleringer"
+                },
+                {
+                    "kontonummer": 5372,
+                    "navn": "Grunde og bygninger, Af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5390,
+                    "navn": "Grunde og bygninger, årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5400,
+                    "navn": "Grunde og bygninger, tilbageførte af- og nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5411,
+            "navn": "Produktionsanlæg og maskiner",
+            "konti": [
+                {
+                    "kontonummer": 5420,
+                    "navn": "Produktionsanlæg og maskiner, kostpris primo"
+                },
+                {
+                    "kontonummer": 5430,
+                    "navn": "Produktionsanlæg og maskiner, årets tilgange"
+                },
+                {
+                    "kontonummer": 5440,
+                    "navn": "Produktionsanlæg og maskiner, årets afgange"
+                },
+                {
+                    "kontonummer": 5450,
+                    "navn": "Produktionsanlæg og maskiner, Værdireguleringer primo"
+                },
+                {
+                    "kontonummer": 5451,
+                    "navn": "Produktionsanlæg og maskiner, Årets værdireguleringer"
+                },
+                {
+                    "kontonummer": 5452,
+                    "navn": "Produktionsanlæg og maskiner, Af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5470,
+                    "navn": "Produktionsanlæg og maskiner, årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5480,
+                    "navn": "Produktionsanlæg og maskiner, tilbageførte af- og nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5491,
+            "navn": "Indretning af lejede lokaler",
+            "konti": [
+                {
+                    "kontonummer": 5500,
+                    "navn": "Indretning af lejede lokaler, kostpris primo"
+                },
+                {
+                    "kontonummer": 5510,
+                    "navn": "Indretning af lejede lokaler, årets tilgange"
+                },
+                {
+                    "kontonummer": 5520,
+                    "navn": "Indretning af lejede lokaler, årets afgange"
+                },
+                {
+                    "kontonummer": 5530,
+                    "navn": "Indretning af lejede lokaler, Værdireguleringer primo"
+                },
+                {
+                    "kontonummer": 5531,
+                    "navn": "Indretning af lejede lokaler, Årets værdireguleringer"
+                },
+                {
+                    "kontonummer": 5532,
+                    "navn": "Indretning af lejede lokaler, Af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5540,
+                    "navn": "Indretning af lejede lokaler, årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5550,
+                    "navn": "Indretning af lejede lokaler, tilbageførte af- og nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5561,
+            "navn": "Andre anlæg, driftsmateriel og inventar",
+            "konti": [
+                {
+                    "kontonummer": 5570,
+                    "navn": "Andre anlæg, driftsmateriel og inventar, kostpris primo"
+                },
+                {
+                    "kontonummer": 5580,
+                    "navn": "Andre anlæg, driftsmateriel og inventar, årets tilgange"
+                },
+                {
+                    "kontonummer": 5590,
+                    "navn": "Andre anlæg, driftsmateriel og inventar, årets afgange"
+                },
+                {
+                    "kontonummer": 5600,
+                    "navn": "Andre anlæg, driftsmateriel og inventar, Værdireguleringer primo"
+                },
+                {
+                    "kontonummer": 5601,
+                    "navn": "Andre anlæg, driftsmateriel og inventar, Årets værdireguleringer"
+                },
+                {
+                    "kontonummer": 5602,
+                    "navn": "Andre anlæg, driftsmateriel og inventar, Af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5610,
+                    "navn": "Andre anlæg, driftsmateriel og inventar, årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5620,
+                    "navn": "Andre anlæg, driftsmateriel og inventar, tilbageførte af- og nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5631,
+            "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver",
+            "konti": [
+                {
+                    "kontonummer": 5640,
+                    "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver, kostpris primo"
+                },
+                {
+                    "kontonummer": 5650,
+                    "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver, årets tilgange"
+                },
+                {
+                    "kontonummer": 5660,
+                    "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver, årets afgange"
+                },
+                {
+                    "kontonummer": 5670,
+                    "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver, værdireguleringer primo"
+                },
+                {
+                    "kontonummer": 5671,
+                    "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver, årets værdireguleringer"
+                },
+                {
+                    "kontonummer": 5675,
+                    "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver, nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5676,
+                    "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver, årets nedskrivninger"
+                },
+                {
+                    "kontonummer": 5677,
+                    "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver, tilbageførte nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5681,
+            "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet (kun klasse A)",
+            "konti": [
+                {
+                    "kontonummer": 5682,
+                    "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet, kostpris primo (kun klasse A)"
+                },
+                {
+                    "kontonummer": 5683,
+                    "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet, Årets tilgange (kun klasse A)"
+                },
+                {
+                    "kontonummer": 5684,
+                    "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet, Årets afgange (kun klasse A)"
+                },
+                {
+                    "kontonummer": 5685,
+                    "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet, Værdireguleringer primo (kun klasse A)"
+                },
+                {
+                    "kontonummer": 5686,
+                    "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet, Årets værdireguleringer (kun klasse A)"
+                },
+                {
+                    "kontonummer": 5687,
+                    "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet, Af- og nedskrivninger primo (kun klasse A)"
+                },
+                {
+                    "kontonummer": 5688,
+                    "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet, Årets af- og nedskrivninger (kun klasse A)"
+                },
+                {
+                    "kontonummer": 5689,
+                    "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet, tilbageførte af- og nedskrivninger (kun klasse A)"
+                },
+                {
+                    "kontonummer": 5690,
+                    "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet, Gevinst og tab (kun klasse A)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5701,
+            "navn": "Finansielt leasede aktiver",
+            "konti": [
+                {
+                    "kontonummer": 5710,
+                    "navn": "Finansielt leasede aktiver, Kostpris primo"
+                },
+                {
+                    "kontonummer": 5720,
+                    "navn": "Finansielt leasede aktiver, årets tilgange"
+                },
+                {
+                    "kontonummer": 5730,
+                    "navn": "Finansielt leasede aktiver, årets afgange"
+                },
+                {
+                    "kontonummer": 5740,
+                    "navn": "Finansielt leasede aktiver, værdireguleringer primo"
+                },
+                {
+                    "kontonummer": 5741,
+                    "navn": "Finansielt leasede aktiver, årets værdireguleringer"
+                },
+                {
+                    "kontonummer": 5745,
+                    "navn": "Finansielt leasede aktiver, af- og nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5750,
+                    "navn": "Finansielt leasede aktiver, årets af- og nedskrivninger"
+                },
+                {
+                    "kontonummer": 5760,
+                    "navn": "Finansielt leasede aktiver, tilbageførte af- og nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 5772,
+            "navn": "Finansielle anlægsaktiver"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5773,
+            "navn": "Kapitalandele i tilknyttede virksomheder",
+            "konti": [
+                {
+                    "kontonummer": 5800,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, kostpris primo"
+                },
+                {
+                    "kontonummer": 5810,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, årets tilgange"
+                },
+                {
+                    "kontonummer": 5820,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, årets afgange"
+                },
+                {
+                    "kontonummer": 5825,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 5829,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, opskrivninger primo"
+                },
+                {
+                    "kontonummer": 5830,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, årets opskrivninger"
+                },
+                {
+                    "kontonummer": 5831,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, årets tilbageførsler af tidligere års opskrivninger"
+                },
+                {
+                    "kontonummer": 5835,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5836,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, årets nedskrivninger"
+                },
+                {
+                    "kontonummer": 5837,
+                    "navn": "Kapitalandele i tilknyttede virksomheder, årets tilbageførsler af tidligere års nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5841,
+            "navn": "Tilgodehavender hos tilknyttede virksomheder (anlægsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 5842,
+                    "navn": "Tilgodehavender hos tilknyttede virksomheder (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 5843,
+                    "navn": "Tilgodehavender hos tilknyttede virksomheder, nedskrivninger primo (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 5844,
+                    "navn": "Tilgodehavender hos tilknyttede virksomheder, nedskrivninger i årets løb (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 5845,
+                    "navn": "Tilgodehavender hos tilknyttede virksomheder, tilbageførsel af tidligere års nedskrivninger (anlægsaktiv)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5851,
+            "navn": "Kapitalandele i associerede virksomheder",
+            "konti": [
+                {
+                    "kontonummer": 5852,
+                    "navn": "Kapitalandele i associerede virksomheder, kostpris primo"
+                },
+                {
+                    "kontonummer": 5853,
+                    "navn": "Kapitalandele i associerede virksomheder, årets tilgange"
+                },
+                {
+                    "kontonummer": 5854,
+                    "navn": "Kapitalandele i associerede virksomheder, årets afgange"
+                },
+                {
+                    "kontonummer": 5855,
+                    "navn": "Kapitalandele i associerede virksomheder, intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 5860,
+                    "navn": "Kapitalandele i associerede virksomheder, opskrivninger primo"
+                },
+                {
+                    "kontonummer": 5861,
+                    "navn": "Kapitalandele i associerede virksomheder, årets opskrivninger"
+                },
+                {
+                    "kontonummer": 5862,
+                    "navn": "Kapitalandele i associerede virksomheder, årets tilbageførsler af tidligere års opskrivninger"
+                },
+                {
+                    "kontonummer": 5870,
+                    "navn": "Kapitalandele i associerede virksomheder, nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5871,
+                    "navn": "Kapitalandele i associerede virksomheder, årets nedskrivninger"
+                },
+                {
+                    "kontonummer": 5872,
+                    "navn": "Kapitalandele i associerede virksomheder, årets tilbageførsler af tidligere års nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5881,
+            "navn": "Tilgodehavender hos associerede virksomheder (anlægsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 5882,
+                    "navn": "Tilgodehavender hos associerede virksomheder (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 5883,
+                    "navn": "Tilgodehavender hos associerede virksomheder, nedskrivninger primo (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 5884,
+                    "navn": "Tilgodehavender hos associerede virksomheder, nedskrivninger i årets løb (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 5885,
+                    "navn": "Tilgodehavender hos associerede virksomheder, tilbageførsel af tidligere års nedskrivninger (anlægsaktiv)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5891,
+            "navn": "Kapitalinteresser",
+            "konti": [
+                {
+                    "kontonummer": 5900,
+                    "navn": "Kapitalinteresser, kostpris primo"
+                },
+                {
+                    "kontonummer": 5910,
+                    "navn": "Kapitalinteresser, årets tilgange"
+                },
+                {
+                    "kontonummer": 5920,
+                    "navn": "Kapitalinteresser, årets afgange"
+                },
+                {
+                    "kontonummer": 5925,
+                    "navn": "Kapitalinteresser, intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 5929,
+                    "navn": "Kapitalinteresser, opskrivninger primo"
+                },
+                {
+                    "kontonummer": 5930,
+                    "navn": "Kapitalinteresser, årets opskrivninger"
+                },
+                {
+                    "kontonummer": 5931,
+                    "navn": "Kapitalinteresser, årets tilbageførsler af tidligere års opskrivninger"
+                },
+                {
+                    "kontonummer": 5935,
+                    "navn": "Kapitalinteresser, nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 5940,
+                    "navn": "Kapitalinteresser, årets nedskrivninger"
+                },
+                {
+                    "kontonummer": 5950,
+                    "navn": "Kapitalinteresser, årets tilbageførsler af tidligere års nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5961,
+            "navn": "Tilgodehavender hos kapitalinteresser (anlægsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 5970,
+                    "navn": "Tilgodehavender hos kapitalinteresser (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 5980,
+                    "navn": "Tilgodehavender hos kapitalinteresser, nedskrivninger primo (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 5984,
+                    "navn": "Tilgodehavender hos kapitalinteresser, nedskrivninger i årets løb (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 5985,
+                    "navn": "Tilgodehavender hos kapitalinteresser, tilbageførsel af tidligere års nedskrivninger (anlægsaktiv)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 5991,
+            "navn": "Andre værdipapirer og kapitalandele",
+            "konti": [
+                {
+                    "kontonummer": 6000,
+                    "navn": "Andre værdipapirer og kapitalandele"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6011,
+            "navn": "Andre tilgodehavender (anlægsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 6020,
+                    "navn": "Udskudte skatteaktiver (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 6030,
+                    "navn": "Øvrige tilgodehavender (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 6040,
+                    "navn": "Deposita (anlægsaktiv)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6051,
+            "navn": "Tilgodehavender hos virksomhedsdeltagere og ledelse (anlægsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 6061,
+                    "navn": "Tilgodehavender hos direktionen (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 6062,
+                    "navn": "Tilgodehavender hos bestyrelsen (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 6063,
+                    "navn": "Tilgodehavender hos tilsynsråd (anlægsaktiv)"
+                },
+                {
+                    "kontonummer": 6064,
+                    "navn": "Tilgodehavender hos repræsentantskab (anlægsaktiv) "
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 6073,
+            "navn": "Omsætningsaktiver"
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 6074,
+            "navn": "Varebeholdninger"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6075,
+            "navn": "Råvarer og hjælpematerialer",
+            "konti": [
+                {
+                    "kontonummer": 6080,
+                    "navn": "Råvarer og hjælpematerialer, kostpris primo"
+                },
+                {
+                    "kontonummer": 6081,
+                    "navn": "Råvarer og hjælpematerialer, årets tilgange"
+                },
+                {
+                    "kontonummer": 6082,
+                    "navn": "Råvarer og hjælpematerialer, årets afgange"
+                },
+                {
+                    "kontonummer": 6083,
+                    "navn": "Råvarer og hjælpematerialer, intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 6085,
+                    "navn": "Råvarer og hjælpematerialer, nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 6090,
+                    "navn": "Råvarer og hjælpematerialer, årets nedskrivning"
+                },
+                {
+                    "kontonummer": 6091,
+                    "navn": "Råvarer og hjælpematerialer, tilbageførsel af tidligere års nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6101,
+            "navn": "Varer under fremstilling",
+            "konti": [
+                {
+                    "kontonummer": 6110,
+                    "navn": "Varer under fremstilling, kostpris primo"
+                },
+                {
+                    "kontonummer": 6111,
+                    "navn": "Varer under fremstilling, årets tilgange"
+                },
+                {
+                    "kontonummer": 6112,
+                    "navn": "Varer under fremstilling, årets afgange"
+                },
+                {
+                    "kontonummer": 6113,
+                    "navn": "Varer under fremstilling, intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 6115,
+                    "navn": "Varer under fremstilling, nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 6120,
+                    "navn": "Varer under fremstilling, årets nedskrivning"
+                },
+                {
+                    "kontonummer": 6121,
+                    "navn": "Varer under fremstilling, tilbageførsel af tidligere års nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6131,
+            "navn": "Fremstillede varer og handelsvarer",
+            "konti": [
+                {
+                    "kontonummer": 6140,
+                    "navn": "Fremstillede varer og handelsvarer, kostpris primo"
+                },
+                {
+                    "kontonummer": 6141,
+                    "navn": "Fremstillede varer og handelsvarer, årets tilgange"
+                },
+                {
+                    "kontonummer": 6142,
+                    "navn": "Fremstillede varer og handelsvarer, årets afgange"
+                },
+                {
+                    "kontonummer": 6143,
+                    "navn": "Fremstillede varer og handelsvarer, intern overførsel til/fra andre poster"
+                },
+                {
+                    "kontonummer": 6145,
+                    "navn": "Fremstillede varer og handelsvarer, nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 6150,
+                    "navn": "Fremstillede varer og handelsvarer, årets nedskrivning"
+                },
+                {
+                    "kontonummer": 6151,
+                    "navn": "Fremstillede varer og handelsvarer, tilbageførsel af tidligere års nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6161,
+            "navn": "Forudbetalinger for varer",
+            "konti": [
+                {
+                    "kontonummer": 6170,
+                    "navn": "Forudbetalinger for varer"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 6182,
+            "navn": "Tilgodehavender"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6183,
+            "navn": "Tilgodehavender fra salg og tjenesteydelser",
+            "konti": [
+                {
+                    "kontonummer": 6190,
+                    "navn": "Tilgodehavender fra salg og tjenesteydelser"
+                },
+                {
+                    "kontonummer": 6200,
+                    "navn": "Tilgodehavender fra salg og tjenesteydelser, nedskrivninger primo"
+                },
+                {
+                    "kontonummer": 6201,
+                    "navn": "Nedskrivninger i årets løb"
+                },
+                {
+                    "kontonummer": 6202,
+                    "navn": "Tilbageførsel af tidligere års nedskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6231,
+            "navn": "Igangværende arbejder for fremmed regning",
+            "konti": [
+                {
+                    "kontonummer": 6240,
+                    "navn": "Igangværende arbejder for fremmed regning"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6251,
+            "navn": "Tilgodehavender hos tilknyttede virksomheder (omsætningsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 6252,
+                    "navn": "Tilgodehavender hos tilknyttede virksomheder (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6255,
+                    "navn": "Tilgodehavender hos tilknyttede virksomheder, nedskrivninger primo (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6256,
+                    "navn": "Tilgodehavender hos tilknyttede virksomheder, nedskrivninger i årets løb"
+                },
+                {
+                    "kontonummer": 6257,
+                    "navn": "Tilgodehavender hos tilknyttede virksomheder, tilbageførsel af tidligere års nedskrivninger (omsætningsaktiv)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6261,
+            "navn": "Tilgodehavender hos associerede virksomheder (omsætningsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 6262,
+                    "navn": "Tilgodehavender hos associerede virksomheder (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6265,
+                    "navn": "Tilgodehavender hos associerede virksomheder, nedskrivninger primo (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6266,
+                    "navn": "Tilgodehavender hos associerede virksomheder, nedskrivninger i årets løb (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6267,
+                    "navn": "Tilgodehavender hos associerede virksomheder, tilbageførsel af tidligere års nedskrivninger (omsætningsaktiv)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6281,
+            "navn": "Tilgodehavender hos kapitalinteresser (omsætningsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 6282,
+                    "navn": "Tilgodehavender hos kapitalinteresser (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6285,
+                    "navn": "Tilgodehavender hos kapitalinteresser, nedskrivninger primo (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6286,
+                    "navn": "Tilgodehavender hos kapitalinteresser, nedskrivninger i årets løb (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6287,
+                    "navn": "Tilgodehavender hos kapitalinteresser, tilbageførsel af tidligere års nedskrivninger (omsætningsaktiv)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6301,
+            "navn": "Andre tilgodehavender (omsætningsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 6305,
+                    "navn": "Udskudte skatteaktiver (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6310,
+                    "navn": "Tilgodehavende kildeskat (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6315,
+                    "navn": "Tilgodehavende selskabsskat (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6320,
+                    "navn": "Tilgodehavende moms (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6330,
+                    "navn": "Øvrige tilgodehavender (omsætningsaktiv)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6341,
+            "navn": "Krav på indbetaling af virksomhedskapital og overkurs",
+            "konti": [
+                {
+                    "kontonummer": 6350,
+                    "navn": "Krav på indbetaling af virksomhedskapital og overkurs"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6361,
+            "navn": "Tilgodehavender hos virksomhedsdeltagere og ledelse (omsætningsaktiv)",
+            "konti": [
+                {
+                    "kontonummer": 6365,
+                    "navn": "Tilgodehavender hos direktionen (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6370,
+                    "navn": "Tilgodehavender hos bestyrelsens (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6375,
+                    "navn": "Tilgodehavender hos tilsynsråd (omsætningsaktiv)"
+                },
+                {
+                    "kontonummer": 6376,
+                    "navn": "Tilgodehavender hos repræsentantskab (omsætningsaktiv)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6381,
+            "navn": "Periodeafgrænsningsposter",
+            "konti": [
+                {
+                    "kontonummer": 6390,
+                    "navn": "Periodeafgrænsningsposter, der kan opretholdes skattemæssigt"
+                },
+                {
+                    "kontonummer": 6400,
+                    "navn": "Periodeafgrænsningsposter, der ikke kan opretholdes skattemæssigt"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 6412,
+            "navn": "Værdipapirer og kapitalandele"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6413,
+            "navn": "Kapitalandele i tilknyttede virksomheder",
+            "konti": [
+                {
+                    "kontonummer": 6420,
+                    "navn": "Kapitalandele i tilknyttede virksomheder som ikke er bestemt til vedvarende eje"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6431,
+            "navn": "Andre værdipapirer og kapitalandele",
+            "konti": [
+                {
+                    "kontonummer": 6450,
+                    "navn": "Andre værdipapirer og kapitalandele som ikke er bestemt til vedvarende eje"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6462,
+            "navn": "Likvide beholdninger",
+            "konti": [
+                {
+                    "kontonummer": 6470,
+                    "navn": "Likvide beholdninger"
+                },
+                {
+                    "kontonummer": 6480,
+                    "navn": "Bankkonto"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 6500,
+            "navn": "PASSIVER"
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 6501,
+            "navn": "Egenkapital"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6502,
+            "navn": "Virksomhedskapital",
+            "konti": [
+                {
+                    "kontonummer": 6510,
+                    "navn": "Registreret kapital mv."
+                },
+                {
+                    "kontonummer": 6520,
+                    "navn": "Indbetalt registreret kapital mv."
+                },
+                {
+                    "kontonummer": 6525,
+                    "navn": "Ikke indbetalt registreret kapital mv."
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6531,
+            "navn": "Overkurs ved emission",
+            "konti": [
+                {
+                    "kontonummer": 6540,
+                    "navn": "Overkurs ved emission"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6551,
+            "navn": "Reserve for opskrivninger",
+            "konti": [
+                {
+                    "kontonummer": 6560,
+                    "navn": "Reserve for opskrivninger"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6591,
+            "navn": "Andre reserver",
+            "konti": [
+                {
+                    "kontonummer": 6800,
+                    "navn": "Reserve for nettoopskrivning efter den indre værdis metode"
+                },
+                {
+                    "kontonummer": 6810,
+                    "navn": "Reserve for udlån og sikkerhedsstillelse"
+                },
+                {
+                    "kontonummer": 6830,
+                    "navn": "Reserve for ikke indbetalt virksomhedskapital og overkurs"
+                },
+                {
+                    "kontonummer": 6840,
+                    "navn": "Reserve for udviklingsomkostninger"
+                },
+                {
+                    "kontonummer": 6870,
+                    "navn": "Øvrige lovpligtige reserver"
+                },
+                {
+                    "kontonummer": 6890,
+                    "navn": "Vedtægtsmæssige reserver"
+                },
+                {
+                    "kontonummer": 6910,
+                    "navn": "Øvrige reserver"
+                },
+                {
+                    "kontonummer": 6914,
+                    "navn": "Reserve for iværksætterselskaber"
+                },
+                {
+                    "kontonummer": 6915,
+                    "navn": "Egenkapital primo (kun klasse A)"
+                },
+                {
+                    "kontonummer": 6916,
+                    "navn": "Årets resultat (kun klasse A)"
+                },
+                {
+                    "kontonummer": 6917,
+                    "navn": "Fri bil (kun klasse A)"
+                },
+                {
+                    "kontonummer": 6918,
+                    "navn": "Rejse og befordringsgodtgørelse (kun klasse A)"
+                },
+                {
+                    "kontonummer": 6919,
+                    "navn": "Fri telefon (Kun klasse A)"
+                },
+                {
+                    "kontonummer": 6920,
+                    "navn": "Private andele (Kun klasse A)"
+                },
+                {
+                    "kontonummer": 6921,
+                    "navn": "Private afskrivninger (Kun klasse A)"
+                },
+                {
+                    "kontonummer": 6922,
+                    "navn": "Driftsudgifter uden fradrag (Kun klasse A)"
+                },
+                {
+                    "kontonummer": 6923,
+                    "navn": "Privat hævet (kun klasse A)"
+                },
+                {
+                    "kontonummer": 6924,
+                    "navn": "Privat indskud (kun klasse A)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6931,
+            "navn": "Overført resultat",
+            "konti": [
+                {
+                    "kontonummer": 6935,
+                    "navn": "Overført resultat, primo"
+                },
+                {
+                    "kontonummer": 6940,
+                    "navn": "Overført resultat, jf. resultatdisponering"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6951,
+            "navn": "Foreslået udbytte indregnet under egenkapitalen",
+            "konti": [
+                {
+                    "kontonummer": 6955,
+                    "navn": "Foreslået udbytte, primo"
+                },
+                {
+                    "kontonummer": 6956,
+                    "navn": "Udloddet udbytte"
+                },
+                {
+                    "kontonummer": 6960,
+                    "navn": "Foreslået udbytte jf. resultatdisponeringen"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 6972,
+            "navn": "Hensatte forpligtelser"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 6980,
+            "navn": "Hensættelser til pensioner og lignende forpligtelser",
+            "konti": [
+                {
+                    "kontonummer": 6985,
+                    "navn": "Hensættelser til pensioner og lignende forpligtelser"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7000,
+            "navn": "Hensættelse til udskudt skat",
+            "konti": [
+                {
+                    "kontonummer": 7010,
+                    "navn": "Hensættelser til udskudt skat"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7031,
+            "navn": "Andre hensatte forpligtelser",
+            "konti": [
+                {
+                    "kontonummer": 7040,
+                    "navn": "Andre hensatte forpligtelser"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 7052,
+            "navn": "Langfristede gældsforpligtelser"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7053,
+            "navn": "Gæld, der er optaget ved udstedelse af obligationer (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7055,
+                    "navn": "Gæld, der er optaget ved udstedelse af obligationer (langfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7061,
+            "navn": "Konvertible og udbyttegivende gældsbreve (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7065,
+                    "navn": "Konvertible og udbyttegivende gældsbreve (langfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7080,
+            "navn": "Gæld til kreditinstitutter (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7110,
+                    "navn": "Gæld til kredit- og realkreditinstitutter (langfristet)"
+                },
+                {
+                    "kontonummer": 7120,
+                    "navn": "Gæld til banker (langfristet)"
+                },
+                {
+                    "kontonummer": 7125,
+                    "navn": "Leasingforpligtelser (langfristet)"
+                },
+                {
+                    "kontonummer": 7126,
+                    "navn": "Øvrig langfristet gæld"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7141,
+            "navn": "Modtagne forudbetalinger fra kunder (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7145,
+                    "navn": "Modtagne forudbetalinger fra kunder (langfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7151,
+            "navn": "Leverandører af varer og tjenesteydelser (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7155,
+                    "navn": "Leverandører af varer og tjenesteydelser (langfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7161,
+            "navn": "Vekselgæld (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7165,
+                    "navn": "Vekselgæld (langfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7171,
+            "navn": "Gæld til tilknyttede virksomheder (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7175,
+                    "navn": "Gæld til tilknyttede virksomheder (langfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7181,
+            "navn": "Gæld til kapitalinteresser (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7185,
+                    "navn": "Gæld til kapitalinteresser (langfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7191,
+            "navn": "Anden gæld, herunder skyldige skatter og skyldige bidrag til social sikring (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7195,
+                    "navn": "Anden gæld (langfristet)"
+                },
+                {
+                    "kontonummer": 7210,
+                    "navn": "Gæld til virksomhedssdeltagere og ledelse (langfristet)"
+                },
+                {
+                    "kontonummer": 7230,
+                    "navn": "Deposita (langfristet)"
+                },
+                {
+                    "kontonummer": 7240,
+                    "navn": "Leasingforpligtelse (langfristet)"
+                },
+                {
+                    "kontonummer": 7250,
+                    "navn": "Skyldig selskabsskat (langfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7261,
+            "navn": "Periodeafgrænsningsposter (langfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7265,
+                    "navn": "Periodeafgrænsningsposter (langfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "hovedkonto",
+            "kontonummer": 7280,
+            "navn": "Kortfristede gældsforpligtelser"
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7281,
+            "navn": "Gæld, der er optaget ved udstedelse af obligationer (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7285,
+                    "navn": "Gæld, der er optaget ved udstedelse af obligationer (kortfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7291,
+            "navn": "Konvertible og udbyttegivende gældsbreve (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7295,
+                    "navn": "Konvertible og udbyttegivende gældsbreve (kortfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7301,
+            "navn": "Gæld til kreditinstitutter (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7310,
+                    "navn": "Gæld til kredit- og realkreditinstitutter (kortfristet)"
+                },
+                {
+                    "kontonummer": 7330,
+                    "navn": "Gæld til banker (kortfristet)"
+                },
+                {
+                    "kontonummer": 7345,
+                    "navn": "Leasingforpligtelser (kortfristet)"
+                },
+                {
+                    "kontonummer": 7350,
+                    "navn": "Øvrig kortfristet gæld"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7401,
+            "navn": "Modtagne forudbetalinger fra kunder (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7410,
+                    "navn": "Modtagne forudbetalinger fra kunder (kortfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7421,
+            "navn": "Leverandører af varer og tjenesteydelser (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7440,
+                    "navn": "Leverandører af varer og tjenesteydelser (kortfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7451,
+            "navn": "Igangværende arbejder for fremmed regning (kortfristet gæld)",
+            "konti": [
+                {
+                    "kontonummer": 7455,
+                    "navn": "Igangværende arbejder for fremmed regning (kortfristet gæld)"
+                },
+                {
+                    "kontonummer": 7456,
+                    "navn": "Modtagne acontobetalinger (kortfristet gæld)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7461,
+            "navn": "Vekselgæld (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7465,
+                    "navn": "Vekselgæld (kortfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7501,
+            "navn": "Gæld til tilknyttede virksomheder (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7510,
+                    "navn": "Gæld til tilknyttede virksomheder (kortfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7531,
+            "navn": "Gæld til kapitalinteresser (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7535,
+                    "navn": "Gæld til kapitalinteresser (kortfristet)"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 7581,
+            "navn": "Anden gæld, herunder skyldige skatter og skyldige bidrag til social sikring (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 7590,
+                    "navn": "Gæld til virksomhedsdeltagere og ledelse (kortfristet)"
+                },
+                {
+                    "kontonummer": 7610,
+                    "navn": "Deposita (kortfristet)"
+                },
+                {
+                    "kontonummer": 7680,
+                    "navn": "Salgsmoms"
+                },
+                {
+                    "kontonummer": 7700,
+                    "navn": "Moms af varekøb udland, EU og ikke-EU"
+                },
+                {
+                    "kontonummer": 7720,
+                    "navn": "Moms af ydelseskøb udland, EU og ikke-EU"
+                },
+                {
+                    "kontonummer": 7740,
+                    "navn": "Købsmoms"
+                },
+                {
+                    "kontonummer": 7760,
+                    "navn": "Olie- og flaskegasafgift"
+                },
+                {
+                    "kontonummer": 7780,
+                    "navn": "Elafgift"
+                },
+                {
+                    "kontonummer": 7800,
+                    "navn": "Naturgas- og bygasafgift"
+                },
+                {
+                    "kontonummer": 7810,
+                    "navn": "Kulafgift"
+                },
+                {
+                    "kontonummer": 7820,
+                    "navn": "Vandafgift"
+                },
+                {
+                    "kontonummer": 7830,
+                    "navn": "Co2-afgift"
+                },
+                {
+                    "kontonummer": 7840,
+                    "navn": "Skyldig moms"
+                },
+                {
+                    "kontonummer": 7860,
+                    "navn": "Skyldig løn og gager"
+                },
+                {
+                    "kontonummer": 7880,
+                    "navn": "Skyldig bonus og tantieme"
+                },
+                {
+                    "kontonummer": 7900,
+                    "navn": "Skyldige feriepenge"
+                },
+                {
+                    "kontonummer": 7920,
+                    "navn": "Skyldig A-skat"
+                },
+                {
+                    "kontonummer": 7940,
+                    "navn": "Skyldigt AM-bidrag"
+                },
+                {
+                    "kontonummer": 7960,
+                    "navn": "Skyldigt ATP-bidrag"
+                },
+                {
+                    "kontonummer": 7980,
+                    "navn": "Skyldigt AMP-bidrag"
+                },
+                {
+                    "kontonummer": 8000,
+                    "navn": "Anden skyldig pension"
+                },
+                {
+                    "kontonummer": 8010,
+                    "navn": "Skyldig arbejdsgiverbidrag (samlet betaling)"
+                },
+                {
+                    "kontonummer": 8030,
+                    "navn": "Skyldig feriepengeforpligtigelse"
+                },
+                {
+                    "kontonummer": 8035,
+                    "navn": "Skyldigt ferietillæg"
+                },
+                {
+                    "kontonummer": 8040,
+                    "navn": "Øvrig anden gæld"
+                },
+                {
+                    "kontonummer": 8045,
+                    "navn": "Modtagne offentlige tilskud til senere beskatning"
+                }
+            ]
+        },
+        {
+            "kontotype": "gruppekonto",
+            "kontonummer": 8051,
+            "navn": "Periodeafgrænsningsposter (kortfristet)",
+            "konti": [
+                {
+                    "kontonummer": 8070,
+                    "navn": "Periodeafgrænsningsposter (kortfristet)"
+                }
+            ]
+        }
+    ],
+    "Sumkonti": {
+        "Konti": [
+            {
+                "kontonummer": 1390,
+                "navn": "Nettoomsætning",
+                "frakonto": 1010,
+                "tilkonto": 1389
+            },
+            {
+                "kontonummer": 1490,
+                "navn": "Ændring i lagre af færdigvarer og varer under fremstilling",
+                "frakonto": 1410,
+                "tilkonto": 1489
+            },
+            {
+                "kontonummer": 1499,
+                "navn": "Arbejde udført for egen regning og opført under aktiver",
+                "frakonto": 1496,
+                "tilkonto": 1498
+            },
+            {
+                "kontonummer": 1590,
+                "navn": "Andre driftsindtægter",
+                "frakonto": 1510,
+                "tilkonto": 1589
+            },
+            {
+                "kontonummer": 1810,
+                "navn": "Omkostninger til råvarer og hjælpematerialer",
+                "frakonto": 1610,
+                "tilkonto": 1809
+            },
+            {
+                "kontonummer": 2010,
+                "navn": "Salgsomkostninger",
+                "frakonto": 1830,
+                "tilkonto": 2009
+            },
+            {
+                "kontonummer": 2210,
+                "navn": "Lokaleomkostninger",
+                "frakonto": 2030,
+                "tilkonto": 2209
+            },
+            {
+                "kontonummer": 2830,
+                "navn": "Administrationsomkostninger",
+                "frakonto": 2230,
+                "tilkonto": 2829
+            },
+            {
+                "kontonummer": 2831,
+                "navn": "Andre eksterne omkostninger",
+                "frakonto": 1830,
+                "tilkonto": 2829
+            },
+            {
+                "kontonummer": 2832,
+                "navn": "Eksterne omkostninger",
+                "frakonto": 1610,
+                "tilkonto": 2829
+            },
+            {
+                "kontonummer": 2840,
+                "navn": "Bruttofortjeneste/Bruttotab",
+                "frakonto": 1010,
+                "tilkonto": 2829
+            },
+            {
+                "kontonummer": 2905,
+                "navn": "Lønninger",
+                "frakonto": 2845,
+                "tilkonto": 2900
+            },
+            {
+                "kontonummer": 2926,
+                "navn": "Pensioner",
+                "frakonto": 2910,
+                "tilkonto": 2925
+            },
+            {
+                "kontonummer": 2950,
+                "navn": "Andre omkostninger til social sikring",
+                "frakonto": 2928,
+                "tilkonto": 2949
+            },
+            {
+                "kontonummer": 2990,
+                "navn": "Personaleomkostninger",
+                "frakonto": 2845,
+                "tilkonto": 2989
+            },
+            {
+                "kontonummer": 3100,
+                "navn": "Af- og nedskrivninger af materielle og immaterielle anlægsaktiver ",
+                "frakonto": 3000,
+                "tilkonto": 3099
+            },
+            {
+                "kontonummer": 3140,
+                "navn": "Nedskrivning af omsætningsaktiver, som overstiger normale nedskrivninger",
+                "frakonto": 3130,
+                "tilkonto": 3139
+            },
+            {
+                "kontonummer": 3175,
+                "navn": "Andre driftsomkostninger",
+                "frakonto": 3160,
+                "tilkonto": 3174
+            },
+            {
+                "kontonummer": 3190,
+                "navn": "Dagsværdiregulering af investeringsejendomme",
+                "frakonto": 3181,
+                "tilkonto": 3189
+            },
+            {
+                "kontonummer": 3205,
+                "navn": "Indtægter af kapitalandele i tilknyttede virksomheder",
+                "frakonto": 3193,
+                "tilkonto": 3204
+            },
+            {
+                "kontonummer": 3219,
+                "navn": "Indtægter af kapitalandele i associerede virksomheder",
+                "frakonto": 3211,
+                "tilkonto": 3218
+            },
+            {
+                "kontonummer": 3240,
+                "navn": "Indtægter af kapitalinteresser",
+                "frakonto": 3221,
+                "tilkonto": 3239
+            },
+            {
+                "kontonummer": 3250,
+                "navn": "Indtægter af kapitalandele i tilknyttede og associerede virksomheder",
+                "frakonto": 3193,
+                "tilkonto": 3239
+            },
+            {
+                "kontonummer": 3260,
+                "navn": "Resultatandele, der hidrører fra tilknyttede virksomheder",
+                "frakonto": 3252,
+                "tilkonto": 3259
+            },
+            {
+                "kontonummer": 3270,
+                "navn": "Resultatandele, der hidrører fra associerede virksomheder",
+                "frakonto": 3262,
+                "tilkonto": 3269
+            },
+            {
+                "kontonummer": 3280,
+                "navn": "Resultatandele, der hidrører fra kapitalinteresser",
+                "frakonto": 3272,
+                "tilkonto": 3279
+            },
+            {
+                "kontonummer": 3410,
+                "navn": "Indtægter af andre kapitalandele, værdipapirer og tilgodehavender, der er anlægsaktiver",
+                "frakonto": 3380,
+                "tilkonto": 3409
+            },
+            {
+                "kontonummer": 3450,
+                "navn": "Andre finansielle indtægter fra tilknyttede virksomheder ",
+                "frakonto": 3440,
+                "tilkonto": 3449
+            },
+            {
+                "kontonummer": 3540,
+                "navn": "Andre finansielle indtægter",
+                "frakonto": 3470,
+                "tilkonto": 3539
+            },
+            {
+                "kontonummer": 3570,
+                "navn": "Nedskrivning af finansielle aktiver",
+                "frakonto": 3560,
+                "tilkonto": 3569
+            },
+            {
+                "kontonummer": 3600,
+                "navn": "Finansielle omkostninger, der hidrører fra tilknyttede virksomheder",
+                "frakonto": 3590,
+                "tilkonto": 3599
+            },
+            {
+                "kontonummer": 3700,
+                "navn": "Andre finansielle omkostninger",
+                "frakonto": 3610,
+                "tilkonto": 3699
+            },
+            {
+                "kontonummer": 3701,
+                "navn": "Øvrige finansielle omkostninger",
+                "frakonto": 3590,
+                "tilkonto": 3699
+            },
+            {
+                "kontonummer": 3702,
+                "navn": "Resultat før skat",
+                "frakonto": 1010,
+                "tilkonto": 3699
+            },
+            {
+                "kontonummer": 3790,
+                "navn": "Skat af årets resultat",
+                "frakonto": 3740,
+                "tilkonto": 3789
+            },
+            {
+                "kontonummer": 3820,
+                "navn": "Andre skatter",
+                "frakonto": 3810,
+                "tilkonto": 3819
+            },
+            {
+                "kontonummer": 4999,
+                "navn": "Årets resultat",
+                "frakonto": 1010,
+                "tilkonto": 3819
+            },
+            {
+                "kontonummer": 5040,
+                "navn": "Færdiggjort udviklingsprojekter, herunder patenter og lignende rettigheder, der stammer fra udviklingsprojekter",
+                "frakonto": 5010,
+                "tilkonto": 5039
+            },
+            {
+                "kontonummer": 5060,
+                "navn": "Erhvervede immaterielle anlægsaktiver",
+                "frakonto": 5042,
+                "tilkonto": 5059
+            },
+            {
+                "kontonummer": 5079,
+                "navn": "Goodwill",
+                "frakonto": 5062,
+                "tilkonto": 5078
+            },
+            {
+                "kontonummer": 5140,
+                "navn": "Udviklingsprojekter under udførelse og forudbetalinger for immaterielle anlægsaktiver",
+                "frakonto": 5085,
+                "tilkonto": 5139
+            },
+            {
+                "kontonummer": 5141,
+                "navn": "Immaterielle anlægsaktiver",
+                "frakonto": 5010,
+                "tilkonto": 5139
+            },
+            {
+                "kontonummer": 5230,
+                "navn": "Investeringsejendomme",
+                "frakonto": 5160,
+                "tilkonto": 5229
+            },
+            {
+                "kontonummer": 5310,
+                "navn": "Investeringsejendomme under opførelse",
+                "frakonto": 5240,
+                "tilkonto": 5309
+            },
+            {
+                "kontonummer": 5410,
+                "navn": "Grunde og bygninger",
+                "frakonto": 5320,
+                "tilkonto": 5409
+            },
+            {
+                "kontonummer": 5490,
+                "navn": "Produktionsanlæg og maskiner",
+                "frakonto": 5420,
+                "tilkonto": 5489
+            },
+            {
+                "kontonummer": 5560,
+                "navn": "Indretning af lejede lokaler",
+                "frakonto": 5500,
+                "tilkonto": 5559
+            },
+            {
+                "kontonummer": 5630,
+                "navn": "Andre anlæg, driftsmateriel og inventar",
+                "frakonto": 5570,
+                "tilkonto": 5629
+            },
+            {
+                "kontonummer": 5680,
+                "navn": "Materielle anlægsaktiver under udførelse og forudbetalinger for materielle anlægsaktiver",
+                "frakonto": 5640,
+                "tilkonto": 5679
+            },
+            {
+                "kontonummer": 5695,
+                "navn": "Andre anlæg, driftsmateriel og inventar blandet benyttet (kun klasse A)",
+                "frakonto": 5682,
+                "tilkonto": 5694
+            },
+            {
+                "kontonummer": 5770,
+                "navn": "Finansielt leasede aktiver",
+                "frakonto": 5710,
+                "tilkonto": 5769
+            },
+            {
+                "kontonummer": 5771,
+                "navn": "Materielle anlægsaktiver",
+                "frakonto": 5160,
+                "tilkonto": 5769
+            },
+            {
+                "kontonummer": 5840,
+                "navn": "Kapitalandele i tilknyttede virksomheder",
+                "frakonto": 5800,
+                "tilkonto": 5839
+            },
+            {
+                "kontonummer": 5850,
+                "navn": "Tilgodehavender hos tilknyttede virksomheder (anlægsaktiv)",
+                "frakonto": 5842,
+                "tilkonto": 5849
+            },
+            {
+                "kontonummer": 5880,
+                "navn": "Kapitalandele i associerede virksomheder",
+                "frakonto": 5852,
+                "tilkonto": 5879
+            },
+            {
+                "kontonummer": 5890,
+                "navn": "Tilgodehavender hos associerede virksomheder (anlægsaktiv)",
+                "frakonto": 5882,
+                "tilkonto": 5889
+            },
+            {
+                "kontonummer": 5960,
+                "navn": "Kapitalinteresser",
+                "frakonto": 5900,
+                "tilkonto": 5959
+            },
+            {
+                "kontonummer": 5990,
+                "navn": "Tilgodehavender hos kapitalinteresser (anlægsaktiv)",
+                "frakonto": 5970,
+                "tilkonto": 5989
+            },
+            {
+                "kontonummer": 6010,
+                "navn": "Andre værdipapirer og kapitalandele",
+                "frakonto": 6000,
+                "tilkonto": 6009
+            },
+            {
+                "kontonummer": 6050,
+                "navn": "Andre tilgodehavender (anlægsaktiv)",
+                "frakonto": 6020,
+                "tilkonto": 6049
+            },
+            {
+                "kontonummer": 6070,
+                "navn": "Tilgodehavender hos virksomhedsdeltagere og ledelse (anlægsaktiv)",
+                "frakonto": 6060,
+                "tilkonto": 6069
+            },
+            {
+                "kontonummer": 6071,
+                "navn": "Finansielle anlægsaktiver",
+                "frakonto": 5800,
+                "tilkonto": 6069
+            },
+            {
+                "kontonummer": 6072,
+                "navn": "Anlægsaktiver i alt",
+                "frakonto": 5010,
+                "tilkonto": 6069
+            },
+            {
+                "kontonummer": 6100,
+                "navn": "Råvarer og hjælpematerialer",
+                "frakonto": 6080,
+                "tilkonto": 6099
+            },
+            {
+                "kontonummer": 6130,
+                "navn": "Varer under fremstilling",
+                "frakonto": 6110,
+                "tilkonto": 6129
+            },
+            {
+                "kontonummer": 6160,
+                "navn": "Fremstillede varer og handelsvarer",
+                "frakonto": 6140,
+                "tilkonto": 6159
+            },
+            {
+                "kontonummer": 6180,
+                "navn": "Forudbetalinger for varer",
+                "frakonto": 6170,
+                "tilkonto": 6179
+            },
+            {
+                "kontonummer": 6181,
+                "navn": "Varebeholdninger",
+                "frakonto": 6080,
+                "tilkonto": 6179
+            },
+            {
+                "kontonummer": 6210,
+                "navn": "Tilgodehavender fra salg og tjenesteydelser",
+                "frakonto": 6190,
+                "tilkonto": 6209
+            },
+            {
+                "kontonummer": 6250,
+                "navn": "Igangværende arbejder for fremmed regning",
+                "frakonto": 6240,
+                "tilkonto": 6249
+            },
+            {
+                "kontonummer": 6260,
+                "navn": "Tilgodehavender hos tilknyttede virksomheder (omsætningsaktiv)",
+                "frakonto": 6252,
+                "tilkonto": 6259
+            },
+            {
+                "kontonummer": 6270,
+                "navn": "Tilgodehavender hos associerede virksomheder (omsætningsaktiv)",
+                "frakonto": 6262,
+                "tilkonto": 6269
+            },
+            {
+                "kontonummer": 6290,
+                "navn": "Tilgodehavender hos kapitalinteresser (omsætningsaktiv)",
+                "frakonto": 6282,
+                "tilkonto": 6289
+            },
+            {
+                "kontonummer": 6340,
+                "navn": "Andre tilgodehavender (omsætningsaktiv)",
+                "frakonto": 6302,
+                "tilkonto": 6339
+            },
+            {
+                "kontonummer": 6360,
+                "navn": "Krav på indbetaling af virksomhedskapital og overkurs",
+                "frakonto": 6350,
+                "tilkonto": 6359
+            },
+            {
+                "kontonummer": 6380,
+                "navn": "Tilgodehavender hos virksomhedsdeltagere og ledelse (omsætningsaktiv)",
+                "frakonto": 6365,
+                "tilkonto": 6379
+            },
+            {
+                "kontonummer": 6410,
+                "navn": "Periodeafgrænsningsposter",
+                "frakonto": 6390,
+                "tilkonto": 6409
+            },
+            {
+                "kontonummer": 6411,
+                "navn": "Tilgodehavender",
+                "frakonto": 6190,
+                "tilkonto": 6409
+            },
+            {
+                "kontonummer": 6430,
+                "navn": "Kapitalandele i tilknyttede virksomheder",
+                "frakonto": 6420,
+                "tilkonto": 6429
+            },
+            {
+                "kontonummer": 6460,
+                "navn": "Andre værdipapirer og kapitalandele",
+                "frakonto": 6450,
+                "tilkonto": 6459
+            },
+            {
+                "kontonummer": 6461,
+                "navn": "Værdipapirer og kapitalandele",
+                "frakonto": 6420,
+                "tilkonto": 6459
+            },
+            {
+                "kontonummer": 6490,
+                "navn": "Likvide beholdninger",
+                "frakonto": 6470,
+                "tilkonto": 6489
+            },
+            {
+                "kontonummer": 6491,
+                "navn": "Omsætningsaktiver i alt",
+                "frakonto": 6080,
+                "tilkonto": 6489
+            },
+            {
+                "kontonummer": 6499,
+                "navn": "AKTIVER I ALT",
+                "frakonto": 5010,
+                "tilkonto": 6489
+            },
+            {
+                "kontonummer": 6530,
+                "navn": "Virksomhedskapital",
+                "frakonto": 6510,
+                "tilkonto": 6529
+            },
+            {
+                "kontonummer": 6550,
+                "navn": "Overkurs ved emission",
+                "frakonto": 6540,
+                "tilkonto": 6549
+            },
+            {
+                "kontonummer": 6570,
+                "navn": "Reserve for opskrivninger",
+                "frakonto": 6560,
+                "tilkonto": 6569
+            },
+            {
+                "kontonummer": 6930,
+                "navn": "Andre reserver",
+                "frakonto": 6800,
+                "tilkonto": 6929
+            },
+            {
+                "kontonummer": 6950,
+                "navn": "Overført resultat",
+                "frakonto": 6935,
+                "tilkonto": 6949
+            },
+            {
+                "kontonummer": 6970,
+                "navn": "Foreslået udbytte indregnet under egenkapitalen",
+                "frakonto": 6955,
+                "tilkonto": 6969
+            },
+            {
+                "kontonummer": 6971,
+                "navn": "Egenkapital i alt",
+                "frakonto": 6510,
+                "tilkonto": 6969
+            },
+            {
+                "kontonummer": 6990,
+                "navn": "Hensættelser til pensioner og lignende forpligtelser",
+                "frakonto": 6985,
+                "tilkonto": 6989
+            },
+            {
+                "kontonummer": 7030,
+                "navn": "Hensættelse til udskudt skat",
+                "frakonto": 7010,
+                "tilkonto": 7029
+            },
+            {
+                "kontonummer": 7050,
+                "navn": "Andre hensatte forpligtelser",
+                "frakonto": 7040,
+                "tilkonto": 7049
+            },
+            {
+                "kontonummer": 7051,
+                "navn": "Hensatte forpligtelser",
+                "frakonto": 6985,
+                "tilkonto": 7049
+            },
+            {
+                "kontonummer": 7060,
+                "navn": "Gæld, der er optaget ved udstedelse af obligationer (langfristet)",
+                "frakonto": 7055,
+                "tilkonto": 7059
+            },
+            {
+                "kontonummer": 7070,
+                "navn": "Konvertible og udbyttegivende gældsbreve (langfristet)",
+                "frakonto": 7065,
+                "tilkonto": 7069
+            },
+            {
+                "kontonummer": 7130,
+                "navn": "Gæld til kreditinstitutter (langfristet)",
+                "frakonto": 7110,
+                "tilkonto": 7129
+            },
+            {
+                "kontonummer": 7150,
+                "navn": "Modtagne forudbetalinger fra kunder (langfristet)",
+                "frakonto": 7145,
+                "tilkonto": 7149
+            },
+            {
+                "kontonummer": 7160,
+                "navn": "Leverandører af varer og tjenesteydelser (langfristet)",
+                "frakonto": 7155,
+                "tilkonto": 7159
+            },
+            {
+                "kontonummer": 7170,
+                "navn": "Vekselgæld (langfristet)",
+                "frakonto": 7165,
+                "tilkonto": 7169
+            },
+            {
+                "kontonummer": 7180,
+                "navn": "Gæld til tilknyttede virksomheder (langfristet)",
+                "frakonto": 7175,
+                "tilkonto": 7179
+            },
+            {
+                "kontonummer": 7190,
+                "navn": "Gæld til kapitalinteresser (langfristet)",
+                "frakonto": 7185,
+                "tilkonto": 7189
+            },
+            {
+                "kontonummer": 7260,
+                "navn": "Anden gæld, herunder skyldige skatter og skyldige bidrag til social sikring (langfristet)",
+                "frakonto": 7192,
+                "tilkonto": 7259
+            },
+            {
+                "kontonummer": 7270,
+                "navn": "Periodeafgrænsningsposter (langfristet)",
+                "frakonto": 7265,
+                "tilkonto": 7269
+            },
+            {
+                "kontonummer": 7271,
+                "navn": "Langfristede gældsforpligtelser",
+                "frakonto": 7055,
+                "tilkonto": 7269
+            },
+            {
+                "kontonummer": 7290,
+                "navn": "Gæld, der er optaget ved udstedelse af obligationer (kortfristet)",
+                "frakonto": 7285,
+                "tilkonto": 7289
+            },
+            {
+                "kontonummer": 7300,
+                "navn": "Konvertible og udbyttegivende gældsbreve (kortfristet)",
+                "frakonto": 7295,
+                "tilkonto": 7299
+            },
+            {
+                "kontonummer": 7360,
+                "navn": "Gæld til kreditinstitutter (kortfristet)",
+                "frakonto": 7310,
+                "tilkonto": 7359
+            },
+            {
+                "kontonummer": 7420,
+                "navn": "Modtagne forudbetalinger fra kunder (kortfristet)",
+                "frakonto": 7410,
+                "tilkonto": 7419
+            },
+            {
+                "kontonummer": 7450,
+                "navn": "Leverandører af varer og tjenesteydelser (kortfristet)",
+                "frakonto": 7440,
+                "tilkonto": 7449
+            },
+            {
+                "kontonummer": 7460,
+                "navn": "Igangværende arbejder for fremmed regning (kortfristet gæld)",
+                "frakonto": 7455,
+                "tilkonto": 7459
+            },
+            {
+                "kontonummer": 7470,
+                "navn": "Vekselgæld (kortfristet)",
+                "frakonto": 7465,
+                "tilkonto": 7469
+            },
+            {
+                "kontonummer": 7530,
+                "navn": "Gæld til tilknyttede virksomheder (kortfristet)",
+                "frakonto": 7510,
+                "tilkonto": 7529
+            },
+            {
+                "kontonummer": 7540,
+                "navn": "Gæld til kapitalinteresser (kortfristet)",
+                "frakonto": 7535,
+                "tilkonto": 7539
+            },
+            {
+                "kontonummer": 8050,
+                "navn": "Anden gæld, herunder skyldige skatter og skyldige bidrag til social sikring",
+                "frakonto": 7590,
+                "tilkonto": 8049
+            },
+            {
+                "kontonummer": 8080,
+                "navn": "Periodeafgrænsningsposter (kortfristet)",
+                "frakonto": 8070,
+                "tilkonto": 8079
+            },
+            {
+                "kontonummer": 9950,
+                "navn": "Kortfristede gældsforpligtelser",
+                "frakonto": 7285,
+                "tilkonto": 8079
+            },
+            {
+                "kontonummer": 9999,
+                "navn": "PASSIVER I ALT ",
+                "frakonto": 6510,
+                "tilkonto": 8079
+            }
+        ]
+    }
+}

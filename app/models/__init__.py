@@ -7,6 +7,7 @@ from .country import Country
 from .invoice import Invoice
 from .invoice_setting import InvoiceSetting
 from .invoiceline import InvoiceLine
+from .ledger import FiscalYear, JournalEntry, JournalLine, LedgerCounter
 from .organization import Organization
 from .product import Product
 from .revoked_token import RevokedToken
@@ -20,9 +21,13 @@ __all__ = [
     "BackupCode",
     "Contact",
     "Country",
+    "FiscalYear",
     "Invoice",
     "InvoiceLine",
     "InvoiceSetting",
+    "JournalEntry",
+    "JournalLine",
+    "LedgerCounter",
     "Organization",
     "Product",
     "RevokedToken",
