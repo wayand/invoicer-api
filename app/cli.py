@@ -5,7 +5,8 @@ import click
 from flask.cli import with_appcontext
 from sqlalchemy import exc
 
-from app.models.account import Account, AccountGroup, AccountType
+from app.chart import apply_starter_chart
+from app.models.account import Account
 from app.models.base import db
 from app.models.contact import Contact
 from app.models.country import Country
@@ -44,7 +45,7 @@ def seed():
             org_users = org_data.pop("users")
             org_products = org_data.pop("products")
             org_contacts = org_data.pop("contacts")
-            account_types = org_data.pop("account_types")
+            bank_account = org_data.pop("bank_account", None)
             tax_rates = org_data.pop("tax_rates")
 
             organization_obj = Organization.find_by(
@@ -204,122 +205,49 @@ def seed():
                         )
 
             #################################
-            # Organization built-in accounts
+            # Organization chart of accounts
             click.echo(
-                "\n-> creating Account types for Organization: "
+                "\n-> creating the chart of accounts for Organization: "
                 + org_data.get("name")
             )
-            if account_types:
-                for account_type_data in account_types:
-                    # extract account_groups
-                    account_type_groups = account_type_data.pop(
-                        "account_groups"
-                    )
+            result = apply_starter_chart(organization_obj)
+            click.echo(_chart_summary(result))
+            if bank_account:
+                bank = Account.find_by(
+                    organization_id=organization_obj.id, system_role="bank"
+                )
+                for key, value in bank_account.items():
+                    setattr(bank, key, value)
+                bank.save()
+                click.echo("-- set the bank details on " + bank.name)
 
-                    account_type_obj = AccountType.find_by(
-                        name=account_type_data.get("name"),
-                        organization_id=organization_obj.id,
-                    )
 
-                    if not account_type_obj:
-                        account_type_data["organization_id"] = (
-                            organization_obj.id
-                        )
-                        account_type_obj = AccountType(**account_type_data)
-                        account_type_obj.save()
-                        click.echo(
-                            "-- created Account type: "
-                            + account_type_data.get("name")
-                        )
-                    else:
-                        click.echo(
-                            "-- already exists: "
-                            + account_type_data.get("name")
-                        )
+def _chart_summary(result):
+    parts = [
+        f"{len(result.created)} created",
+        f"{len(result.adopted)} adopted",
+        f"{len(result.unchanged)} already there",
+    ]
+    if result.skipped:
+        parts.append(f"{len(result.skipped)} skipped")
+    lines = ["-- accounts: " + ", ".join(parts)]
+    for number, reason in sorted(result.skipped.items()):
+        lines.append(f"-- skipped {number}: {reason}")
+    return "\n".join(lines)
 
-                    #####################
-                    # account_groups
-                    click.echo(
-                        "\n-- -> creating account groups for account-type: "
-                        + account_type_data.get("name")
-                    )
 
-                    if account_type_groups:
-                        for account_group_data in account_type_groups:
-                            # extract accounts
-                            if account_group_data.get("accounts") is not None:
-                                accounts = account_group_data.pop("accounts")
-
-                            account_group_obj = AccountGroup.find_by(
-                                name=account_group_data.get("name"),
-                                organization_id=organization_obj.id,
-                                account_type_id=account_type_obj.id,
-                            )
-
-                            if not account_group_obj:
-                                account_group_data["organization_id"] = (
-                                    organization_obj.id
-                                )
-                                account_group_data["account_type_id"] = (
-                                    account_type_obj.id
-                                )
-                                account_group_obj = AccountGroup(
-                                    **account_group_data
-                                )
-                                account_group_obj.save()
-                                click.echo(
-                                    "-- -- created Account group: "
-                                    + account_group_data.get("name")
-                                )
-                            else:
-                                click.echo(
-                                    "-- -- already exists: "
-                                    + account_group_data.get("name")
-                                )
-
-                            #####################
-                            # accounts
-                            click.echo(
-                                "\n-- -- -> creating accounts for account-group: "
-                                + account_group_data.get("name")
-                            )
-
-                            if accounts:
-                                for account_data in accounts:
-                                    tax_rate_id = None
-                                    if account_data.get("tax_rate_id"):
-                                        tax_rate_obj = TaxRate.find_by(
-                                            name=account_data.get(
-                                                "tax_rate_id"
-                                            ),
-                                            organization_id=organization_obj.id,
-                                        )
-                                        tax_rate_id = tax_rate_obj.id
-                                    try:
-                                        account_data["organization_id"] = (
-                                            organization_obj.id
-                                        )
-                                        account_data["account_type_id"] = (
-                                            account_type_obj.id
-                                        )
-                                        account_data["account_group_id"] = (
-                                            account_group_obj.id
-                                        )
-                                        account_data["tax_rate_id"] = (
-                                            tax_rate_id
-                                        )
-                                        account_obj = Account(**account_data)
-                                        account_obj.save()
-                                        click.echo(
-                                            "-- -- -- created Account: "
-                                            + account_data.get("name")
-                                        )
-                                    except exc.IntegrityError:
-                                        db.session.rollback()
-                                        click.echo(
-                                            "-- -- -- already exists: "
-                                            + account_data.get("name")
-                                        )
+@click.command("chart-apply")
+@click.argument("slug")
+@with_appcontext
+def chart_apply(slug):
+    """Give the organization SLUG the starter chart of accounts of its
+    company form. Safe to run again: accounts that exist are kept."""
+    organization = Organization.find_by(slug=slug)
+    if organization is None:
+        raise click.ClickException(f"No organization with slug {slug}")
+    result = apply_starter_chart(organization)
+    click.echo(f"{organization.name} ({organization.company_form})")
+    click.echo(_chart_summary(result))
 
 
 @click.command("user-reset-2fa")
@@ -341,4 +269,5 @@ def user_reset_2fa(email):
 def register_commands(app):
     """Register CLI commands."""
     app.cli.add_command(seed)
+    app.cli.add_command(chart_apply)
     app.cli.add_command(user_reset_2fa)

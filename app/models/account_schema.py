@@ -48,14 +48,18 @@ class DepositAccountSchema(BaseAccountSchema):
 
 class AccountSchema(BaseAccountSchema):
     tax_rate_id = fields.Integer(allow_none=True)
+    # Set by the chart of accounts (app/chart.py), not by the client
+    standard_account = fields.Integer(dump_only=True, allow_none=True)
+    system_role = fields.String(dump_only=True, allow_none=True)
     description = fields.Str()
     currency_id = fields.Str()
     is_archived = fields.Boolean()
     is_deposit = fields.Boolean()
     is_bank_account = fields.Boolean()
     is_payment_enabled = fields.Boolean()
-    bank_account_number = fields.Integer()
-    bank_registration_number = fields.Integer()
+    # An account that is not a bank account has no bank details: null
+    bank_account_number = fields.Integer(allow_none=True)
+    bank_registration_number = fields.Integer(allow_none=True)
     bank_iban_number = fields.Str()
     bank_swift_number = fields.Str()
     bank_id = fields.Integer(allow_none=True)

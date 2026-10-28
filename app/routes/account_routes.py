@@ -13,6 +13,19 @@ from app.models.base import db
 from app.routes import bp
 
 
+def _conflict(organization_id, number, name, account_id=None):
+    """Why the number or name cannot be used, or None. Both are unique per
+    organization; account_id is the account being changed, if any."""
+    query = Account.query.filter(Account.organization_id == organization_id)
+    if account_id is not None:
+        query = query.filter(Account.id != account_id)
+    if number is not None and query.filter(Account.number == number).first():
+        return f"Account number {number} is already in use"
+    if name is not None and query.filter(Account.name == name).first():
+        return f"Account name ({name}) is already in use"
+    return None
+
+
 @bp.get("/account-groups")
 @jwt_required()
 def get_account_groups():
@@ -67,6 +80,15 @@ def update_account(account_id):
             return {"errors": errors}, 422
 
         account_data = account_schema.load(json_data)
+
+        conflict = _conflict(
+            organization_id,
+            account_data.get("number", account.number),
+            account_data.get("name", account.name),
+            account.id,
+        )
+        if conflict:
+            return {"error": conflict}, 409
 
         account.number = account_data.get("number", account.number)
         account.account_type_id = account_data.get(
@@ -131,13 +153,13 @@ def create_account():
             return {"errors": errors}, 422
 
         account_data = account_schema.load(json_data)
-        duplicate_check = Account.query.filter_by(
-            organization_id=organization_id, name=account_data.get("name")
-        ).first()
-        if duplicate_check:
-            raise Exception(
-                f"Account name ({duplicate_check.name}) already exists"
-            )
+        conflict = _conflict(
+            organization_id,
+            account_data.get("number"),
+            account_data.get("name"),
+        )
+        if conflict:
+            return {"error": conflict}, 409
 
         account_data["organization_id"] = organization_id
         account = Account(**account_data)

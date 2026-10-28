@@ -17,8 +17,8 @@ and an accountant has answered only part of it (see "Accountant's note" below).
   downloaded from the repository's `master` branch on 2026-10-25 (so after the correction):
   `Standardkontoplan.json` is 127,283 bytes, SHA-256 `ad5b9ba7...6f55f97`, 603 accounts plus a list
   of sum accounts; `Momskoder-Bruttoliste.json` is 83,640 bytes, SHA-256 `2c6e4277...24e90d9`, valid
-  from 2025-12-01, 72 codes. The files are not in this repo yet: phase 1 adds them (with their
-  version and source) and generates the seed from them, not from this page.
+  from 2025-12-01, 72 codes. The files are in the repo, in `app/seed/standard/` (with their source
+  and hashes), and a test checks that the tables below agree with them.
 - The standard is **not mandatory**: a company can use its own chart if each account is mapped to a
   standard account, and the standard chart can also be built straight into the system
   ([Erhvervsstyrelsen](https://erhvervsstyrelsen.dk/standardkontoplan-saf-t)). As I understand it,
@@ -263,9 +263,13 @@ acquisition VAT reported in box A, exempt purchases) is the same as the official
    how are the company tax and the proposed dividend posted?
 7. Is the rounding rule (per line, then VAT on the net total) the one you want?
 
-## Next
+## In the code
 
-Phase 1 starts by putting the two official JSON files in the repo (with the version and where they
-came from), then generating the seed chart and the VAT code table from them. The seed creates the
-starter chart above, adds the equity accounts for the organization's company form, and gives each
-role its account.
+`app/chart.py` holds the starter chart as a list of account numbers, types and roles. Names and
+standard accounts come from the official file, and the code never writes a number or name by hand
+for an account of the standard. `flask chart-apply <slug>` gives an organization the accounts of its
+company form; `flask seed` does it for the demo organizations. Running it again changes nothing: an
+account with the number is kept, and gets its standard account and role if it has none.
+
+VAT codes on the accounts (the defaults in the tables above) are not seeded yet: they come with the
+VAT codes in phase 2.
