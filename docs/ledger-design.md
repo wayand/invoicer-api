@@ -168,3 +168,57 @@ tables, which a migration downgrade does.
    migration changes only the structure, and PR 2 reseeds the demo organizations with the starter
    chart instead of renumbering their old accounts.
 5. **`account_types` and `account_groups` stay as they are** for now.
+
+## The posting service (PR 3)
+
+`app/ledger.py` is the one way an entry gets into the journal. It checks the entry before the
+database sees it, writes it in a savepoint (so a failure leaves nothing behind, not even a used
+voucher number), and flushes without committing: the caller commits.
+
+**Checks**, each refused with `LedgerError` (422) and a message that says which line is wrong:
+
+- a description of 1 to 255 characters, and a date in 2000 to 2100 (anything else is a typing
+  mistake that would open a fiscal year nobody wants);
+- 2 to 500 lines, each with either a debit or a credit above 0 (never both, never neither, never
+  negative), rounded half up to 2 decimals as in `money-rules.md` before they are added up. So
+  `0.005 + 0.005` against a credit of `0.01` is refused: it rounds to `0.02`;
+- the debits equal the credits;
+- every account and contact belongs to the organization and the accounts are not archived. An
+  account of another organization looks the same as one that does not exist.
+
+**Fiscal year.** The open fiscal year that covers the date is used. If none covers it, the
+**calendar year is opened automatically**, so nobody is blocked from posting on 1 January. It is not
+opened if it would overlap an existing year (for example a year from July to June): that is a
+conflict (409) and the user opens the right year. Posting in a **closed** year is a conflict (409).
+Closing a year is a manual step (`POST /fiscal-years/<id>/close`); there is no reopening yet.
+
+**Voucher numbers** come from the counter row, locked until the transaction ends: one running
+sequence per organization, no gaps, no restarts. Checked with 8 simultaneous writers: 48 postings
+got the numbers 1 to 48, and each calendar year was opened once.
+
+**Reversal.** `reverse_entry` posts the same accounts with debit and credit swapped, dated today
+unless told otherwise, with `source_type` `reversal` and `reverses_entry_id` set. An entry is
+reversed once (409 the second time; the database refuses it too, so two simultaneous reversals
+leave exactly one) and a reversal cannot be reversed: post a new entry instead.
+
+**The database is still the last line of defence.** After the lines are written the service asks the
+database to check the balance at once, so a bug in these checks would be raised and rolled back with
+the entry, not at the commit.
+
+**API.** All routes need a login and work on the user's own organization:
+
+| Route | |
+|---|---|
+| `POST /journal-entries` | post a manual entry: `entry_date`, `description`, `lines` (`account_id`, `debit`, `credit`, `description`, `contact_id`) |
+| `GET /journal-entries` | newest voucher first; `fiscal_year_id`, `limit` (at most 200), `offset` |
+| `GET /journal-entries/<id>` | one entry with its lines |
+| `POST /journal-entries/<id>/reverse` | optional body: `entry_date`, `description` |
+| `GET /fiscal-years` | newest first |
+| `POST /fiscal-years/<id>/close` | |
+
+Amounts are JSON numbers (a string is refused). The voucher number, the user, the fiscal year and
+the source cannot be set by the client: unknown fields are refused. An entry shows
+`reversed_by_entry_id` when it has been reversed.
+
+Not in PR 3: the audit log and the reports (account ledger, trial balance), and any screen in the
+app.
