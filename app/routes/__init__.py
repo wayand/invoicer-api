@@ -7,6 +7,7 @@ bp = Blueprint("routes", __name__)
 
 from app.routes import (
     account_routes,
+    audit_routes,
     auth_routes,
     contact_routes,
     country_routes,
@@ -21,6 +22,7 @@ from app.routes import (
 
 __all__ = [
     "account_routes",
+    "audit_routes",
     "auth_routes",
     "contact_routes",
     "country_routes",

@@ -1,6 +1,7 @@
 """Importing this package registers every model with SQLAlchemy."""
 
 from .account import Account, AccountGroup, AccountType
+from .audit import AuditLog
 from .backup_code import BackupCode
 from .contact import Contact
 from .country import Country
@@ -18,6 +19,7 @@ __all__ = [
     "Account",
     "AccountGroup",
     "AccountType",
+    "AuditLog",
     "BackupCode",
     "Contact",
     "Country",

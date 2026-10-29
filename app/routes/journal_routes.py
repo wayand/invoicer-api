@@ -135,7 +135,9 @@ def get_fiscal_years():
 @jwt_required()
 def close_year(fiscal_year_id):
     try:
-        year = close_fiscal_year(current_user.organization_id, fiscal_year_id)
+        year = close_fiscal_year(
+            current_user.organization_id, fiscal_year_id, current_user.id
+        )
         db.session.commit()
     except LedgerError as error:
         return _failed(error)

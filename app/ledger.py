@@ -8,7 +8,8 @@ tried it. A mistake is corrected with `reverse_entry`, never by an edit.
 
 The functions flush but do not commit: the caller commits, or rolls back.
 Nothing is half done if an error is raised, because the writes are in a
-savepoint.
+savepoint. Each change writes its audit log row (app/audit.py) in the same
+transaction, so the log and the books always agree.
 """
 
 from collections.abc import Sequence
@@ -19,6 +20,7 @@ from decimal import Decimal
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 
+from app.audit import record
 from app.models.account import Account
 from app.models.base import db
 from app.models.contact import Contact
@@ -155,9 +157,12 @@ def _check_accounts_and_contacts(
                 )
 
 
-def fiscal_year_for(organization_id: int, day: date) -> FiscalYear:
+def fiscal_year_for(
+    organization_id: int, day: date, user_id: int
+) -> FiscalYear:
     """The open fiscal year that covers the day. If no fiscal year covers it,
-    the calendar year is opened, unless that would overlap another year."""
+    the calendar year is opened (and logged as opened by user_id), unless that
+    would overlap another year."""
     year = FiscalYear.query.filter(
         FiscalYear.organization_id == organization_id,
         FiscalYear.start_date <= day,
@@ -190,6 +195,18 @@ def fiscal_year_for(organization_id: int, day: date) -> FiscalYear:
             )
             db.session.add(year)
             db.session.flush()
+            record(
+                organization_id,
+                user_id,
+                "fiscal_year.opened",
+                "fiscal_year",
+                year.id,
+                {
+                    "start_date": start,
+                    "end_date": end,
+                    "opened_by": "the first posting in the year",
+                },
+            )
     except IntegrityError:
         # Someone else opened it a moment ago
         year = FiscalYear.query.filter_by(
@@ -241,7 +258,7 @@ def post_entry(
     _check_accounts_and_contacts(organization_id, checked)
 
     with db.session.begin_nested():
-        year = fiscal_year_for(organization_id, entry_date)
+        year = fiscal_year_for(organization_id, entry_date, user_id)
         entry = JournalEntry(
             organization_id=organization_id,
             fiscal_year_id=year.id,
@@ -269,6 +286,23 @@ def post_entry(
                 )
             )
         db.session.flush()
+        record(
+            organization_id,
+            user_id,
+            "journal_entry.posted",
+            "journal_entry",
+            entry.id,
+            {
+                "voucher_no": entry.voucher_no,
+                "entry_date": entry_date,
+                "fiscal_year_id": year.id,
+                "source_type": source_type,
+                "line_count": len(checked),
+                "debit_total": sum(
+                    (line.debit for line in checked), Decimal("0.00")
+                ),
+            },
+        )
         # The database checks the balance when the transaction ends. Ask now,
         # so that a problem is raised here and rolled back with this entry.
         db.session.execute(
@@ -336,7 +370,7 @@ def reverse_entry(
         description += original.description
         description = description[:MAX_TEXT]
     try:
-        return post_entry(
+        reversal = post_entry(
             organization_id,
             user_id,
             entry_date or date.today(),
@@ -346,6 +380,19 @@ def reverse_entry(
             source_id=original.id,
             reverses_entry_id=original.id,
         )
+        record(
+            organization_id,
+            user_id,
+            "journal_entry.reversed",
+            "journal_entry",
+            original.id,
+            {
+                "voucher_no": original.voucher_no,
+                "reversal_entry_id": reversal.id,
+                "reversal_voucher_no": reversal.voucher_no,
+            },
+        )
+        return reversal
     except IntegrityError as error:
         # Two reversals at the same moment: the second one loses
         if "reverses_entry_id" in str(error):
@@ -355,7 +402,9 @@ def reverse_entry(
         raise
 
 
-def close_fiscal_year(organization_id: int, fiscal_year_id: int) -> FiscalYear:
+def close_fiscal_year(
+    organization_id: int, fiscal_year_id: int, user_id: int
+) -> FiscalYear:
     """Close a fiscal year: nothing more can be posted in it."""
     year = FiscalYear.query.filter_by(
         organization_id=organization_id, id=fiscal_year_id
@@ -368,4 +417,12 @@ def close_fiscal_year(organization_id: int, fiscal_year_id: int) -> FiscalYear:
         raise LedgerConflict("The fiscal year is already closed")
     year.status = "closed"
     db.session.flush()
+    record(
+        organization_id,
+        user_id,
+        "fiscal_year.closed",
+        "fiscal_year",
+        year.id,
+        {"start_date": year.start_date, "end_date": year.end_date},
+    )
     return year

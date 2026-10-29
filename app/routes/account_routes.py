@@ -2,6 +2,7 @@ from flask import request
 from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
 
+from app.audit import record
 from app.models.account import Account, AccountGroup
 from app.models.account_schema import (
     DepositAccountSchema,
@@ -11,6 +12,57 @@ from app.models.account_schema import (
 )
 from app.models.base import db
 from app.routes import bp
+
+# What is logged when an account is changed. The bank numbers are not copied
+# into the log: it says only that they changed.
+LOGGED_FIELDS = (
+    "number",
+    "name",
+    "description",
+    "account_type_id",
+    "account_group_id",
+    "tax_rate_id",
+    "currency_id",
+    "is_bank_account",
+    "is_payment_enabled",
+    "is_archived",
+)
+BANK_FIELDS = (
+    "bank_id",
+    "bank_account_number",
+    "bank_registration_number",
+    "bank_iban_number",
+    "bank_swift_number",
+)
+
+
+def _snapshot(account):
+    return {
+        key: getattr(account, key) for key in (*LOGGED_FIELDS, *BANK_FIELDS)
+    }
+
+
+def _log_changes(account, before):
+    """Log an account change with what changed, if anything did."""
+    after = _snapshot(account)
+    changes = {
+        key: {"from": before[key], "to": after[key]}
+        for key in LOGGED_FIELDS
+        if before[key] != after[key]
+    }
+    bank_changed = any(before[key] != after[key] for key in BANK_FIELDS)
+    if changes or bank_changed:
+        details = {"changes": changes}
+        if bank_changed:
+            details["bank_details_changed"] = True
+        record(
+            account.organization_id,
+            current_user.id,
+            "account.updated",
+            "account",
+            account.id,
+            details,
+        )
 
 
 def _conflict(organization_id, number, name, account_id=None):
@@ -90,6 +142,7 @@ def update_account(account_id):
         if conflict:
             return {"error": conflict}, 409
 
+        before = _snapshot(account)
         account.number = account_data.get("number", account.number)
         account.account_type_id = account_data.get(
             "account_type_id", account.account_type_id
@@ -129,6 +182,8 @@ def update_account(account_id):
         account.is_archived = account_data.get(
             "is_archived", account.is_archived
         )
+        # The log row is committed with the change
+        _log_changes(account, before)
         account.update()
 
         return account_schema.dump(account), 200
@@ -163,7 +218,22 @@ def create_account():
 
         account_data["organization_id"] = organization_id
         account = Account(**account_data)
-        account.save()
+        db.session.add(account)
+        db.session.flush()
+        record(
+            organization_id,
+            current_user.id,
+            "account.created",
+            "account",
+            account.id,
+            {
+                "number": account.number,
+                "name": account.name,
+                "account_type_id": account.account_type_id,
+                "account_group_id": account.account_group_id,
+            },
+        )
+        db.session.commit()
 
         return account_schema.jsonify(account), 201
 

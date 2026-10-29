@@ -165,7 +165,7 @@ def test_no_calendar_year_is_opened_over_another_fiscal_year(db_session, books):
 
 def test_nothing_can_be_posted_in_a_closed_fiscal_year(db_session, books):
     first = post(books, date(2026, 3, 1))
-    close_fiscal_year(books["org"].id, first.fiscal_year_id)
+    close_fiscal_year(books["org"].id, first.fiscal_year_id, books["user"].id)
 
     with pytest.raises(LedgerConflict, match="is closed"):
         post(books, date(2026, 4, 1))
@@ -176,7 +176,7 @@ def test_nothing_can_be_posted_in_a_closed_fiscal_year(db_session, books):
 
 def test_another_year_is_still_open_when_one_is_closed(db_session, books):
     first = post(books, date(2026, 3, 1))
-    close_fiscal_year(books["org"].id, first.fiscal_year_id)
+    close_fiscal_year(books["org"].id, first.fiscal_year_id, books["user"].id)
 
     assert post(books, date(2027, 3, 1)).voucher_no == 2
 
@@ -581,7 +581,9 @@ def test_an_entry_of_another_organization_cannot_be_reversed(
 
 def test_a_reversal_is_refused_in_a_closed_fiscal_year(db_session, books):
     original = post(books, date(2026, 3, 1))
-    close_fiscal_year(books["org"].id, original.fiscal_year_id)
+    close_fiscal_year(
+        books["org"].id, original.fiscal_year_id, books["user"].id
+    )
 
     with pytest.raises(LedgerConflict, match="is closed"):
         reverse_entry(
@@ -600,15 +602,15 @@ def test_a_reversal_is_refused_in_a_closed_fiscal_year(db_session, books):
 
 
 def test_a_fiscal_year_is_closed_once(db_session, books):
-    year = fiscal_year_for(books["org"].id, date(2026, 3, 1))
+    year = fiscal_year_for(books["org"].id, date(2026, 3, 1), books["user"].id)
 
-    close_fiscal_year(books["org"].id, year.id)
+    close_fiscal_year(books["org"].id, year.id, books["user"].id)
 
     assert year.status == "closed"
     with pytest.raises(LedgerConflict, match="already closed"):
-        close_fiscal_year(books["org"].id, year.id)
+        close_fiscal_year(books["org"].id, year.id, books["user"].id)
 
 
 def test_an_unknown_fiscal_year_cannot_be_closed(db_session, books):
     with pytest.raises(LedgerNotFound):
-        close_fiscal_year(books["org"].id, 999999)
+        close_fiscal_year(books["org"].id, 999999, books["user"].id)
