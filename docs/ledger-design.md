@@ -222,3 +222,48 @@ the source cannot be set by the client: unknown fields are refused. An entry sho
 
 Not in PR 3: the audit log and the reports (account ledger, trial balance), and any screen in the
 app.
+
+## The audit log (PR 4)
+
+The table `audit_log` is an append-only record of who did what to the books and when. A trigger
+refuses any `UPDATE`, `DELETE` or `TRUNCATE` on it, as for the journal.
+
+| Column | |
+|---|---|
+| `id` | bigint, in the order things happened |
+| `organization_id`, `user_id` | whose books, and who did it |
+| `occurred_at` | set by the database (`now()`, with time zone), never by the application |
+| `action` | an entity, a dot and what happened: `journal_entry.posted` |
+| `entity_type`, `entity_id` | what it happened to |
+| `details` | JSON with the facts a reader needs: voucher number, date, totals |
+
+`app/audit.py` has one function, `record`. It adds the row to the session and flushes: the row is
+committed, or rolled back, **together with the change it describes**, so the log and the books can
+never disagree. A refused or failed posting leaves no log row, not even for a fiscal year it opened.
+
+**What is logged:**
+
+| Action | When | Details |
+|---|---|---|
+| `journal_entry.posted` | every entry, including a reversal | voucher number, date, fiscal year, source, line count, debit total |
+| `journal_entry.reversed` | on the original, when it is reversed | its voucher number, the reversal's id and voucher number |
+| `fiscal_year.opened` | the first posting in a calendar year | start and end |
+| `fiscal_year.closed` | when a year is closed | start and end |
+| `account.created` | a new account | number, name, type, group |
+| `account.updated` | an account is saved with a change | what changed, each as `{from, to}`: number, name, description, type, group, VAT rate, currency, the bank and payment flags, archived |
+
+Accounts are logged because renaming or renumbering one changes how every old entry on it reads.
+The log says only that the bank details changed, not what they were: they are personal data and the
+journal does not need them. The entry description is not copied either: the entry itself is
+unchangeable and can be looked up from the voucher number.
+
+Every entry has a `journal_entry.posted` row: a test checks it with a query, so an entry that
+bypassed the posting service shows up.
+
+**API:** `GET /audit-log`, newest first, for the user's own organization. Filters: `entity_type`,
+`entity_id`, `action`, and `limit` (at most 200) and `offset`.
+
+**Not logged yet:** the starter chart created by `flask chart-apply` and `flask seed` (an operator
+action with no user), logins, and invoices (they enter the ledger in phase 3). Nothing makes the log
+tamper-evident against someone who owns the database; a hash chain over the rows would, and belongs
+with the compliance work in phase 7.
