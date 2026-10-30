@@ -339,7 +339,9 @@ def reverse_entry(
 ) -> JournalEntry:
     """Post the opposite of an entry: the same accounts with debit and credit
     swapped. An entry is reversed once, and a reversal is not reversed (post
-    a new entry instead). The reversal is dated today unless told otherwise."""
+    a new entry instead). The reversal is dated today unless told otherwise,
+    or on the date of the entry if that is later, so that it never comes
+    before the entry it cancels."""
     original = get_entry(organization_id, entry_id)
     if original.reverses_entry_id is not None:
         raise LedgerConflict(
@@ -373,7 +375,7 @@ def reverse_entry(
         reversal = post_entry(
             organization_id,
             user_id,
-            entry_date or date.today(),
+            entry_date or max(original.entry_date, date.today()),
             description,
             lines,
             source_type="reversal",

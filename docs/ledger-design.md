@@ -197,7 +197,8 @@ sequence per organization, no gaps, no restarts. Checked with 8 simultaneous wri
 got the numbers 1 to 48, and each calendar year was opened once.
 
 **Reversal.** `reverse_entry` posts the same accounts with debit and credit swapped, dated today
-unless told otherwise, with `source_type` `reversal` and `reverses_entry_id` set. An entry is
+(or on the entry's own date if that is later, so a reversal never comes before the entry it
+cancels) unless told otherwise, with `source_type` `reversal` and `reverses_entry_id` set. An entry is
 reversed once (409 the second time; the database refuses it too, so two simultaneous reversals
 leave exactly one) and a reversal cannot be reversed: post a new entry instead.
 

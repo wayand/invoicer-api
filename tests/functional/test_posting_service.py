@@ -1,7 +1,7 @@
 """The posting service (app/ledger.py): what gets into the journal, and what
 is refused before the database sees it."""
 
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 import pytest
@@ -535,6 +535,29 @@ def test_a_reversal_can_have_its_own_description_and_is_dated_today(
     )
 
     assert reversal.description == "Posted on the wrong account"
+    assert reversal.entry_date == date.today()
+
+
+def test_a_reversal_is_not_dated_before_a_future_dated_entry(db_session, books):
+    later = date.today() + timedelta(days=3)
+    original = post(books, day=later)
+
+    reversal = reverse_entry(books["org"].id, books["user"].id, original.id)
+
+    assert reversal.entry_date == later
+
+
+def test_a_reversal_date_that_is_asked_for_is_kept(db_session, books):
+    later = date.today() + timedelta(days=3)
+    original = post(books, day=later)
+
+    reversal = reverse_entry(
+        books["org"].id,
+        books["user"].id,
+        original.id,
+        entry_date=date.today(),
+    )
+
     assert reversal.entry_date == date.today()
 
 
