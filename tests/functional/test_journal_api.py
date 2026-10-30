@@ -1,7 +1,7 @@
 """The journal routes: post a manual entry, read it back, reverse it, and
 close a fiscal year."""
 
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from flask_jwt_extended import create_access_token
@@ -335,6 +335,18 @@ def test_a_reversal_needs_no_body_and_is_dated_today(client, books):
     assert res.status_code == 201
     assert res.get_json()["entry_date"] == date.today().isoformat()
     assert res.get_json()["description"].startswith("Reversal of voucher 1")
+
+
+def test_a_reversal_is_not_dated_before_a_future_dated_entry(client, books):
+    later = (date.today() + timedelta(days=3)).isoformat()
+    created = post_entry(client, books, entry_date=later).get_json()
+
+    res = client.post(
+        f"/journal-entries/{created['id']}/reverse", headers=books["headers"]
+    )
+
+    assert res.status_code == 201
+    assert res.get_json()["entry_date"] == later
 
 
 def test_an_entry_cannot_be_reversed_twice(client, books):
