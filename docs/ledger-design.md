@@ -267,3 +267,43 @@ bypassed the posting service shows up.
 action with no user), logins, and invoices (they enter the ledger in phase 3). Nothing makes the log
 tamper-evident against someone who owns the database; a hash chain over the rows would, and belongs
 with the compliance work in phase 7.
+
+## The reports (PR 5)
+
+`app/reports.py` has the two reports every bookkeeping starts from. They read the journal and
+nothing else, so they cannot disagree with it.
+
+- **By the date of the entry** (`entry_date`), not the date it was posted, and over a plain range
+  of dates: `from` and `to` are both included and both optional. A report does not care which
+  fiscal year an entry is in, and closed years are included. The income statement accounts that
+  start from zero each year are the year-end closing's business (phase 6), not the reports'.
+- **Reversals are entries like any other**, so a reversed entry nets out: its account shows the
+  entry and the reversal, ending at the same balance as before the entry.
+- **A balance is debit minus credit**, a signed amount: a debit balance is positive, a credit
+  balance negative. The account's `normal_balance` (`debit` or `credit`) comes with it, so a
+  screen can show sales as a positive number.
+- Amounts are JSON numbers with 2 decimals; the sums are made in the database on exact
+  `NUMERIC`, never as floats.
+
+**`GET /reports/account-ledger?account_id=&from=&to=`** lists every posting on one account in the
+range, by date, then voucher number, then line, each with a running `balance`. The report has the
+`opening_balance` carried in from before `from`, the `total_debit` and `total_credit` of the range,
+and the `closing_balance`. The ledger of an account of another organization is a 404, as for an
+unknown one.
+
+**`GET /reports/trial-balance?from=&to=`** lists, for every account with a posting up to `to`, its
+`opening_balance` (before `from`), what was `debit`ed and `credit`ed in the range, and the
+`closing_balance`. An account that was posted to and reversed is listed with a zero balance;
+accounts never posted to are not listed. Sorted by account number. The totals are zero (opening
+and closing) or equal (debit and credit), because every entry balances, and `balanced` says so: if
+it is ever `false`, something has bypassed the posting service and the database guards.
+
+Unknown query fields and bad or reversed dates are refused with 422.
+
+**Checked against a plain sum.** Besides the worked examples, a test posts 70 random balanced
+entries over three years (some reversed) and, for six different date ranges, compares every figure
+of both reports with a sum made in Python from the lines that were posted. Every ledger must end at
+the trial balance's closing balance for the same account, and the trial balance must net to zero.
+
+Not in PR 5: screens in the app, a balance sheet and income statement (phase 6), and paging of a
+very long ledger: an account with many thousands of postings returns them all.
