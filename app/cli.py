@@ -14,8 +14,8 @@ from app.models.invoice import Invoice
 from app.models.invoiceline import InvoiceLine
 from app.models.organization import Organization
 from app.models.product import Product
-from app.models.tax_rate import TaxRate
 from app.models.user import User
+from app.models.vat_code import VatCode
 
 
 @click.command()
@@ -46,7 +46,6 @@ def seed():
             org_products = org_data.pop("products")
             org_contacts = org_data.pop("contacts")
             bank_account = org_data.pop("bank_account", None)
-            tax_rates = org_data.pop("tax_rates")
 
             organization_obj = Organization.find_by(
                 name=org_data.get("name"),
@@ -156,9 +155,16 @@ def seed():
                                 invoice_data["contact_id"] = contact_obj.id
                                 lines = invoice_data.pop("lines")
 
-                                # add product to invoiceLine
+                                # add product and VAT code to invoiceLine
                                 for line in lines:
                                     line["product_id"] = product_obj.id
+                                    line["vat_code_id"] = (
+                                        VatCode.query.filter_by(
+                                            code=line.pop("vat_code")
+                                        )
+                                        .one()
+                                        .id
+                                    )
 
                                 invoice_obj = Invoice(
                                     **invoice_data,
@@ -179,30 +185,6 @@ def seed():
                                 )
             else:
                 click.echo("-- No contacts found")
-
-            ########################
-            # Organization built-in tax_rates
-            click.echo(
-                "\n-> creating Tax-rates for Organization: "
-                + org_data.get("name")
-            )
-            if tax_rates:
-                for tax_rate_data in tax_rates:
-                    tax_rate_obj = TaxRate.find_by(
-                        name=tax_rate_data.get("name"),
-                        organization_id=organization_obj.id,
-                    )
-                    if not tax_rate_obj:
-                        tax_rate_data["organization_id"] = organization_obj.id
-                        tax_rate_obj = TaxRate(**tax_rate_data)
-                        tax_rate_obj.save()
-                        click.echo(
-                            "-- created Tax-rate " + tax_rate_data.get("name")
-                        )
-                    else:
-                        click.echo(
-                            "-- already exists: " + tax_rate_data.get("name")
-                        )
 
             #################################
             # Organization chart of accounts

@@ -56,6 +56,7 @@ def body(organization, contact, product, **overrides) -> dict:
             {
                 "product_id": product.id,
                 "description": "Work",
+                "vat_code": "S01",
                 "quantity": 1,
                 "unit_price": 100,
             }

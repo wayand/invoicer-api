@@ -91,5 +91,72 @@
             "vat_amount": "15.00",
             "gross_amount": "75.00"
         }
+    ],
+    "coded_about": "Invoices with a VAT code on every line (docs/vat-design.md, section 7). Each line is [quantity, unit price, code]; rates gives the rate of each code (a code that carries no VAT has 0). by_code is [code, base, vat] in the order the codes first appear. The VAT is rounded once per code, not once per line.",
+    "rates": {"S01": "0.25", "S02": "0", "S21": "0"},
+    "coded_cases": [
+        {
+            "name": "one code is the same as one rate",
+            "lines": [["1", "100", "S01"], ["2", "100", "S01"]],
+            "line_amounts": ["100.00", "200.00"],
+            "amount": "300.00",
+            "vat_amount": "75.00",
+            "gross_amount": "375.00",
+            "by_code": [["S01", "300.00", "75.00"]]
+        },
+        {
+            "name": "a sale with VAT and a sale without",
+            "lines": [["1", "100", "S01"], ["1", "50", "S02"]],
+            "line_amounts": ["100.00", "50.00"],
+            "amount": "150.00",
+            "vat_amount": "25.00",
+            "gross_amount": "175.00",
+            "by_code": [["S01", "100.00", "25.00"], ["S02", "50.00", "0.00"]]
+        },
+        {
+            "name": "the codes appear in the order of the lines",
+            "lines": [["1", "10", "S21"], ["1", "100", "S01"], ["1", "10", "S21"], ["1", "20", "S01"]],
+            "line_amounts": ["10.00", "100.00", "10.00", "20.00"],
+            "amount": "140.00",
+            "vat_amount": "30.00",
+            "gross_amount": "170.00",
+            "by_code": [["S21", "20.00", "0.00"], ["S01", "120.00", "30.00"]]
+        },
+        {
+            "name": "VAT is rounded once per code and not once per line",
+            "lines": [["1", "0.10", "S01"], ["1", "0.10", "S01"], ["1", "0.10", "S01"]],
+            "line_amounts": ["0.10", "0.10", "0.10"],
+            "amount": "0.30",
+            "vat_amount": "0.08",
+            "gross_amount": "0.38",
+            "by_code": [["S01", "0.30", "0.08"]]
+        },
+        {
+            "name": "each code is rounded on its own",
+            "lines": [["1", "0.10", "S01"], ["1", "0.30", "S02"]],
+            "line_amounts": ["0.10", "0.30"],
+            "amount": "0.40",
+            "vat_amount": "0.03",
+            "gross_amount": "0.43",
+            "by_code": [["S01", "0.10", "0.03"], ["S02", "0.30", "0.00"]]
+        },
+        {
+            "name": "a credit note has negative VAT",
+            "lines": [["1", "-100", "S01"]],
+            "line_amounts": ["-100.00"],
+            "amount": "-100.00",
+            "vat_amount": "-25.00",
+            "gross_amount": "-125.00",
+            "by_code": [["S01", "-100.00", "-25.00"]]
+        },
+        {
+            "name": "a credit line against a charge of the same code",
+            "lines": [["1", "100", "S01"], ["1", "-40", "S01"], ["1", "10", "S02"]],
+            "line_amounts": ["100.00", "-40.00", "10.00"],
+            "amount": "70.00",
+            "vat_amount": "15.00",
+            "gross_amount": "85.00",
+            "by_code": [["S01", "60.00", "15.00"], ["S02", "10.00", "0.00"]]
+        }
     ]
 }

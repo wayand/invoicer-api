@@ -16,6 +16,7 @@ from app.models.invoiceline import InvoiceLine
 from app.models.organization import Organization
 from app.models.product import Product
 from app.models.user import User
+from app.models.vat_code import VatCode
 
 
 def auth_headers(user: User) -> dict:
@@ -114,6 +115,7 @@ def invoice_b(db_session, org_b, contact_b, product_b) -> Invoice:
         InvoiceLine(
             invoice_id=invoice.id,
             product_id=product_b.id,
+            vat_code_id=VatCode.query.filter_by(code="S01").one().id,
             description="Line of B",
             quantity=1,
             unit_price=100,
@@ -137,6 +139,7 @@ def invoice_payload(organization_id: int, contact_id: int, product_id: int):
             {
                 "product_id": product_id,
                 "description": "Work",
+                "vat_code": "S01",
                 "quantity": 1,
                 "unit_price": 100,
             }

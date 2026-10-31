@@ -204,8 +204,9 @@ current return still has to be checked on skat.dk before the VAT report is built
 - `accounts` has a composite primary key of `(organization_id, name, number)`, so renaming an
   account changes its key. Journal lines need a stable key: they should reference `accounts.id`,
   with a unique `(organization_id, number)` and the name as an ordinary column.
-- `accounts.tax_rate_id` points at one tax rate. VAT moves to VAT codes on the posting and the
-  invoice line (phase 2). Whether `tax_rates` stays or becomes the VAT code table is decided there.
+- `accounts.tax_rate_id` pointed at one tax rate. VAT moved to VAT codes on the posting and the
+  invoice line (phase 2), and `tax_rates` and that column are gone: `accounts.default_vat_code_id`
+  is the suggestion that replaces it.
 - New columns on `accounts`: `standard_account` and `system_role` (unique per organization). New
   column `company_form` on the organization (`enkeltmandsvirksomhed` or `aps`).
 - The account groups with number intervals in the seed are replaced by the standard's own

@@ -252,6 +252,11 @@ do not handle those.
 - The single "active sales tax rate" of the organization, and the 409 when there is none or several,
   are gone. `money-rules.md` is updated: the rule is the same, VAT once per code and not once per
   invoice.
+- An organization that is not VAT-registered can still make invoices: it uses a code without VAT
+  (`S81`, `S82` ...). The registration is checked when the invoice is posted in phase 3, as it is
+  for a voucher.
+- Lines that existed before the codes got `S01`, the rate every invoice was calculated with, and
+  keep their amounts until the invoice is saved again.
 - Invoices are still not posted. Approving an invoice posts it in phase 3, using this engine.
 - `tax_rates`, `accounts.tax_rate_id`, the `/tax-rates` routes and the tax rate store in the app
   are replaced by the VAT codes and removed in the same PR as the invoice change. Nothing is live,

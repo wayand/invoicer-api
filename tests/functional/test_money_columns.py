@@ -19,7 +19,6 @@ MONEY_COLUMNS = [
     ("invoice_lines", "unit_price", 14, 3),
     ("products", "unit_price", 14, 3),
     ("invoice_settings", "default_reminder_fee", 14, 2),
-    ("tax_rates", "rate", 6, 4),
 ]
 
 

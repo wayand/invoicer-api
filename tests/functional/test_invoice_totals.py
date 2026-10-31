@@ -13,7 +13,6 @@ from app.models.contact import Contact
 from app.models.invoice import Invoice
 from app.models.invoiceline import InvoiceLine
 from app.models.product import Product
-from app.models.tax_rate import TaxRate
 
 
 def auth_headers(user) -> dict:
@@ -49,6 +48,7 @@ def line(product, quantity, unit_price, **extra) -> dict:
     return {
         "product_id": product.id,
         "description": "Work",
+        "vat_code": "S01",
         "quantity": quantity,
         "unit_price": unit_price,
         **extra,
@@ -282,47 +282,6 @@ def test_amounts_are_returned_as_json_numbers(
         assert isinstance(value, float)
 
 
-def test_vat_uses_the_active_sales_tax_rate_of_the_organization(
-    client,
-    db_session,
-    test_user,
-    organization,
-    contact,
-    product,
-    invoice_setting,
-):
-    rate = TaxRate.query.filter_by(organization_id=organization.id).one()
-    rate.rate = Decimal("0.10")
-    db_session.commit()
-
-    res = create(
-        client, test_user, organization, contact, [line(product, 1, 100)]
-    )
-
-    assert totals(res.get_json()) == (100.0, 10.0, 110.0)
-
-
-def test_a_rate_of_zero_is_a_rate(
-    client,
-    db_session,
-    test_user,
-    organization,
-    contact,
-    product,
-    invoice_setting,
-):
-    rate = TaxRate.query.filter_by(organization_id=organization.id).one()
-    rate.rate = Decimal("0")
-    db_session.commit()
-
-    res = create(
-        client, test_user, organization, contact, [line(product, 1, 100)]
-    )
-
-    assert res.status_code == 201, res.get_json()
-    assert totals(res.get_json()) == (100.0, 0.0, 100.0)
-
-
 def test_update_recomputes_the_amounts(
     client, test_user, organization, contact, product, invoice_setting
 ):
@@ -452,85 +411,207 @@ def test_a_quantity_too_large_for_its_column_is_refused(
     assert Invoice.query.filter_by(organization_id=organization.id).count() == 0
 
 
-def test_create_needs_a_sales_tax_rate(
-    client,
-    db_session,
-    test_user,
-    organization,
-    contact,
-    product,
-    invoice_setting,
+# --- the VAT code of every line --------------------------------------------
+
+
+def vat_of(response_json) -> list:
+    return [
+        (item["code"], item["rate"], item["base"], item["vat"])
+        for item in response_json["vat_by_code"]
+    ]
+
+
+def test_the_rate_comes_from_the_code_of_the_line(
+    client, test_user, organization, contact, product, invoice_setting
 ):
-    TaxRate.query.filter_by(organization_id=organization.id).delete()
-    db_session.commit()
-
     res = create(
-        client, test_user, organization, contact, [line(product, 1, 100)]
-    )
-
-    assert res.status_code == 409
-    assert "sales tax rate" in res.get_json()["error"]
-    assert Invoice.query.filter_by(organization_id=organization.id).count() == 0
-
-
-def test_create_refuses_to_guess_between_two_sales_tax_rates(
-    client,
-    db_session,
-    test_user,
-    organization,
-    contact,
-    product,
-    invoice_setting,
-):
-    db_session.add(
-        TaxRate(
-            organization_id=organization.id,
-            name="Reduced",
-            abbreviation="R",
-            applies_to_sales=True,
-            is_active=True,
-            rate=Decimal("0.10"),
-        )
-    )
-    db_session.commit()
-
-    res = create(
-        client, test_user, organization, contact, [line(product, 1, 100)]
-    )
-
-    assert res.status_code == 409
-
-
-def test_an_inactive_sales_tax_rate_is_not_used(
-    client,
-    db_session,
-    test_user,
-    organization,
-    contact,
-    product,
-    invoice_setting,
-):
-    db_session.add(
-        TaxRate(
-            organization_id=organization.id,
-            name="Old",
-            abbreviation="O",
-            applies_to_sales=True,
-            is_active=False,
-            rate=Decimal("0.50"),
-        )
-    )
-    db_session.commit()
-
-    res = create(
-        client, test_user, organization, contact, [line(product, 1, 100)]
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 100, vat_code="S02")],
     )
 
     assert res.status_code == 201, res.get_json()
-    assert totals(res.get_json()) == (100.0, 25.0, 125.0)
+    assert totals(res.get_json()) == (100.0, 0.0, 100.0)
+    assert res.get_json()["lines"][0]["vat_code"] == "S02"
 
 
-def test_update_needs_a_sales_tax_rate(
+def test_every_code_has_its_own_vat(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    res = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [
+            line(product, 1, 100),
+            line(product, 1, 50, vat_code="S02"),
+            line(product, 1, 20),
+        ],
+    )
+
+    assert res.status_code == 201, res.get_json()
+    assert totals(res.get_json()) == (170.0, 30.0, 200.0)
+    assert vat_of(res.get_json()) == [
+        ("S01", 0.25, 120.0, 30.0),
+        ("S02", 0.0, 50.0, 0.0),
+    ]
+
+
+def test_vat_is_rounded_once_per_code_and_not_once_per_line(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    res = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 0.10) for _ in range(3)],
+    )
+
+    assert res.status_code == 201, res.get_json()
+    # 0.075 once is 0.08; 0.025 three times would be 0.09
+    assert totals(res.get_json()) == (0.30, 0.08, 0.38)
+
+
+def test_a_credit_note_has_negative_vat_per_code(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    res = create(
+        client, test_user, organization, contact, [line(product, 1, -100)]
+    )
+
+    assert res.status_code == 201, res.get_json()
+    assert totals(res.get_json()) == (-100.0, -25.0, -125.0)
+    assert vat_of(res.get_json()) == [("S01", 0.25, -100.0, -25.0)]
+
+
+def test_the_vat_per_code_is_read_back_with_the_invoice(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    created = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 100), line(product, 1, 50, vat_code="S21")],
+    ).get_json()
+
+    res = client.get(
+        f"/invoices/{created['id']}", headers=auth_headers(test_user)
+    )
+
+    assert vat_of(res.get_json()) == [
+        ("S01", 0.25, 100.0, 25.0),
+        ("S21", 0.0, 50.0, 0.0),
+    ]
+    assert vat_of(res.get_json()) == vat_of(created)
+
+
+def test_the_vat_per_code_is_the_sum_that_the_totals_show(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    res = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [
+            line(product, 3, 0.335),
+            line(product, 7, 1.115, vat_code="S02"),
+            line(product, 1, 19.99),
+            line(product, 2, 0.005),
+        ],
+    ).get_json()
+
+    assert res["vat_amount"] == pytest.approx(
+        sum(item["vat"] for item in res["vat_by_code"])
+    )
+    assert res["amount"] == pytest.approx(
+        sum(item["base"] for item in res["vat_by_code"])
+    )
+
+
+def test_a_line_without_a_vat_code_is_refused(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    bare = line(product, 1, 100)
+    del bare["vat_code"]
+
+    res = create(client, test_user, organization, contact, [bare])
+
+    assert res.status_code == 422, res.get_json()
+    assert "vat_code" in str(res.get_json()["errors"])
+    assert Invoice.query.filter_by(organization_id=organization.id).count() == 0
+
+
+@pytest.mark.parametrize("value", [None, 25, "", "S0000000001", ["S01"]])
+def test_a_vat_code_that_is_not_a_code_is_refused(
+    client, test_user, organization, contact, product, invoice_setting, value
+):
+    res = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 100, vat_code=value)],
+    )
+
+    assert res.status_code == 422, res.get_json()
+    assert Invoice.query.filter_by(organization_id=organization.id).count() == 0
+
+
+@pytest.mark.parametrize(
+    ("code", "message"),
+    [
+        ("S1", "no VAT code S1"),  # the old name is not a code
+        ("S99", "no VAT code S99"),
+        ("K010", "for purchases"),
+        ("S83", "cannot be used yet"),  # a deferred sales code
+        ("S61", "cannot be used yet"),
+    ],
+)
+def test_a_code_an_invoice_cannot_have_is_refused_and_nothing_is_saved(
+    client,
+    test_user,
+    organization,
+    contact,
+    product,
+    invoice_setting,
+    code,
+    message,
+):
+    res = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 100), line(product, 1, 50, vat_code=code)],
+    )
+
+    assert res.status_code == 422, res.get_json()
+    assert message in res.get_json()["error"]
+    assert Invoice.query.filter_by(organization_id=organization.id).count() == 0
+    assert InvoiceLine.query.count() == 0
+
+
+def test_the_client_cannot_send_the_id_of_the_code(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    res = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 100, vat_code_id=1)],
+    )
+
+    assert res.status_code == 422, res.get_json()
+
+
+def test_an_organization_that_is_not_vat_registered_can_still_invoice(
     client,
     db_session,
     test_user,
@@ -538,12 +619,44 @@ def test_update_needs_a_sales_tax_rate(
     contact,
     product,
     invoice_setting,
+):
+    # It uses a code without VAT. The registration is checked when an invoice
+    # is posted (phase 3), as for a voucher
+    assert organization.vat_period_type is None
+
+    res = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 100, vat_code="S81")],
+    )
+
+    assert res.status_code == 201, res.get_json()
+    assert totals(res.get_json()) == (100.0, 0.0, 100.0)
+
+
+def test_the_code_is_stored_on_the_line(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    res = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 100, vat_code="S21")],
+    )
+
+    stored = InvoiceLine.query.filter_by(invoice_id=res.get_json()["id"]).one()
+    assert stored.vat_code.code == "S21"
+
+
+def test_update_changes_the_vat_with_the_code_of_a_line(
+    client, test_user, organization, contact, product, invoice_setting
 ):
     invoice = create(
         client, test_user, organization, contact, [line(product, 1, 100)]
     ).get_json()
-    TaxRate.query.filter_by(organization_id=organization.id).delete()
-    db_session.commit()
 
     res = update(
         client,
@@ -551,7 +664,80 @@ def test_update_needs_a_sales_tax_rate(
         organization,
         invoice,
         contact,
-        [saved_line(invoice["lines"][0])],
+        [saved_line(invoice["lines"][0]) | {"vat_code": "S02"}],
     )
 
-    assert res.status_code == 409
+    assert res.status_code == 200, res.get_json()
+    assert totals(res.get_json()) == (100.0, 0.0, 100.0)
+    assert vat_of(res.get_json()) == [("S02", 0.0, 100.0, 0.0)]
+
+
+def test_update_needs_a_code_on_every_line(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    invoice = create(
+        client, test_user, organization, contact, [line(product, 1, 100)]
+    ).get_json()
+    kept = saved_line(invoice["lines"][0])
+    del kept["vat_code"]
+
+    res = update(client, test_user, organization, invoice, contact, [kept])
+
+    assert res.status_code == 422, res.get_json()
+    assert totals(
+        client.get(
+            f"/invoices/{invoice['id']}", headers=auth_headers(test_user)
+        ).get_json()
+    ) == (100.0, 25.0, 125.0)
+
+
+def test_update_refuses_a_purchase_code_and_keeps_the_invoice(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    invoice = create(
+        client, test_user, organization, contact, [line(product, 1, 100)]
+    ).get_json()
+
+    res = update(
+        client,
+        test_user,
+        organization,
+        invoice,
+        contact,
+        [saved_line(invoice["lines"][0]) | {"vat_code": "K010"}],
+    )
+
+    assert res.status_code == 422, res.get_json()
+    assert "for purchases" in res.get_json()["error"]
+    assert totals(
+        client.get(
+            f"/invoices/{invoice['id']}", headers=auth_headers(test_user)
+        ).get_json()
+    ) == (100.0, 25.0, 125.0)
+
+
+def test_the_lines_route_returns_the_code(
+    client, test_user, organization, contact, product, invoice_setting
+):
+    invoice = create(
+        client,
+        test_user,
+        organization,
+        contact,
+        [line(product, 1, 100, vat_code="S21")],
+    ).get_json()
+
+    res = client.get(
+        f"/organizations/{organization.id}/invoices/{invoice['id']}"
+        "/invoice-lines",
+        headers=auth_headers(test_user),
+    )
+
+    assert res.status_code == 200
+    assert [item["vat_code"] for item in res.get_json()] == ["S21"]
+
+
+def test_the_tax_rate_routes_are_gone(client, test_user):
+    res = client.get("/tax-rates", headers=auth_headers(test_user))
+
+    assert res.status_code == 404

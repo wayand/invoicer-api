@@ -14,6 +14,9 @@ class InvoiceLine(BaseModel):
     product_id = db.Column(
         db.Integer, db.ForeignKey("products.id"), nullable=False
     )
+    vat_code_id = db.Column(
+        db.Integer, db.ForeignKey("vat_codes.id"), nullable=False
+    )
     description = db.Column(db.String(255), nullable=False)
     quantity = db.Column(
         db.Numeric(14, 3), server_default="0.00", default=0.00, nullable=False
@@ -24,6 +27,8 @@ class InvoiceLine(BaseModel):
     amount = db.Column(
         db.Numeric(14, 2), server_default="0.00", default=0.00, nullable=False
     )
+
+    vat_code = db.relationship("VatCode")
 
     def __repr__(self):
         return "<InvoiceLine {}>".format(self.description)
