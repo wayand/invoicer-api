@@ -36,9 +36,12 @@ class VatCode:
     code: str
     new_code: str
     name: str
+    title: str
     rate: str
     deduction: str
     vat_return: str
+    # The date the list is valid from, as in the file (yyyy-mm-dd)
+    valid_from: str
 
 
 def _read(path: Path) -> dict:
@@ -83,9 +86,11 @@ def standard_vat_codes() -> tuple[VatCode, ...]:
             code=item["momskode"],
             new_code=item["momskode NY"],
             name=item["momskode betegnelse NY"],
+            title=item["overskrift"].strip(),
             rate=item["momssats"],
             deduction=item["fradragsret"],
             vat_return=item["momsangivelse"],
+            valid_from=data["File info"]["Valid from date"],
         )
         for group in data["momskoder - bruttoliste"]
         for item in group["momskoder"]

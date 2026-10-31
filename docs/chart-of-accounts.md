@@ -93,7 +93,11 @@ The common expense accounts (all detail accounts, with no sub-accounts, in the s
 | 2896 | Kursusudgifter | K1 |
 
 The default VAT code per expense account is my guess at the usual treatment: the file has no such
-default. Check it with the accountant (rent and insurance are normally without VAT, cars are
+default. In the database it is the column `accounts.default_vat_code_id`, set by the starter chart
+with the new names of the codes (`S1` is `S01`, `K1` is `K010`, `K25A` is `K070`, `K-EU-V-1` is
+`K210`), and only for the 22 accounts whose code is a supported one. 1650 has no default because
+`K-%EU-V-1` (`K410`) is import VAT, which phase 2 does not calculate, and 2470 and 2540 have none
+until they are checked. Check it with the accountant (rent and insurance are normally without VAT, cars are
 limited). Accounts whose names end in "kun klasse A" exist for sole proprietorships and are marked
 below.
 

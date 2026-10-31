@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from app.models.account import Account, AccountGroup, AccountType
 from app.models.base import db
 from app.models.organization import COMPANY_FORMS, Organization
+from app.models.vat_code import VatCode
 from app.standard_chart import (
     ACCOUNT,
     GROUP,
@@ -41,45 +42,49 @@ class StarterAccount:
     name: str | None = None
     standard_account: int | None = None
     is_bank: bool = False
+    # The code (new name, see app/vat.py) a line on the account starts with.
+    # A guess at the usual treatment, to be checked with the accountant: the
+    # official list has no such default (docs/chart-of-accounts.md).
+    vat: str | None = None
 
 
 A = StarterAccount
 
 STARTER_ACCOUNTS = (
     # Income
-    A(1010, "Income", "sales"),
-    A(1050, "Income", "sales_eu_goods"),
-    A(1100, "Income", "sales_non_eu_goods"),
-    A(1150, "Income", "sales_eu_services"),
-    A(1200, "Income", "sales_non_eu_services"),
-    A(1210, "Income"),
-    A(1250, "Income"),
+    A(1010, "Income", "sales", vat="S01"),
+    A(1050, "Income", "sales_eu_goods", vat="S21"),
+    A(1100, "Income", "sales_non_eu_goods", vat="S41"),
+    A(1150, "Income", "sales_eu_services", vat="S23"),
+    A(1200, "Income", "sales_non_eu_services", vat="S42"),
+    A(1210, "Income", vat="S01"),
+    A(1250, "Income", vat="S01"),
     A(3470, "Income"),
     A(3490, "Income"),
     # Purchases and expenses
-    A(1610, "Expense", "purchases"),
-    A(1630, "Expense"),
+    A(1610, "Expense", "purchases", vat="K010"),
+    A(1630, "Expense", vat="K210"),
     A(1650, "Expense"),
-    A(1710, "Expense"),
-    A(1760, "Expense"),
-    A(1850, "Expense"),
-    A(1910, "Expense"),
-    A(1930, "Expense"),
+    A(1710, "Expense", vat="K260"),
+    A(1760, "Expense", vat="K010"),
+    A(1850, "Expense", vat="K010"),
+    A(1910, "Expense", vat="K070"),
+    A(1930, "Expense", vat="K010"),
     A(2030, "Expense"),
-    A(2230, "Expense"),
-    A(2310, "Expense"),
-    A(2370, "Expense"),
-    A(2390, "Expense"),
-    A(2410, "Expense"),
-    A(2450, "Expense"),
+    A(2230, "Expense", vat="K010"),
+    A(2310, "Expense", vat="K010"),
+    A(2370, "Expense", vat="K010"),
+    A(2390, "Expense", vat="K030"),
+    A(2410, "Expense", vat="K010"),
+    A(2450, "Expense", vat="K010"),
     A(2470, "Expense"),
     A(2540, "Expense"),
     A(2650, "Expense"),
     A(2660, "Expense"),
-    A(2670, "Expense"),
+    A(2670, "Expense", vat="K010"),
     A(2720, "Expense", "rounding"),
     A(2895, "Expense"),
-    A(2896, "Expense"),
+    A(2896, "Expense", vat="K010"),
     A(3650, "Expense"),
     A(3670, "Expense"),
     A(3675, "Expense"),
@@ -209,10 +214,11 @@ def apply_starter_chart(
     """Give the organization the starter accounts of its company form.
 
     Safe to run again. An account that already has the number is kept as it
-    is, and gets its standard account and its role if it has none. Nothing is
-    ever deleted or renamed.
+    is, and gets its standard account, its role and its default VAT code if it
+    has none. Nothing is ever deleted or renamed.
     """
     standard = standard_accounts()
+    vat_code_ids = {code.code: code.id for code in VatCode.query}
     result = ChartResult()
     for item in starter_accounts(organization.company_form):
         number = item.number
@@ -233,8 +239,12 @@ def apply_starter_chart(
             )
             continue
 
+        vat_code_id = vat_code_ids[item.vat] if item.vat else None
         if existing is not None:
             changed = False
+            if existing.default_vat_code_id is None and vat_code_id:
+                existing.default_vat_code_id = vat_code_id
+                changed = True
             if existing.standard_account is None:
                 existing.standard_account = standard_number(item)
                 changed = True
@@ -261,6 +271,7 @@ def apply_starter_chart(
                 name=name,
                 standard_account=standard_number(item),
                 system_role=item.role,
+                default_vat_code_id=vat_code_id,
                 is_bank_account=item.is_bank,
                 is_payment_enabled=item.is_bank,
                 is_deposit=item.is_bank,

@@ -1,7 +1,7 @@
 from flask_marshmallow import Marshmallow
 from marshmallow import fields, validate
 
-from .organization import Organization
+from .organization import VAT_PERIOD_TYPES, Organization
 
 ma = Marshmallow()
 
@@ -15,6 +15,10 @@ class OrganizationSchema(ma.SQLAlchemySchema):
     email = fields.Email(required=True)
     name = fields.String(
         required=True, validate=[validate.Length(min=5, max=100)]
+    )
+    # Null: not VAT-registered
+    vat_period_type = fields.String(
+        allow_none=True, validate=validate.OneOf(VAT_PERIOD_TYPES)
     )
     logo = fields.String(allow_none=True)
     phone = fields.String(allow_none=True)

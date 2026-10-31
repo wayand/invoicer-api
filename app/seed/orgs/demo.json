@@ -74,6 +74,7 @@
         }
     ],
     "company_form": "aps",
+    "vat_period_type": "quarter",
     "bank_account": {
         "bank_id": 1,
         "bank_registration_number": 2279,

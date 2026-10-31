@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 
 
 COMPANY_FORMS = ("enkeltmandsvirksomhed", "aps")
+# How often the organization files its VAT return (docs/vat-design.md)
+VAT_PERIOD_TYPES = ("half_year", "quarter", "month")
 
 
 class Organization(BaseModel):
@@ -18,6 +20,11 @@ class Organization(BaseModel):
         db.CheckConstraint(
             "company_form IN ('enkeltmandsvirksomhed', 'aps')",
             name="ck_organizations_company_form",
+        ),
+        db.CheckConstraint(
+            "vat_period_type IS NULL OR "
+            "vat_period_type IN ('half_year', 'quarter', 'month')",
+            name="ck_organizations_vat_period_type",
         ),
     )
 
@@ -44,6 +51,9 @@ class Organization(BaseModel):
         default="enkeltmandsvirksomhed",
         nullable=False,
     )
+
+    # Null when the organization is not VAT-registered: it uses no VAT codes
+    vat_period_type = db.Column(db.String(10), nullable=True)
 
     logo = db.Column(db.String(255), nullable=True)
     phone = db.Column(db.String(20), nullable=True)

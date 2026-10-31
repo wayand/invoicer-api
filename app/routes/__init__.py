@@ -19,6 +19,7 @@ from app.routes import (
     product_routes,
     report_routes,
     taxrate_routes,
+    vat_code_routes,
 )
 
 __all__ = [
@@ -35,6 +36,7 @@ __all__ = [
     "product_routes",
     "report_routes",
     "taxrate_routes",
+    "vat_code_routes",
 ]
 
 

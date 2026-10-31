@@ -11,6 +11,7 @@ from app.models.account_schema import (
     accounts_schema,
 )
 from app.models.base import db
+from app.models.vat_code import VatCode
 from app.routes import bp
 
 # What is logged when an account is changed. The bank numbers are not copied
@@ -22,6 +23,7 @@ LOGGED_FIELDS = (
     "account_type_id",
     "account_group_id",
     "tax_rate_id",
+    "default_vat_code_id",
     "currency_id",
     "is_bank_account",
     "is_payment_enabled",
@@ -75,6 +77,18 @@ def _conflict(organization_id, number, name, account_id=None):
         return f"Account number {number} is already in use"
     if name is not None and query.filter(Account.name == name).first():
         return f"Account name ({name}) is already in use"
+    return None
+
+
+def _vat_code_problem(vat_code_id):
+    """Why the id cannot be the default VAT code of an account, or None."""
+    if vat_code_id is None:
+        return None
+    code = db.session.get(VatCode, vat_code_id)
+    if code is None:
+        return f"There is no VAT code with id {vat_code_id}"
+    if not code.is_supported:
+        return f"The VAT code {code.code} cannot be used yet"
     return None
 
 
@@ -133,6 +147,10 @@ def update_account(account_id):
 
         account_data = account_schema.load(json_data)
 
+        problem = _vat_code_problem(account_data.get("default_vat_code_id"))
+        if problem:
+            return {"errors": {"default_vat_code_id": [problem]}}, 422
+
         conflict = _conflict(
             organization_id,
             account_data.get("number", account.number),
@@ -152,6 +170,9 @@ def update_account(account_id):
         )
         account.tax_rate_id = account_data.get(
             "tax_rate_id", account.tax_rate_id
+        )
+        account.default_vat_code_id = account_data.get(
+            "default_vat_code_id", account.default_vat_code_id
         )
         account.name = account_data.get("name", account.name)
         account.bank_account_number = account_data.get(
@@ -208,6 +229,11 @@ def create_account():
             return {"errors": errors}, 422
 
         account_data = account_schema.load(json_data)
+
+        problem = _vat_code_problem(account_data.get("default_vat_code_id"))
+        if problem:
+            return {"errors": {"default_vat_code_id": [problem]}}, 422
+
         conflict = _conflict(
             organization_id,
             account_data.get("number"),
