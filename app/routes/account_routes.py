@@ -22,7 +22,6 @@ LOGGED_FIELDS = (
     "description",
     "account_type_id",
     "account_group_id",
-    "tax_rate_id",
     "default_vat_code_id",
     "currency_id",
     "is_bank_account",
@@ -167,9 +166,6 @@ def update_account(account_id):
         )
         account.account_group_id = account_data.get(
             "account_group_id", account.account_group_id
-        )
-        account.tax_rate_id = account_data.get(
-            "tax_rate_id", account.tax_rate_id
         )
         account.default_vat_code_id = account_data.get(
             "default_vat_code_id", account.default_vat_code_id

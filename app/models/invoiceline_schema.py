@@ -17,6 +17,12 @@ ma = Marshmallow()
 #         raise ValidationError(f"Amount type is: {amount} {type(amount)}")
 
 
+def _vat_code(value):
+    if not isinstance(value, str) or not 1 <= len(value) <= 10:
+        raise ValidationError("Expected a VAT code such as S01.")
+    return value
+
+
 class InvoiceLineSchema(ma.SQLAlchemySchema):
     id = fields.Integer()
     product_id = fields.Integer(required=True)
@@ -35,6 +41,13 @@ class InvoiceLineSchema(ma.SQLAlchemySchema):
     amount = DecimalNumber(places=2, dump_only=True)
     description = fields.String(
         required=True, validate=[validate.Length(min=2, max=100)]
+    )
+    # A sales code such as S01 (docs/vat-design.md, section 7). The route
+    # checks that it can be used on an invoice.
+    vat_code = fields.Function(
+        serialize=lambda line: line.vat_code.code,
+        deserialize=lambda value: _vat_code(value),
+        required=True,
     )
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)

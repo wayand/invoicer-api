@@ -33,44 +33,21 @@
                     "invoice_no": "1",
                     "invoice_date": "2021-01-10",
                     "duedate": "2021-01-10",
-                    "amount": 12.99,
-                    "gross_amount": 13.88,
-                    "vat_amount": 4.77,
+                    "amount": 13.88,
+                    "gross_amount": 17.35,
+                    "vat_amount": 3.47,
                     "lines": [
                         {
                             "product_id": 0,
                             "description": "demo product",
+                            "vat_code": "S01",
                             "quantity": 1,
                             "unit_price": 13.88,
-                            "amount": 199.5
+                            "amount": 13.88
                         }
                     ]
                 }
             ]
-        }
-    ],
-    "tax_rates": [
-        {
-            "name": "Salgsmoms",
-            "abbreviation": "S",
-            "applies_to_purchases": false,
-            "applies_to_sales": true,
-            "description": "25% moms på salg til Danmark samt private EU-kunder.",
-            "is_active": true,
-            "is_predefined": true,
-            "predefined_tag": "2014_sales",
-            "rate": 0.25
-        },
-        {
-            "name": "Købsmoms",
-            "abbreviation": "K",
-            "applies_to_purchases": true,
-            "applies_to_sales": false,
-            "description": "25% moms på normale fradragsberettigede varer/ydelser købt i Danmark.",
-            "is_active": true,
-            "is_predefined": true,
-            "predefined_tag": "2014_purchases",
-            "rate": 0.25
         }
     ],
     "company_form": "aps",

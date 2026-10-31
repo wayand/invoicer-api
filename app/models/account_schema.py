@@ -47,7 +47,6 @@ class DepositAccountSchema(BaseAccountSchema):
 
 
 class AccountSchema(BaseAccountSchema):
-    tax_rate_id = fields.Integer(allow_none=True)
     default_vat_code_id = fields.Integer(allow_none=True)
     # Set by the chart of accounts (app/chart.py), not by the client
     standard_account = fields.Integer(dump_only=True, allow_none=True)
@@ -67,7 +66,6 @@ class AccountSchema(BaseAccountSchema):
 
     account_group = fields.Nested("AccountGroupSchema", dump_only=True)
     account_type = fields.Nested("AccountTypeSchema", dump_only=True)
-    tax_rate = fields.Nested("TaxRateSchema", dump_only=True)
 
 
 account_schema = AccountSchema()

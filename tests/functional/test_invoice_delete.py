@@ -13,6 +13,7 @@ from app.models.contact import Contact
 from app.models.invoice import Invoice
 from app.models.invoiceline import InvoiceLine
 from app.models.product import Product
+from app.models.vat_code import VatCode
 
 
 def auth_headers(user) -> dict:
@@ -62,6 +63,7 @@ def make_invoice(db_session, organization, contact, product):
             lines=[
                 InvoiceLine(
                     product_id=product.id,
+                    vat_code_id=VatCode.query.filter_by(code="S01").one().id,
                     description=f"Work {n}",
                     quantity=1,
                     unit_price=100,

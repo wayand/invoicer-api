@@ -20,6 +20,7 @@ from app.models.invoiceline import InvoiceLine
 from app.models.organization import Organization
 from app.models.product import Product
 from app.models.user import User
+from app.models.vat_code import VatCode
 
 ORG_SCOPED_ROUTES = [
     ("DELETE", "/organizations/{organization_id}"),
@@ -110,6 +111,7 @@ def ids_b(db_session, org_b, country) -> dict:
         lines=[
             InvoiceLine(
                 product_id=product.id,
+                vat_code_id=VatCode.query.filter_by(code="S01").one().id,
                 description="Work",
                 quantity=1,
                 unit_price=100,

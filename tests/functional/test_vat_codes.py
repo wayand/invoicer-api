@@ -42,7 +42,7 @@ def code_id(code: str) -> int:
 
 
 def as_app_sends(account_json: dict) -> dict:
-    skip = {"id", "account_type", "account_group", "tax_rate"}
+    skip = {"id", "account_type", "account_group"}
     skip |= {"created_at", "updated_at", "standard_account", "system_role"}
     return {
         key: value for key, value in account_json.items() if key not in skip

@@ -1,13 +1,7 @@
-from typing import TYPE_CHECKING
-
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import BaseModel, db
-
-if TYPE_CHECKING:
-    from .tax_rate import TaxRate
-
 
 # The roles of the accounts the posting service needs (docs/chart-of-accounts.md).
 # The check constraint in the database and the migration list the same values.
@@ -154,9 +148,6 @@ class Account(BaseModel):
     account_group_id = db.Column(
         db.Integer, db.ForeignKey("account_groups.id"), nullable=False
     )
-    tax_rate_id: Mapped[int | None] = mapped_column(
-        ForeignKey("tax_rates.id"), nullable=True
-    )
     # The VAT code a new line on the account starts with: a suggestion for
     # the screen, never enforced (docs/vat-design.md)
     default_vat_code_id: Mapped[int | None] = mapped_column(
@@ -165,10 +156,6 @@ class Account(BaseModel):
 
     account_type = db.relationship("AccountType", backref="accounts")
     account_group = db.relationship("AccountGroup", backref="accounts")
-
-    tax_rate: Mapped["TaxRate"] = relationship(
-        "TaxRate", back_populates="accounts"
-    )
 
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(

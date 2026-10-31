@@ -436,7 +436,7 @@ def account_body(client, books, number) -> dict:
     found = client.get(
         f"/accounts/{books['accounts'][number].id}", headers=books["headers"]
     ).get_json()
-    skip = {"id", "account_type", "account_group", "tax_rate", "created_at"}
+    skip = {"id", "account_type", "account_group", "created_at"}
     skip |= {"updated_at", "standard_account", "system_role"}
     return {key: value for key, value in found.items() if key not in skip}
 

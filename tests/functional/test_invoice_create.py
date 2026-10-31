@@ -58,6 +58,7 @@ def payload(organization, contact, product, invoice_no) -> dict:
             {
                 "product_id": product.id,
                 "description": "Work",
+                "vat_code": "S01",
                 "quantity": 1,
                 "unit_price": 100,
             }

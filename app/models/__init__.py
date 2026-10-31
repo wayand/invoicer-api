@@ -12,7 +12,6 @@ from .ledger import FiscalYear, JournalEntry, JournalLine, LedgerCounter
 from .organization import Organization
 from .product import Product
 from .revoked_token import RevokedToken
-from .tax_rate import TaxRate
 from .user import User
 from .vat_code import VatCode
 
@@ -34,7 +33,6 @@ __all__ = [
     "Organization",
     "Product",
     "RevokedToken",
-    "TaxRate",
     "User",
     "VatCode",
 ]

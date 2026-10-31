@@ -300,7 +300,7 @@ def test_the_demo_seed_describes_the_organization_and_its_bank():
     data = json.loads((SEED_DIR / "demo.json").read_text(encoding="utf-8"))
 
     assert "account_types" not in data  # the chart is created by the code
-    for key in ("users", "products", "contacts", "tax_rates"):
+    for key in ("users", "products", "contacts"):
         data.pop(key)
     bank = data.pop("bank_account")
     organization = Organization(**data)
