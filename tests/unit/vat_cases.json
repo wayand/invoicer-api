@@ -1,0 +1,754 @@
+{
+ "about": "Cases of the VAT engine (app/vat_engine.py), shared with invoicer-vue: change both copies together. Each case lists the lines that carry a code (account, debit, credit, code) and the VAT lines that come out, in order: the part, the code, the role of the account (null for the non-deductible part, which goes to `account`), and the amounts. `rules` are the codes used, as in the official list (app/vat.py).",
+ "rules": {
+  "S01": {
+   "applies_to": "sales",
+   "rate": "0.25",
+   "deduction": null,
+   "direction": "output"
+  },
+  "S02": {
+   "applies_to": "sales",
+   "rate": "0",
+   "deduction": null,
+   "direction": "none"
+  },
+  "S21": {
+   "applies_to": "sales",
+   "rate": "0",
+   "deduction": null,
+   "direction": "none"
+  },
+  "S23": {
+   "applies_to": "sales",
+   "rate": "0",
+   "deduction": null,
+   "direction": "none"
+  },
+  "S81": {
+   "applies_to": "sales",
+   "rate": null,
+   "deduction": null,
+   "direction": "none"
+  },
+  "K010": {
+   "applies_to": "purchases",
+   "rate": "0.25",
+   "deduction": "1",
+   "direction": "input"
+  },
+  "K030": {
+   "applies_to": "purchases",
+   "rate": null,
+   "deduction": "0",
+   "direction": "none"
+  },
+  "K040": {
+   "applies_to": "purchases",
+   "rate": "0.25",
+   "deduction": "0.5",
+   "direction": "input"
+  },
+  "K070": {
+   "applies_to": "purchases",
+   "rate": "0.25",
+   "deduction": "0.25",
+   "direction": "input"
+  },
+  "K210": {
+   "applies_to": "purchases",
+   "rate": "0.25",
+   "deduction": "1",
+   "direction": "acquisition_goods"
+  },
+  "K230": {
+   "applies_to": "purchases",
+   "rate": "0.25",
+   "deduction": "0",
+   "direction": "acquisition_goods"
+  },
+  "K260": {
+   "applies_to": "purchases",
+   "rate": "0.25",
+   "deduction": "1",
+   "direction": "acquisition_services"
+  },
+  "K280": {
+   "applies_to": "purchases",
+   "rate": "0.25",
+   "deduction": "0",
+   "direction": "acquisition_services"
+  },
+  "K460": {
+   "applies_to": "purchases",
+   "rate": "0.25",
+   "deduction": "1",
+   "direction": "acquisition_services"
+  },
+  "K480": {
+   "applies_to": "purchases",
+   "rate": "0.25",
+   "deduction": "0",
+   "direction": "acquisition_services"
+  }
+ },
+ "cases": [
+  {
+   "name": "a domestic sale",
+   "lines": [
+    {
+     "account": 1,
+     "debit": "0.00",
+     "credit": "1000.00",
+     "code": "S01"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "S01",
+     "role": "output_vat",
+     "account": null,
+     "debit": "0.00",
+     "credit": "250.00"
+    }
+   ]
+  },
+  {
+   "name": "VAT is rounded once per code, not per line: three lines of 0.10",
+   "lines": [
+    {
+     "account": 1,
+     "debit": "0.00",
+     "credit": "0.10",
+     "code": "S01"
+    },
+    {
+     "account": 1,
+     "debit": "0.00",
+     "credit": "0.10",
+     "code": "S01"
+    },
+    {
+     "account": 2,
+     "debit": "0.00",
+     "credit": "0.10",
+     "code": "S01"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "S01",
+     "role": "output_vat",
+     "account": null,
+     "debit": "0.00",
+     "credit": "0.08"
+    }
+   ]
+  },
+  {
+   "name": "VAT that rounds to nothing is not posted",
+   "lines": [
+    {
+     "account": 1,
+     "debit": "0.00",
+     "credit": "0.01",
+     "code": "S01"
+    }
+   ],
+   "vat_lines": []
+  },
+  {
+   "name": "a sale with VAT and a sale to an EU business: only the first has VAT",
+   "lines": [
+    {
+     "account": 1,
+     "debit": "0.00",
+     "credit": "1000.00",
+     "code": "S01"
+    },
+    {
+     "account": 2,
+     "debit": "0.00",
+     "credit": "400.00",
+     "code": "S23"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "S01",
+     "role": "output_vat",
+     "account": null,
+     "debit": "0.00",
+     "credit": "250.00"
+    }
+   ]
+  },
+  {
+   "name": "a credit note: the VAT is on the other side",
+   "lines": [
+    {
+     "account": 1,
+     "debit": "1000.00",
+     "credit": "0.00",
+     "code": "S01"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "S01",
+     "role": "output_vat",
+     "account": null,
+     "debit": "250.00",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "a sale and a credit note of the same code net against each other",
+   "lines": [
+    {
+     "account": 1,
+     "debit": "0.00",
+     "credit": "1000.00",
+     "code": "S01"
+    },
+    {
+     "account": 2,
+     "debit": "400.00",
+     "credit": "0.00",
+     "code": "S01"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "S01",
+     "role": "output_vat",
+     "account": null,
+     "debit": "0.00",
+     "credit": "150.00"
+    }
+   ]
+  },
+  {
+   "name": "sales with no VAT: exempt, outside the VAT act, EU goods, at 0%",
+   "lines": [
+    {
+     "account": 1,
+     "debit": "0.00",
+     "credit": "10.00",
+     "code": "S02"
+    },
+    {
+     "account": 1,
+     "debit": "0.00",
+     "credit": "10.00",
+     "code": "S81"
+    },
+    {
+     "account": 1,
+     "debit": "0.00",
+     "credit": "10.00",
+     "code": "S21"
+    }
+   ],
+   "vat_lines": []
+  },
+  {
+   "name": "a domestic purchase with full deduction",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "800.00",
+     "credit": "0.00",
+     "code": "K010"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K010",
+     "role": "input_vat",
+     "account": null,
+     "debit": "200.00",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "a purchase credit note: the VAT is on the other side",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "0.00",
+     "credit": "800.00",
+     "code": "K010"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K010",
+     "role": "input_vat",
+     "account": null,
+     "debit": "0.00",
+     "credit": "200.00"
+    }
+   ]
+  },
+  {
+   "name": "a purchase with no deduction and no VAT",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "800.00",
+     "credit": "0.00",
+     "code": "K030"
+    }
+   ],
+   "vat_lines": []
+  },
+  {
+   "name": "representation: 25% of the VAT is deductible",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "100.00",
+     "credit": "0.00",
+     "code": "K070"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K070",
+     "role": "input_vat",
+     "account": null,
+     "debit": "6.25",
+     "credit": "0.00"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K070",
+     "role": null,
+     "account": 10,
+     "debit": "18.75",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "a fixed phone: 50% is deductible",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "100.00",
+     "credit": "0.00",
+     "code": "K040"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K040",
+     "role": "input_vat",
+     "account": null,
+     "debit": "12.50",
+     "credit": "0.00"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K040",
+     "role": null,
+     "account": 10,
+     "debit": "12.50",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "the non-deductible VAT is shared over the lines by amount",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "100.00",
+     "credit": "0.00",
+     "code": "K070"
+    },
+    {
+     "account": 11,
+     "debit": "200.00",
+     "credit": "0.00",
+     "code": "K070"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K070",
+     "role": "input_vat",
+     "account": null,
+     "debit": "18.75",
+     "credit": "0.00"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K070",
+     "role": null,
+     "account": 10,
+     "debit": "18.75",
+     "credit": "0.00"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K070",
+     "role": null,
+     "account": 11,
+     "debit": "37.50",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "a remainder goes to the first line: three lines of 0.10 at 50%",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "0.10",
+     "credit": "0.00",
+     "code": "K040"
+    },
+    {
+     "account": 11,
+     "debit": "0.10",
+     "credit": "0.00",
+     "code": "K040"
+    },
+    {
+     "account": 12,
+     "debit": "0.10",
+     "credit": "0.00",
+     "code": "K040"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K040",
+     "role": "input_vat",
+     "account": null,
+     "debit": "0.04",
+     "credit": "0.00"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K040",
+     "role": null,
+     "account": 10,
+     "debit": "0.02",
+     "credit": "0.00"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K040",
+     "role": null,
+     "account": 11,
+     "debit": "0.01",
+     "credit": "0.00"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K040",
+     "role": null,
+     "account": 12,
+     "debit": "0.01",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "the share of a credit note is that of the invoice, negated",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "0.00",
+     "credit": "0.10",
+     "code": "K040"
+    },
+    {
+     "account": 11,
+     "debit": "0.00",
+     "credit": "0.10",
+     "code": "K040"
+    },
+    {
+     "account": 12,
+     "debit": "0.00",
+     "credit": "0.10",
+     "code": "K040"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K040",
+     "role": "input_vat",
+     "account": null,
+     "debit": "0.00",
+     "credit": "0.04"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K040",
+     "role": null,
+     "account": 10,
+     "debit": "0.00",
+     "credit": "0.02"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K040",
+     "role": null,
+     "account": 11,
+     "debit": "0.00",
+     "credit": "0.01"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K040",
+     "role": null,
+     "account": 12,
+     "debit": "0.00",
+     "credit": "0.01"
+    }
+   ]
+  },
+  {
+   "name": "services from the EU, full deduction",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "800.00",
+     "credit": "0.00",
+     "code": "K260"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K260",
+     "role": "vat_eu_services",
+     "account": null,
+     "debit": "0.00",
+     "credit": "200.00"
+    },
+    {
+     "part": "vat",
+     "code": "K260",
+     "role": "input_vat",
+     "account": null,
+     "debit": "200.00",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "goods from the EU, no deduction: the VAT is a cost",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "800.00",
+     "credit": "0.00",
+     "code": "K230"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K230",
+     "role": "vat_eu_goods",
+     "account": null,
+     "debit": "0.00",
+     "credit": "200.00"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K230",
+     "role": null,
+     "account": 10,
+     "debit": "200.00",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "goods from the EU, full deduction",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "800.00",
+     "credit": "0.00",
+     "code": "K210"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K210",
+     "role": "vat_eu_goods",
+     "account": null,
+     "debit": "0.00",
+     "credit": "200.00"
+    },
+    {
+     "part": "vat",
+     "code": "K210",
+     "role": "input_vat",
+     "account": null,
+     "debit": "200.00",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "services from outside the EU, full deduction",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "100.00",
+     "credit": "0.00",
+     "code": "K460"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K460",
+     "role": "vat_eu_services",
+     "account": null,
+     "debit": "0.00",
+     "credit": "25.00"
+    },
+    {
+     "part": "vat",
+     "code": "K460",
+     "role": "input_vat",
+     "account": null,
+     "debit": "25.00",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "services from outside the EU, no deduction",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "800.00",
+     "credit": "0.00",
+     "code": "K480"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K480",
+     "role": "vat_eu_services",
+     "account": null,
+     "debit": "0.00",
+     "credit": "200.00"
+    },
+    {
+     "part": "nondeductible",
+     "code": "K480",
+     "role": null,
+     "account": 10,
+     "debit": "200.00",
+     "credit": "0.00"
+    }
+   ]
+  },
+  {
+   "name": "an EU purchase credit note",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "0.00",
+     "credit": "800.00",
+     "code": "K260"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K260",
+     "role": "vat_eu_services",
+     "account": null,
+     "debit": "200.00",
+     "credit": "0.00"
+    },
+    {
+     "part": "vat",
+     "code": "K260",
+     "role": "input_vat",
+     "account": null,
+     "debit": "0.00",
+     "credit": "200.00"
+    }
+   ]
+  },
+  {
+   "name": "two codes in one entry, in the order they first appear",
+   "lines": [
+    {
+     "account": 10,
+     "debit": "100.00",
+     "credit": "0.00",
+     "code": "K010"
+    },
+    {
+     "account": 11,
+     "debit": "200.00",
+     "credit": "0.00",
+     "code": "K260"
+    },
+    {
+     "account": 12,
+     "debit": "50.00",
+     "credit": "0.00",
+     "code": "K010"
+    }
+   ],
+   "vat_lines": [
+    {
+     "part": "vat",
+     "code": "K010",
+     "role": "input_vat",
+     "account": null,
+     "debit": "37.50",
+     "credit": "0.00"
+    },
+    {
+     "part": "vat",
+     "code": "K260",
+     "role": "vat_eu_services",
+     "account": null,
+     "debit": "0.00",
+     "credit": "50.00"
+    },
+    {
+     "part": "vat",
+     "code": "K260",
+     "role": "input_vat",
+     "account": null,
+     "debit": "50.00",
+     "credit": "0.00"
+    }
+   ]
+  }
+ ]
+}

@@ -11,6 +11,7 @@ from sqlalchemy.orm import Mapped, relationship
 
 from .account import Account
 from .base import BaseModel, db
+from .vat_code import VatCode
 
 FISCAL_YEAR_STATUSES = ("open", "closed")
 
@@ -152,6 +153,15 @@ class JournalLine(db.Model):
             name="ck_journal_lines_one_side",
         ),
         db.Index("ix_journal_lines_account", "account_id"),
+        # A line has both a VAT code and a part, or neither
+        db.CheckConstraint(
+            "(vat_code_id IS NULL) = (vat_part IS NULL)",
+            name="ck_journal_lines_vat",
+        ),
+        db.CheckConstraint(
+            "vat_part IS NULL OR vat_part IN ('base', 'vat', 'nondeductible')",
+            name="ck_journal_lines_vat_part",
+        ),
     )
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -175,10 +185,19 @@ class JournalLine(db.Model):
     contact_id = db.Column(
         db.Integer, db.ForeignKey("contacts.id"), nullable=True
     )
+    # The VAT code of the line, and what the line is: the net amount the code
+    # applies to (base), the VAT the engine added (vat), or the part of the VAT
+    # that cannot be deducted, which is a cost (nondeductible). Both or
+    # neither (docs/vat-design.md).
+    vat_code_id = db.Column(
+        db.Integer, db.ForeignKey("vat_codes.id"), nullable=True
+    )
+    vat_part = db.Column(db.String(15), nullable=True)
 
     entry: Mapped["JournalEntry"] = relationship(
         "JournalEntry", back_populates="lines"
     )
+    vat_code: Mapped[VatCode | None] = relationship("VatCode", viewonly=True)
     account: Mapped[Account] = relationship(
         "Account",
         primaryjoin="and_(JournalLine.account_id == Account.id, "

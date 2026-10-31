@@ -200,7 +200,8 @@ got the numbers 1 to 48, and each calendar year was opened once.
 (or on the entry's own date if that is later, so a reversal never comes before the entry it
 cancels) unless told otherwise, with `source_type` `reversal` and `reverses_entry_id` set. An entry is
 reversed once (409 the second time; the database refuses it too, so two simultaneous reversals
-leave exactly one) and a reversal cannot be reversed: post a new entry instead.
+leave exactly one) and a reversal cannot be reversed: post a new entry instead. A reversal copies every line, VAT lines and VAT codes included, and
+does not calculate the VAT again ([vat-design.md](vat-design.md), section 5).
 
 **The database is still the last line of defence.** After the lines are written the service asks the
 database to check the balance at once, so a bug in these checks would be raised and rolled back with
