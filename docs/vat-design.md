@@ -175,7 +175,21 @@ never by number. If the organization has no account with a needed role, the entr
 
 A caller sends only the net lines with a `vat_code`. The VAT lines are the server's. A caller can
 no longer make the VAT wrong by sending a wrong figure, the same principle as for invoice totals.
-Lines without a code are posted as they are, as today.
+Lines without a code are posted as they are, as today. The lines the caller gives must balance
+together with the VAT lines (the refusal says "with the VAT lines"), so a caller adds the VAT to its
+gross line the same way: the engine (`app/vat_engine.py`) is a pure function for this, and its cases
+in `tests/unit/vat_cases.json` are shared with the app.
+
+The non-deductible VAT is shared over the lines of the code in proportion to their amounts, to the
+cent, so each cost account gets its own part. What is left after rounding down goes to the largest
+remainders, the first line first when they are equal. A credit note shares like the invoice it
+corrects, negated.
+
+What the service refuses, each with 422 and nothing posted: a code that does not exist (the old
+name `S1` is not a code), a code that cannot be used yet, a code on one of the VAT accounts, an
+organization that is not VAT-registered, a `vat_part` from the caller, and lines that do not
+balance with the VAT lines. It refuses with 409 when the organization has no account for a role the
+VAT needs.
 
 ### Worked examples (25% VAT, accounts as in the starter chart)
 

@@ -465,12 +465,13 @@ def test_the_database_refuses_an_unbalanced_entry_that_got_past_the_checks(
     """If the checks above had a bug, the triggers still hold."""
     monkeypatch.setattr(
         ledger_module,
-        "_check_lines",
+        "_check_each",
         lambda lines: [
             LineInput(account_id=books["bank"].id, debit=D("100.00")),
             LineInput(account_id=books["sales"].id, credit=D("90.00")),
         ],
     )
+    monkeypatch.setattr(ledger_module, "_check_balance", lambda *args: None)
 
     with pytest.raises(IntegrityError, match="is not balanced"):
         post(books)

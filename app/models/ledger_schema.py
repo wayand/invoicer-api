@@ -21,6 +21,8 @@ class JournalLineInputSchema(Schema):
         allow_none=True, validate=validate.Length(max=MAX_TEXT)
     )
     contact_id = fields.Integer(allow_none=True)
+    # A net line that carries VAT: the server adds the VAT lines
+    vat_code = fields.String(allow_none=True, validate=validate.Length(max=10))
 
     @pre_load
     def amounts_are_numbers(self, data, **kwargs):
@@ -60,6 +62,12 @@ class JournalLineSchema(Schema):
     credit = DecimalNumber(places=2)
     description = fields.String(allow_none=True)
     contact_id = fields.Integer(allow_none=True)
+    vat_code = fields.Function(
+        lambda line: line.vat_code.code if line.vat_code else None,
+        allow_none=True,
+    )
+    # base, vat or nondeductible: what the line is, as far as VAT goes
+    vat_part = fields.String(allow_none=True)
 
 
 class JournalEntrySchema(Schema):
