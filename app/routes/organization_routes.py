@@ -167,6 +167,9 @@ def update_organization(organization_id):
         organization.registration_no = organization_data.get(
             "registration_no", organization.registration_no
         )
+        organization.vat_period_type = organization_data.get(
+            "vat_period_type", organization.vat_period_type
+        )
         organization.phone = organization_data.get("phone", organization.phone)
         organization.street = organization_data.get(
             "street", organization.street

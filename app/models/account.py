@@ -157,6 +157,11 @@ class Account(BaseModel):
     tax_rate_id: Mapped[int | None] = mapped_column(
         ForeignKey("tax_rates.id"), nullable=True
     )
+    # The VAT code a new line on the account starts with: a suggestion for
+    # the screen, never enforced (docs/vat-design.md)
+    default_vat_code_id: Mapped[int | None] = mapped_column(
+        ForeignKey("vat_codes.id"), nullable=True
+    )
 
     account_type = db.relationship("AccountType", backref="accounts")
     account_group = db.relationship("AccountGroup", backref="accounts")

@@ -81,8 +81,10 @@ The other **50 are listed but cannot be chosen yet**, in these groups:
 | Import VAT: the amount comes from the customs documents, not from the invoice | 2 | K410, K430 |
 | Triangular trade: needs the EU sales list (phase 7) | 1 | S25 |
 
-A deferred code is a flag on the row, not a missing row: posted lines point at the code table, and
-the table must hold every official code from the start.
+A deferred code is a row like the others, with its reason and no direction (a constraint makes a
+code either supported with a direction, or deferred with a reason): posted lines point at the code
+table, and the table must hold every official code from the start. Only a supported code can be
+the default code of an account.
 
 ## 3. Data model
 
@@ -97,9 +99,10 @@ the table must hold every official code from the start.
 | `applies_to` | `sales` or `purchases` |
 | `rate` | `NUMERIC(6,4)`: 0.2500, 0.0000, or null when the file leaves it open |
 | `deduction` | `NUMERIC(6,4)` share of the VAT that is deductible, null for sales |
-| `direction` | `output`, `input`, `acquisition_goods`, `acquisition_services` or `none` |
+| `direction` | `output`, `input`, `acquisition_goods`, `acquisition_services` or `none`. Null for a deferred code |
 | `base_box` | where the net amount is reported: `a_goods`, `a_services`, `b_goods`, `b_services`, `c`, or null |
 | `is_supported` | whether the engine calculates it (section 2) |
+| `deferred_reason` | why a code cannot be chosen yet (the groups of section 2), null for a supported one |
 | `valid_from`, `valid_to` | the version of the file it came from |
 
 A migration inserts the rows as data. It does not read the JSON file in the repository, because a
@@ -130,8 +133,8 @@ unchangeable; it does not check the VAT calculation, because that needs the rate
 rule. That is checked by the service, by tests (section 9) and by the reconciliation of the report
 (section 6).
 
-**`organizations`** gets `vat_period_type`: `half_year`, `quarter`, `month`, or null when the
-organization is not VAT-registered. A sole proprietorship below the turnover limit has no VAT and
+**`organizations`** gets `vat_period_type` (in the organization API, null until it is set):
+`half_year`, `quarter`, `month`, or null when the organization is not VAT-registered. A sole proprietorship below the turnover limit has no VAT and
 uses no codes (decision 1).
 
 **`accounts`** gets `default_vat_code_id`: the code a new line on the account starts with. The
