@@ -66,17 +66,22 @@ Problems to fix before a ledger can be trusted (found in the code on 2026-10-19)
 
 Sources are linked; check the official text before relying on any of this.
 
-- **Bookkeeping act (`bogføringsloven`).** Digital bookkeeping applies from 1 July 2024 for registered
-  systems and from 1 January 2025 for non-registered ones, for companies and others that file annual
-  reports. For sole proprietors and associations the sources disagree (1 Jan or 1 Jul 2026), so check
-  the official rules. See the
-  [Erhvervsstyrelsen guidance](https://erhvervsstyrelsen.dk/vejledning-vejledning-til-udbydere-af-digitale-standard-bogfoeringssystemer)
+- **Bookkeeping act (`bogføringsloven`).** Checked on 2026-11-01 against Erhvervsstyrelsen's page for
+  [non-registered digital bookkeeping systems](https://erhvervsstyrelsen.dk/ikke-registrerede-digitale-bogfoeringssystemer),
+  which includes a system built for a company's own use. It applies to companies that file annual
+  reports from the financial year that starts on or after 1 January 2025, and to businesses that do not
+  file annual reports but had a net turnover of at least 300,000 kr. in each of the two years before,
+  at the earliest from the income year that starts on or after 1 January 2026. That settles the earlier
+  doubt about sole proprietors (1 January or 1 July 2026). See also the
+  [guidance for registered providers](https://erhvervsstyrelsen.dk/vejledning-vejledning-til-udbydere-af-digitale-standard-bogfoeringssystemer)
   and the [Dinero FAQ](https://dinero.dk/support/faq-den-nye-bogfoeringslov/).
-- **What BEK 205/2024 requires, per summaries of it** (read the regulation text): booked entries
-  can't be changed, backdated or deleted, and corrections are new postings; SAF-T export in the
-  format Erhvervsstyrelsen defines; sending and receiving e-invoices and credit notes through
-  Nemhandel in OIOUBL and Peppol BIS; automatic backup at least weekly; support for bank
-  reconciliation.
+- **What a non-registered system must do** (same page, sections 4.2 and 5.1): it must not be possible
+  to delete, change or backdate a finally booked transaction, and an error is corrected with a new
+  posting; a change to an attachment is logged, and the original content can be found; a full backup
+  of all booked transactions and attachments at least weekly, kept for 5 years, with a party that is
+  not related to the company, on a server in the EU or EEA. SAF-T export, e-invoicing through
+  Nemhandel (OIOUBL, Peppol BIS) and support for bank reconciliation are described, per summaries, for
+  registered systems: whether they also apply to a non-registered one is checked in phase 7.
 - **VAT periods and deadlines** ([skat.dk](https://skat.dk/erhverv/moms/frister-indberet-og-betal-moms)):
   half-yearly under 5 mio. kr. turnover (once filed and paid on time); quarterly for new
   businesses, those who apply, and 5-50 mio. kr.; monthly above 50 mio. kr. Quarterly deadlines are

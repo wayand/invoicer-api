@@ -53,33 +53,60 @@ What exists, found in the code on 2026-11-01:
 
 ## 3. The Danish rules that shape it
 
-Check the official text before relying on any of this; the sources are links.
+Checked on 2026-11-01 against the official texts (the Tax Agency's legal guidance at info.skat.dk,
+Erhvervsstyrelsen, and retsinformation.dk). What I could not read in the official text is marked.
+The system follows Danish rules only.
 
-- **Numbering.** A full invoice has a sequential number "based on one or more series" that
-  identifies it, and the same demands apply to credit notes
-  ([Den juridiske vejledning, A.B.3.3.1.4](https://tax.dk/jv/ab/A_B_3_3_1_4.htm), from
-  momsbekendtgørelsen § 58). So one series or several are both allowed, a number is never reused, and
-  an invoice that is issued has its number for ever. This is why the number is taken when the
-  invoice is approved (section 4), and not when a draft is started.
-- **Credit notes.** An invoice that has to be cancelled is cancelled with a credit note. It has its own
-  number and refers to the invoice it corrects. Summaries of the bookkeeping rules say the same
-  ([Dinero](https://dinero.dk/tips/fakturanummer-krav-regler.md),
-  [Pleo](https://blog.pleo.io/da/fakturanummer)); the reference to the original is not in the
-  excerpts of the official text that I could read, so it is checked on the page above.
-- **When VAT is due.** On the invoice date, not on the payment (invoice-based VAT, as in phase 2). A
-  payment never touches VAT.
-- **Reminders.** A fee of at most 100 kr. per reminder, for at most three reminders, sent at least 10
-  days apart, and late-payment interest at the central bank's lending rate plus 8 percentage points
-  when nothing else is agreed, under the interest act
-  (`renteloven` § 9 b; a summary at
-  [Gældsstyrelsen](https://gaeldst.dk/media/x0lnpjzy/gebyr-for-rykkerskrivelser-efter-renteloven-foopgeb.pdf)).
-  The rate changes twice a year. Check [retsinformation.dk](https://www.retsinformation.dk/eli/lta/2015/1075/Pdf).
-- **Posted entries cannot be changed or backdated** (BEK 205/2024, in the plan): a booked invoice is
-  corrected with a credit note and a new invoice, never edited.
-
-What a printed invoice must show (the seller's CVR number, dates, the VAT per rate and so on) is a
-question for the invoice template, not for the ledger. The template already shows most of it; a
-check of it against § 58 is a separate task, listed in section 11.
+- **An invoice for every taxable supply.** A VAT-registered business issues an invoice for each
+  supply with VAT, to businesses and to private persons alike (`momsloven` § 52 a, stk. 1). If
+  payment is due before the supply is complete, an invoice is issued for that amount. A business
+  that is **not** VAT-registered may not show VAT on its invoices, and has to pay what it shows if it
+  does (§ 52 a, stk. 6 and 7)
+  ([A.B.3.3.1.2](https://info.skat.dk/data.aspx?oid=2068787)). Section 4 uses this.
+- **What a full invoice shows** (`momsbekendtgørelsen` § 58, stk. 1; the order is BEK nr. 1435 of
+  2023 with later changes, so the newest number is looked up on retsinformation.dk): the issue date, a sequential number, the seller's CVR number, the names and addresses of
+  seller and buyer, the quantity and kind of goods or the scope and kind of services, the date of
+  supply **if it differs from the issue date**, the unit price without VAT and any discount, the VAT
+  rate, and the VAT amount
+  ([A.B.3.3.1.4](https://info.skat.dk/data.aspx?oid=2068789)). The template is checked against this
+  list in a separate task (section 11).
+- **Numbering.** The number is sequential, "based on one or more series", and identifies the invoice.
+  The same demands apply to credit notes, so one series or several are both allowed, and a number is
+  never used twice. Only utilities and telephone companies with customer numbers are excused. This
+  is why the number is taken when the invoice is approved (section 6), and not when a draft is
+  started: a draft that is deleted must not leave a gap in a series of invoices that were issued.
+- **Credit notes.** A sent invoice cannot be cancelled by cancelling it in the books: a credit note
+  goes to the customer. The guidance does **not** say that the credit note must carry the number of
+  the invoice. It says that a document that "specifically and unambiguously" changes or refers to
+  the invoice is treated as an invoice (§ 58, stk. 2). Referring to the invoice is the way to be
+  that, and it is how Dinero and Pleo describe the rule, so the design requires the reference
+  (decision 4).
+- **When the VAT belongs to a period.** VAT is due when the supply is made (`momsloven` § 23, stk. 1).
+  If an invoice is issued before the supply ends, or soon after it, the date of the invoice counts as
+  the time of supply (stk. 2). A payment received before the supply can also be the time of supply
+  (stk. 3). So the VAT is booked on the invoice date, and the invoice date has to be the day the
+  invoice is issued, shortly before or after the supply. An invoice sent long after the supply has
+  its VAT in the period of the supply: the app does not decide this for the user, and the date of
+  supply (section 11) is what an auditor would look at. A payment after the invoice never touches VAT.
+- **Posted entries.** A system a company builds for its own use falls under the requirements for
+  non-registered systems
+  ([Erhvervsstyrelsen](https://erhvervsstyrelsen.dk/ikke-registrerede-digitale-bogfoeringssystemer),
+  section 4.2): it must not be possible to delete, change or backdate a finally booked transaction,
+  and an error is corrected "ved en ny postering". A booked invoice is therefore corrected with a
+  credit note and a new invoice, never edited.
+- **Reminders** (`renteloven` § 9 b, in [LBK nr. 459 of 2014](https://www.retsinformation.dk/eli/lta/2014/459)):
+  a fee of at most 100 kr. per reminder, for at most three reminders about the same claim, and only
+  for reminders sent at least 10 days apart, and only when the reminder was sent with good reason
+  (stk. 2). A collection fee of at most 100 kr. is allowed (stk. 3). Late payment carries interest at
+  the central bank's lending rate of 1 January and 1 July plus 8 percentage points (§ 5). For
+  business claims a fixed compensation of 310 kr. for collection costs can be claimed without a
+  reminder (§ 9 a, stk. 3, and BEK nr. 105 of 2013). The interest and the fee are not part of the
+  taxable amount: Landsskatteretten held that reminder fees are compensation for costs and not a
+  payment for the supply, so **there is no VAT on them** (SKM2003.541.LSR, on
+  [info.skat.dk](https://info.skat.dk/data.aspx?oid=170881)), and interest is excluded by `momsloven`
+  § 27, stk. 3, nr. 4. I could read these texts only through summaries, because retsinformation.dk
+  does not give its text to a program: the amounts are checked against the consolidated acts there
+  before reminders are built.
 
 ## 4. Approving an invoice
 
@@ -111,9 +138,22 @@ check of it against § 58 is a separate task, listed in section 11.
 
 It is refused, with nothing written and no number taken, when the entry is refused: a closed fiscal
 year (409), a VAT period that is settled (409: the invoice has to be dated in the open period, which
-is possible because it is still a draft), a chart without the accounts it needs (409), or a VAT code
-on an organization that is not VAT-registered. For the last one an organization that is not
-VAT-registered uses a code without VAT (`S81` or `S82`), as phase 2 already allows when saving.
+is possible because it is still a draft), or a chart without the accounts it needs (409).
+
+**An organization that is not VAT-registered** (a sole proprietorship under the limit, say) may not
+show VAT on its invoices (section 3). The code of phase 2 does not fit it yet: the posting service
+refuses every VAT code for an organization with no VAT period, so approving an invoice would be
+refused, and the invoice form preselects `S01` (25%) for every organization. So, for such an
+organization:
+
+- the lines of an invoice can only have a code that carries no VAT: `S81`, "outside the scope of the
+  VAT law" (which code is the right one is a question for the accountant). The app preselects it and
+  does not show the choice. An invoice with VAT (`S01`) is refused, on save and on approval, with 422;
+- approving posts the invoice **without VAT codes**: there is no VAT to report and no VAT period, so
+  the entry is the receivable against the sales accounts, nothing more;
+- if the organization registers later, its earlier invoices stay as they were posted.
+
+This closes a gap in phase 2 as well, and is part of PR 1 and PR 2 below.
 
 The invoice and its entry then agree by construction: the gross amount of the invoice is the
 receivable line, and the VAT of each code is the VAT of the lines. A test checks it on random invoices
@@ -245,8 +285,8 @@ being wrong.
 **Reminders.** `reminders`: `invoice_id`, `level` (1 to 3), `reminder_date`, `fee`. A reminder can be
 made for an invoice that is past its due date and not paid, at least 10 days after the one before. The
 fee is at most 100 kr. and is zero by default (the setting `default_reminder_fee` is the starting
-value). Posting a fee needs the answer to question 5 of the accountant's list (is it income on 3490
-or 1010, and is there VAT), so in the first version a reminder is a record, and the fee is not
+value). The fee has no VAT (section 3). Which account it is posted to (3490 or 1010) is still question
+5 of the accountant's list, so in the first version a reminder is a record, and the fee is not
 posted. Decision 6.
 
 ## 10. How it is tested
@@ -271,6 +311,8 @@ The invariants, as tests, in the style of phases 1 and 2:
   receivables account for that contact, and the trial balance is balanced.
 - **A reversed payment sets everything back:** the open amounts, the bank account and the report.
 - **A voucher of a document cannot be reversed from the journal.**
+- **An organization that is not VAT-registered:** an invoice with `S01` is refused on save and on
+  approval, and one with `S81` is approved and posted with no VAT code and no VAT line.
 - **The invoice date decides the period:** an invoice dated in a settled VAT period is refused, one
   dated after it is posted, and its VAT lands in that period's report.
 - **Two approvals at once** (two connections): different numbers, no gap, one entry each; and two
@@ -281,12 +323,15 @@ The invariants, as tests, in the style of phases 1 and 2:
 - **Refunding a credit balance** (a payment out, allocated to a credit note), **write-offs** and
   small differences (a customer pays 1,249.95 against 1,250). A write-off of a bad debt also has VAT
   rules of its own. They are the next step after the first version, and need the accountant.
-- **Interest on late payment.** The fee of a reminder is handled in decision 6; interest is a
-  separate calculation and posting.
+- **Interest on late payment** (the lending rate plus 8 points) and the fixed compensation of 310 kr.
+  for collection costs. The fee of a reminder is handled in decision 6; interest and compensation are
+  separate calculations and postings, and neither carries VAT.
 - **E-mailing invoices, e-invoicing (OIOUBL, Peppol)** and the EU sales list: phase 7. The contacts
   have no VAT number yet, which the EU list and the EU codes need.
-- **The invoice template against the requirements of § 58** (the date of supply, the buyer's number
-  for EU sales, and so on).
+- **The invoice template against the requirements of § 58** (section 3 has the list): the date of
+  supply when it differs from the invoice date, the names and addresses of both parties, the unit
+  price without VAT, and the buyer's VAT number for EU sales. The invoice has no date of supply
+  today, and the VAT period of a late invoice depends on it (`momsloven` § 23).
 - **The setting `lines_incl_vat`.** The server treats every price as excluding VAT, and the setting
   does nothing. It is removed from the screen or built, in a later step.
 - **Other currencies.** Approving an invoice that is not in DKK is refused.
@@ -296,7 +341,10 @@ The invariants, as tests, in the style of phases 1 and 2:
 
 ## 12. Decisions to confirm
 
-Each has my recommendation.
+Each has my recommendation. On 2026-11-01 the answer was "there are no real invoices in any
+database, production included, so do whatever is easy; the system is only for Denmark". That settles
+decision 2 and takes the others as recommended, except where checking the official rules (section 3)
+changed the recommendation, which is said under the decision.
 
 1. **Numbers.** Take the number when the invoice is approved, so a deleted draft leaves no gap, with
    invoices and credit notes in one series (recommended). The alternative is to keep taking it when the
@@ -305,21 +353,24 @@ Each has my recommendation.
 2. **Invoices that exist.** The migration puts every invoice that is not a draft back to draft, so
    it can be approved and posted, and drops `is_paid` (recommended: nothing is live, and a backfill of
    postings for test data is not worth it). The alternative is a backfill that posts them with an
-   opening balance, as the plan sketched.
+   opening balance, as the plan sketched. **Decided:** back to draft.
 3. **The sales account of a line.** The product's account, then the account with the role of the
    VAT code, then the default of the settings (recommended), or the role of the code first, which
    makes the VAT code decide and ignores what the user chose on the product.
 4. **Credit notes.** An invoice of its own kind that refers to the invoice it corrects, partial
    credit notes allowed, the total credited at most the invoice, and always an invoice of the program
    to refer to (recommended). A credit note for an invoice from before the program was used is not
-   possible, for the same reason as the backfill of decision 2.
+   possible, for the same reason as the backfill of decision 2. The official guidance does not
+   demand the reference, only that the document "specifically and unambiguously" changes the
+   invoice, so this is the safe way, and not a legal requirement.
 5. **Payments.** Allocated by hand to named invoices, partial payments allowed, an overpayment kept
    as credit for the customer, no write-offs and no small-difference account in the first version
    (recommended). The alternative is to allow a small difference (say up to 1 kr.) to go to the
    rounding account `2720`.
 6. **Reminders.** Records first, with the fee not posted until the accountant has answered
    question 5, and no interest (recommended). The alternative is to post the fee now on `3490`
-   without VAT, which is my guess and not the answer.
+   (without VAT, which section 3 confirms), the account being my guess and not the accountant's
+   answer.
 7. **The date of an invoice.** Not in the future, and otherwise free apart from the two automatic
    rules (a closed fiscal year and a settled VAT period) (recommended). The alternative is also to
    refuse a date earlier than the latest approved invoice, so that the numbers follow the dates, which
@@ -332,6 +383,10 @@ Each has my recommendation.
    for a contact outside the EU, or `S01` for one inside it, and the server does not refuse
    (recommended, until the contacts have VAT numbers in phase 7).
 10. **Currency.** DKK only: approving an invoice in another currency is refused (recommended).
+    **Decided:** the system is for Denmark only.
+11. **An organization that is not VAT-registered** invoices with `S81` and no VAT, and its invoices
+    are posted without VAT codes (section 4). New with the rules check; recommended because the law
+    forbids showing VAT on its invoices.
 
 ## 13. The PRs of phase 3
 
@@ -339,8 +394,8 @@ Each is a branch, with tests, and each is merged before the next.
 
 | # | Repo | What | Needs |
 |---|---|---|---|
-| 1 | api | Approve and lock: the number at approval, the posting of an invoice, the primary key change, `journal_entry_id` and the approval fields, the client no longer sets `state` or `is_paid`, reversal of documents refused, the migration of existing invoices | decisions 1, 2, 3, 7, 8, 10 |
-| 2 | app | The approve flow: Approve button, "Draft" instead of a number, read-only approved invoices, the voucher of an invoice, `is_paid` gone | PR 1 |
+| 1 | api | Approve and lock: the number at approval, the posting of an invoice, the primary key change, `journal_entry_id` and the approval fields, the client no longer sets `state` or `is_paid`, reversal of documents refused, the migration of existing invoices (back to draft), invoices of an organization that is not VAT-registered (`S81` only, posted without VAT codes) | decisions 1, 2, 3, 7, 8, 10, 11 |
+| 2 | app | The approve flow: Approve button, "Draft" instead of a number, read-only approved invoices, the voucher of an invoice, `is_paid` gone, and `S81` preselected (and the choice hidden) for an organization that is not VAT-registered | PR 1 |
 | 3 | api | Credit notes: the kind, the reference, create from an invoice, approve, the check of the total, settling the invoice | PR 1 and decision 4 |
 | 4 | app | Credit notes: create from an invoice, edit as a draft, approve, show on the invoice | PR 3 |
 | 5 | api | Payments and allocations, open amounts and `payment_status`, reversal of a payment, the receivables report with the check against the ledger | PR 3 and decision 5 |

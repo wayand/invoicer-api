@@ -29,8 +29,12 @@ Not in phase 2 (see section 10): filing to SKAT, the EU sales list, OSS, import 
 the special schemes (used goods, margin, cars), deduction that needs a percentage the user decides,
 and cash-basis VAT.
 
-VAT is due when the invoice is made (`faktureringsmoms`), not when it is paid. That is how the
-ledger works too: approving an invoice posts the VAT (phase 3), and the payment does not touch it.
+VAT belongs to the period in which the supply is made, and an invoice issued before the supply ends
+or soon after it counts as the time of supply (`momsloven` § 23, stk. 1 and 2): this is invoice-based
+VAT, not cash-basis. So VAT is booked on the invoice date, not when the customer pays. That is how the
+ledger works too: approving an invoice posts the VAT (phase 3), and the payment does not touch it. An
+invoice issued long after the supply belongs to the period of the supply: see
+[invoice-posting-design.md](invoice-posting-design.md), section 3.
 
 ## 2. The official codes, and which ones phase 2 supports
 

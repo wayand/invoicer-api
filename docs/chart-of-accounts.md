@@ -262,8 +262,10 @@ acquisition VAT reported in box A, exempt purchases) is the same as the official
    the private share of mixed costs (telephone, car) go: on 6923 too, or on 6920-6922?
 3. Mapping the Skattekonto, our own 6481, to 6330 rather than to the bank account 6480: acceptable?
 4. Reverse charge on EU purchases (7700, 7720 with 7740): are these the right accounts and signs?
-5. Where do reminder fees and interest charged to customers go (3490 or 1010)? Is there VAT on
-   them?
+5. Where do reminder fees and interest charged to customers go (3490 or 1010)? (There is no VAT on
+   them: Landsskatteretten held reminder fees to be compensation for costs and outside the VAT, and
+   interest is excluded by `momsloven` § 27, stk. 3, nr. 4. See
+   [invoice-posting-design.md](invoice-posting-design.md), section 3.)
 6. ApS: do 6935 and 6940 work as described for the opening balance and the year-end closing, and
    how are the company tax and the proposed dividend posted?
 7. Is the rounding rule (per line, then VAT on the net total) the one you want?
