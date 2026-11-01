@@ -1,18 +1,36 @@
 from flask import request
 from flask_jwt_extended import current_user, jwt_required
+from marshmallow import ValidationError
 from sqlalchemy import and_, exc, not_
 
-from app.invoice_vat import InvoiceVatError, apply_totals, sales_codes
+from app.invoice_posting import approve_invoice
+from app.invoice_vat import (
+    MAX_INVOICE_LINES,
+    InvoiceVatError,
+    apply_totals,
+    sales_codes,
+)
+from app.ledger import LedgerError
 from app.models.base import db
 from app.models.contact import Contact
 from app.models.invoice import Invoice
-from app.models.invoice_schema import invoice_schema_with_lines, invoices_schema
+from app.models.invoice_schema import (
+    approve_input_schema,
+    invoice_schema_with_lines,
+    invoices_schema,
+)
 from app.models.invoice_setting import InvoiceSetting
 from app.models.invoiceline import InvoiceLine
+from app.models.organization import Organization
 from app.models.product import Product
 from app.money import MoneyError
 from app.routes import bp
 from app.routes.authz import org_member_required
+
+LOCKED = (
+    "An approved invoice cannot be changed: a mistake is corrected with a "
+    "credit note"
+)
 
 
 @bp.patch("/invoices/<int:invoice_id>/mark-as-sent")
@@ -29,6 +47,10 @@ def mark_as_sent(invoice_id):
         ).first_or_404(description=f"Invoice with id {invoice_id} not found!")
         if not isinstance(invoice_data["is_sent"], bool):
             return {"error": '"is_sent" is NOT of type boolean!'}, 422
+        if invoice.state != "approved":
+            return {
+                "error": "Only an approved invoice can be marked as sent"
+            }, 409
 
         invoice.is_sent = invoice_data.get("is_sent", invoice.is_sent)
         invoice.update()
@@ -85,7 +107,11 @@ def create_invoice(organization_id):
                 "Set them up under Settings, Invoicing before creating "
                 "invoices."
             }, 409
-        codes = _line_codes(invoice_loaded["lines"])
+        _check_line_count(invoice_loaded["lines"])
+        codes = _line_codes(organization_id, invoice_loaded["lines"])
+        invoice_loaded["invoice_no"] = _draft_number(
+            invoice_setting, invoice_loaded.get("invoice_no")
+        )
         if not _contact_in_org(organization_id, invoice_loaded["contact_id"]):
             return {
                 "error": f"Contact with id {invoice_loaded['contact_id']} not found!"
@@ -95,14 +121,15 @@ def create_invoice(organization_id):
                 return {
                     "error": f"Product with id {line.get('product_id')} not found!"
                 }, 404
-        duplicate_check = Invoice.query.filter_by(
-            organization_id=organization_id,
-            invoice_no=invoice_loaded.get("invoice_no"),
-        ).first()
-        if duplicate_check:
-            raise Exception(
-                f"Invoice_no ({duplicate_check.invoice_no}) already exists"
-            )
+        if invoice_loaded["invoice_no"] is not None:
+            duplicate_check = Invoice.query.filter_by(
+                organization_id=organization_id,
+                invoice_no=invoice_loaded["invoice_no"],
+            ).first()
+            if duplicate_check:
+                raise Exception(
+                    f"Invoice_no ({duplicate_check.invoice_no}) already exists"
+                )
         lines = invoice_loaded.pop("lines")
         invoice = Invoice(
             **invoice_loaded,
@@ -110,10 +137,6 @@ def create_invoice(organization_id):
         )
         apply_totals(invoice, invoice.lines, _by_id(codes))
         invoice.save(commit=False)
-
-        next_invoice_no = _following_invoice_no(invoice.invoice_no)
-        if next_invoice_no is not None:
-            invoice_setting.next_invoice_no = next_invoice_no
         db.session.commit()
 
         return invoice_schema_with_lines.dump(invoice), 201
@@ -125,10 +148,32 @@ def create_invoice(organization_id):
         return {"error": str(e)}, 400
 
 
-def _line_codes(lines):
+def _line_codes(organization_id, lines):
     """The VAT codes of the lines by name. Raises InvoiceVatError for one that
-    an invoice cannot have."""
-    return sales_codes(line["vat_code"] for line in lines)
+    an invoice cannot have: an organization that is not VAT-registered may not
+    show VAT, so it can only use the code without it."""
+    organization = db.session.get(Organization, organization_id)
+    return sales_codes(
+        (line["vat_code"] for line in lines),
+        registered=organization.vat_period_type is not None,
+    )
+
+
+def _check_line_count(lines):
+    if len(lines) > MAX_INVOICE_LINES:
+        raise InvoiceVatError(
+            f"An invoice has at most {MAX_INVOICE_LINES} lines"
+        )
+
+
+def _draft_number(invoice_setting, given):
+    """The number a draft is saved with. In sequential mode it has none: the
+    number is taken when the invoice is approved, so that a deleted draft
+    leaves no gap, and a number the client sends is not used. In manual mode
+    it is the number the user typed, if any."""
+    if invoice_setting.invoice_no_mode == "sequential":
+        return None
+    return (given or "").strip() or None
 
 
 def _by_id(codes):
@@ -140,14 +185,6 @@ def _with_code_id(line, codes):
     line = dict(line)
     line["vat_code_id"] = codes[line.pop("vat_code")].id
     return line
-
-
-def _following_invoice_no(invoice_no):
-    """The number after a plain numeric one; None for manual numbers such as
-    "INV-7", which don't move the sequence."""
-    if invoice_no.isascii() and invoice_no.isdecimal():
-        return int(invoice_no) + 1
-    return None
 
 
 def _contact_in_org(organization_id, contact_id):
@@ -187,6 +224,8 @@ def update_invoice(organization_id, invoice_id):
     invoice = Invoice.query.filter_by(
         organization_id=organization_id, id=invoice_id
     ).first_or_404(description=f"Invoice with id {invoice_id} not found!")
+    if invoice.state != "draft":
+        return {"error": LOCKED}, 409
 
     try:
         json_data = request.get_json()
@@ -201,16 +240,29 @@ def update_invoice(organization_id, invoice_id):
 
     try:
         data = invoice_schema_with_lines.load(json_data)
-        codes = _line_codes(data["lines"])
+        _check_line_count(data["lines"])
+        codes = _line_codes(organization_id, data["lines"])
+        invoice_setting = InvoiceSetting.query.filter_by(
+            organization_id=organization_id
+        ).first()
+        if invoice_setting is None:
+            return {
+                "error": "Invoice settings are missing for this organization. "
+                "Set them up under Settings, Invoicing before saving "
+                "invoices."
+            }, 409
+        data["invoice_no"] = _draft_number(
+            invoice_setting, data.get("invoice_no")
+        )
         if not _contact_in_org(organization_id, data["contact_id"]):
             return {
                 "error": f"Contact with id {data['contact_id']} not found!"
             }, 404
-        if _invoice_no_exists(
-            invoice_id, organization_id, data.get("invoice_no")
+        if data["invoice_no"] is not None and _invoice_no_exists(
+            invoice_id, organization_id, data["invoice_no"]
         ):
             return {
-                "error": f"Invoice_no {data.get('invoice_no')} already exists"
+                "error": f"Invoice_no {data['invoice_no']} already exists"
             }, 400
 
         lines = data.get("lines")
@@ -220,12 +272,9 @@ def update_invoice(organization_id, invoice_id):
             }, 400
 
         invoice.contact_id = data.get("contact_id", invoice.contact_id)
-        invoice.invoice_no = data.get("invoice_no", invoice.invoice_no)
+        invoice.invoice_no = data["invoice_no"]
         invoice.invoice_date = data.get("invoice_date", invoice.invoice_date)
         invoice.duedate = data.get("duedate", invoice.duedate)
-        invoice.is_paid = data.get("is_paid", invoice.is_paid)
-        invoice.is_sent = data.get("is_sent", invoice.is_sent)
-        invoice.state = data.get("state", invoice.state)
         invoice.currency_id = data.get("currency_id", invoice.currency_id)
         invoice.template_id = data.get("template_id", invoice.template_id)
 
@@ -296,9 +345,9 @@ def delete_invoice(organization_id, invoice_id):
     invoice = Invoice.query.filter_by(
         organization_id=organization_id, id=invoice_id
     ).first_or_404(description=f"Invoice with id {invoice_id} not found!")
-    # Once approved, sent or paid an invoice is part of the books: deleting it
-    # would leave a gap in the numbering.
-    if invoice.state != "draft" or invoice.is_sent or invoice.is_paid:
+    # Once approved an invoice is part of the books: deleting it would leave a
+    # gap in the numbering, and its voucher without a document.
+    if invoice.state != "draft":
         return {"error": "Only draft invoices can be deleted"}, 409
     try:
         invoice.delete()
@@ -307,3 +356,30 @@ def delete_invoice(organization_id, invoice_id):
         }, 200
     except Exception as e:
         return {"error": str(e)}, 400
+
+
+@bp.post(
+    "/organizations/<int:organization_id>/invoices/<int:invoice_id>/approve"
+)
+@jwt_required()
+@org_member_required
+def approve_invoice_route(organization_id, invoice_id):
+    """Approve a draft invoice: it gets its number and is posted to the
+    ledger, and from then on it cannot be changed. The body is optional: the
+    invoice number, for an organization that numbers its invoices by hand."""
+    try:
+        data = approve_input_schema.load(request.get_json(silent=True) or {})
+        invoice = approve_invoice(
+            organization_id,
+            current_user.id,
+            invoice_id,
+            invoice_no=data.get("invoice_no"),
+        )
+        db.session.commit()
+    except ValidationError as error:
+        db.session.rollback()
+        return {"errors": error.messages}, 422
+    except LedgerError as error:
+        db.session.rollback()
+        return {"error": str(error)}, error.status
+    return invoice_schema_with_lines.dump(invoice), 200

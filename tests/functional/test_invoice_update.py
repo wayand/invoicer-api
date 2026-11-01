@@ -49,7 +49,6 @@ def body(organization, contact, product, **overrides) -> dict:
         "contact_id": contact.id,
         "invoice_no": "1001",
         "currency_id": "DKK",
-        "state": "draft",
         "invoice_date": date(2026, 1, 1).isoformat(),
         "duedate": date(2026, 1, 15).isoformat(),
         "lines": [
@@ -104,25 +103,6 @@ def test_the_invoice_starts_on_the_template_it_was_created_with(invoice):
     assert stored_template(invoice) == "2"
 
 
-@pytest.mark.parametrize("is_sent", [True, False])
-def test_update_keeps_the_template_when_only_is_sent_is_sent(
-    client, test_user, organization, contact, product, invoice, is_sent
-):
-    res = update(
-        client,
-        test_user,
-        organization,
-        invoice,
-        contact,
-        product,
-        is_sent=is_sent,
-    )
-
-    assert res.status_code == 200, res.get_json()
-    assert stored_template(invoice) == "2"
-    assert res.get_json()["template_id"] == "2"
-
-
 def test_update_keeps_the_template_when_none_is_sent(
     client, test_user, organization, contact, product, invoice
 ):
@@ -150,19 +130,25 @@ def test_update_changes_the_template_when_one_is_sent(
     assert res.get_json()["template_id"] == "3"
 
 
-def test_update_still_saves_is_sent(
-    client, test_user, organization, contact, product, invoice
+@pytest.mark.parametrize(
+    "field",
+    [
+        {"is_sent": True},
+        {"state": "approved"},
+        {"state": "draft"},
+        {"is_paid": True},
+        {"journal_entry_id": 1},
+        {"approved_at": "2026-01-01T00:00:00"},
+    ],
+)
+def test_update_does_not_take_what_the_server_sets_from_the_client(
+    client, test_user, organization, contact, product, invoice, field
 ):
     res = update(
-        client,
-        test_user,
-        organization,
-        invoice,
-        contact,
-        product,
-        is_sent=True,
+        client, test_user, organization, invoice, contact, product, **field
     )
 
-    assert res.status_code == 200, res.get_json()
-    assert res.get_json()["is_sent"] is True
-    assert Invoice.query.filter_by(id=invoice["id"]).one().is_sent is True
+    assert res.status_code == 422, res.get_json()
+    stored = Invoice.query.filter_by(id=invoice["id"]).one()
+    assert stored.state == "draft"
+    assert stored.is_sent is False

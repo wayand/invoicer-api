@@ -1,8 +1,8 @@
 """
-Creating an invoice is all-or-nothing: either the invoice is saved and the
-organization's next invoice number is advanced, or neither happens and the
-caller gets an error. It must never answer with an error while the invoice
-is already in the database.
+Creating an invoice is all-or-nothing: either the draft is saved, or nothing
+is, and the caller gets an error. It must never answer with an error while the
+invoice is already in the database. The number moves when the invoice is
+approved (tests/functional/test_invoice_approval.py), not for a draft.
 """
 
 from datetime import date
@@ -51,7 +51,6 @@ def payload(organization, contact, product, invoice_no) -> dict:
         "contact_id": contact.id,
         "invoice_no": invoice_no,
         "currency_id": "DKK",
-        "state": "draft",
         "invoice_date": date(2026, 1, 1).isoformat(),
         "duedate": date(2026, 1, 15).isoformat(),
         "lines": [
@@ -83,7 +82,7 @@ def next_number(db_session, invoice_setting) -> int:
     return invoice_setting.next_invoice_no
 
 
-def test_create_invoice_succeeds_and_advances_the_next_number(
+def test_create_invoice_saves_a_draft_with_the_number_given(
     client,
     db_session,
     test_user,
@@ -92,14 +91,18 @@ def test_create_invoice_succeeds_and_advances_the_next_number(
     product,
     invoice_setting,
 ):
+    before = next_number(db_session, invoice_setting)
+
     res = post_invoice(
         client, test_user, organization, contact, product, "1001"
     )
 
     assert res.status_code == 201
+    assert res.get_json()["state"] == "draft"
     assert len(invoices_numbered("1001")) == 1
     assert InvoiceLine.query.count() == 1
-    assert next_number(db_session, invoice_setting) == 1002
+    # The next number moves when the invoice is approved, not for a draft
+    assert next_number(db_session, invoice_setting) == before
 
 
 def test_create_invoice_keeps_the_next_number_for_non_numeric_numbers(
@@ -154,10 +157,10 @@ def test_create_invoice_rolls_back_when_a_later_step_fails(
     invoice_setting,
     monkeypatch,
 ):
-    def boom(_invoice_no):
+    def boom(*_args):
         raise RuntimeError("simulated failure after the invoice was added")
 
-    monkeypatch.setattr("app.routes.invoice_routes._following_invoice_no", boom)
+    monkeypatch.setattr("app.routes.invoice_routes.apply_totals", boom)
     before = next_number(db_session, invoice_setting)
 
     res = post_invoice(
@@ -190,7 +193,6 @@ def test_create_invoice_rejects_a_duplicate_number_and_changes_nothing(
 
     assert again.status_code == 400
     assert len(invoices_numbered("1001")) == 1
-    assert next_number(db_session, invoice_setting) == 1002
 
 
 def test_create_invoice_requires_authentication(client, organization):

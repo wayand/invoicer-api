@@ -15,6 +15,12 @@ from app.money import CodeTotal, invoice_totals, vat_by_code
 from app.vat import OUTPUT, SALES
 
 NO_RATE = Decimal("0")
+# An invoice has at most this many lines: its entry has one line for each, and
+# the posting service takes at most 500
+MAX_INVOICE_LINES = 400
+# The only code an organization that is not VAT-registered can use: it may
+# not show VAT on its invoices (momsloven § 52 a, stk. 6)
+UNREGISTERED_CODE = "S81"
 
 
 class InvoiceVatError(ValueError):
@@ -30,11 +36,19 @@ def sales_rate(code: VatCode) -> Decimal:
     return NO_RATE
 
 
-def sales_codes(codes: Iterable[str]) -> dict[str, VatCode]:
+def sales_codes(
+    codes: Iterable[str], registered: bool = True
+) -> dict[str, VatCode]:
     """The VAT codes with these names, for the lines of an invoice. Raises
     InvoiceVatError for a code that does not exist, one for purchases, or one
-    that cannot be used yet."""
+    that cannot be used yet, and for any code but S81 when the organization
+    is not VAT-registered."""
     wanted = set(codes)
+    if not registered and wanted - {UNREGISTERED_CODE}:
+        raise InvoiceVatError(
+            "The organization is not VAT-registered, so its invoices show "
+            f"no VAT: use the VAT code {UNREGISTERED_CODE}"
+        )
     found = {
         code.code: code
         for code in VatCode.query.filter(VatCode.code.in_(wanted))

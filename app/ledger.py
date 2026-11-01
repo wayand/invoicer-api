@@ -55,6 +55,20 @@ MAX_LINES = 500
 MAX_TEXT = 255
 
 
+# The vouchers that belong to a document: reversing one would leave the
+# document without its posting, so the document is corrected instead
+NOT_REVERSIBLE = {
+    "invoice": "posts an invoice: it cannot be reversed, an approved "
+    "invoice is corrected with a credit note",
+    "credit_note": "posts a credit note: it cannot be reversed, post a new "
+    "invoice instead",
+    "payment": "posts a payment: it cannot be reversed here, reverse the "
+    "payment",
+    SETTLEMENT: "settles a VAT period: it cannot be reversed, a mistake in a "
+    "settled period is corrected in a later one",
+}
+
+
 class LedgerError(ValueError):
     """The entry cannot be posted as asked. The message says why."""
 
@@ -557,11 +571,9 @@ def reverse_entry(
     or on the date of the entry if that is later, so that it never comes
     before the entry it cancels."""
     original = get_entry(organization_id, entry_id)
-    if original.source_type == SETTLEMENT:
+    if original.source_type in NOT_REVERSIBLE:
         raise LedgerConflict(
-            f"Voucher {original.voucher_no} settles a VAT period: it cannot "
-            "be reversed, a mistake in a settled period is corrected in a "
-            "later one"
+            f"Voucher {original.voucher_no} {NOT_REVERSIBLE[original.source_type]}"
         )
     if original.reverses_entry_id is not None:
         raise LedgerConflict(
