@@ -14,6 +14,7 @@ from .product import Product
 from .revoked_token import RevokedToken
 from .user import User
 from .vat_code import VatCode
+from .vat_period import VatPeriod
 
 __all__ = [
     "Account",
@@ -35,4 +36,5 @@ __all__ = [
     "RevokedToken",
     "User",
     "VatCode",
+    "VatPeriod",
 ]

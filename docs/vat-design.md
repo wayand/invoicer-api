@@ -297,9 +297,10 @@ date is stored on the period and can be corrected, and the screen says to check
 provisional assessment, a fee (1,400 kr. per period at the time of writing) and interest.
 
 **Settlement.** `POST /vat-periods/settle` for the first open period, only after the period has
-ended. The posting service makes one voucher (`source_type` `vat_settlement`, `source_id` the
-period), dated the last day of the period, that moves the whole balance of the VAT accounts of the
-period to `7840`. This is what the accountant's note describes.
+ended (decision 7: before that it is refused with 409 and says from when it can be settled). The
+posting service makes one voucher (`source_type` `vat_settlement`, `source_id` the period), dated
+the last day of the period, that moves the whole balance of the VAT accounts of the period to
+`7840`. This is what the accountant's note describes.
 
 | Lines | |
 |---|---|
@@ -310,27 +311,50 @@ period to `7840`. This is what the accountant's note describes.
 
 Example: sales VAT 250, acquisition VAT 200, input VAT 400. Debit `7680` 250 and `7720` 200,
 credit `7740` 400 and `7840` 50. The VAT accounts are then zero for the period, and `7840` holds
-the 50 until SKAT has drawn it from the Skattekonto (phase 5 covers the payment).
+the 50 until SKAT has drawn it from the Skattekonto (phase 5 covers the payment). An account whose
+balance is on the other side (a credit note larger than the sales) is cleared the other way. A period
+where nothing moves (only codes that carry no VAT) is settled with no voucher.
 
 The settlement refuses (409) when the report does not tie to the ledger (section 6): you cannot
 settle a period with postings on VAT accounts that are not coded, so the return always agrees
-with the books. The fix is to reverse them and post them again with a code.
+with the books (decision 5). The fix is to reverse them, with the reversal dated inside the period
+(a reversal is otherwise dated today, and the posting would stay in the period), and post them
+again with a code. Uncoded postings that cancel inside the period are no obstacle, because the
+report and the ledger then agree. The report of a period leaves out the settlement voucher in its
+check against the ledger, so a settled period still shows the figures that were settled and ties.
 
-**Filing.** The user enters the figures in TastSelv Erhverv and then marks the period filed, with
-the date and an optional reference. Filing locks nothing more than settling does; it records that
-the deadline was met.
+**Filing.** The user enters the figures in TastSelv Erhverv and then marks the period filed:
+`POST /vat-periods/<id>/file` with the date it was filed (default today, not in the future and not
+before the period ends) and an optional reference. A period is filed once. Filing locks nothing more
+than settling does; it records that the deadline was met, and the audit log says whether it was.
 
 **Locking.** An entry dated inside a settled period is refused (409, with the period) if it touches
 VAT: a line with a VAT code, or a line on `7680`, `7700`, `7720`, `7740`, `7840` or `6320`. Other
 entries, for example a bank fee posted late, are still allowed (decision 4). A reversal is dated
 today or later (section 5), so it falls in an open period. There is no way to un-settle: a
-mistake in a settled period is corrected in a later one.
+mistake in a settled period is corrected in a later one, and the settlement voucher itself cannot be
+reversed. The lock is in the posting service. It runs after the service has taken the lock of the
+books of the organization (the same row every posting locks for its voucher number), and so does the
+settlement, so an entry and a settlement cannot pass each other: whichever comes second sees the
+other. The settlement is let through its own lock, which is why it can be dated inside the period.
 
 **`vat_periods`**: `id`, `organization_id`, `period_type`, `start_date`, `end_date`, `due_date`,
-`status` (`settled` or `filed`), `settlement_entry_id`, `settled_at`, `settled_by`, `filed_at`,
-`filed_by`, `reference`. The figures are not stored: they come from the ledger, and the lock keeps
-them unchanged. Settling and filing are written to the audit log (`vat_period.settled`,
-`vat_period.filed`).
+`status` (`settled` or `filed`), `settlement_entry_id` (null when nothing was moved), `settled_at`,
+`settled_by`, `filed_on` (the day the user says it was filed), `filed_by`, `reference`. The figures
+are not stored: they come from the ledger, and the lock keeps them unchanged. A period that is filed
+must say when and by whom, which the database checks. Settling, filing and a corrected due date
+are written to the audit log (`vat_period.settled`, `vat_period.filed`,
+`vat_period.due_date_changed`).
+
+**The API.**
+
+- `GET /vat-periods`: the settled periods, newest first, and `open_period`: the first period not
+  settled yet, with `ended`, `can_settle` and `blocked_by` (what stops it, in words), or null when
+  the organization is not VAT-registered or nothing has a VAT code yet. The open period is not stored:
+  it follows from the last settled period, and for the first one from the earliest posting with a code.
+- `POST /vat-periods/settle`: settles the open period, 201 with the period.
+- `POST /vat-periods/<id>/file`: body optional (`filed_on`, `reference`).
+- `PATCH /vat-periods/<id>` with `due_date`: corrects the due date, after the period ends.
 
 ## 9. How it is tested
 
@@ -364,7 +388,8 @@ The invariants, as tests, in the style of phases 0 and 1:
 
 ## 11. Decisions to confirm
 
-Each has my recommendation.
+Each has my recommendation. Decisions 4, 5 and 7 were taken as recommended when PR 5 was built, and
+are marked **Decided**. The others are still open.
 
 1. **Which of your businesses are VAT-registered, and with which period?** The sole proprietorship
    may be below the limit and have no VAT at all, in which case `vat_period_type` stays empty and
@@ -377,17 +402,19 @@ Each has my recommendation.
    for the accountant.
 4. **What a settled period locks.** Only entries that touch VAT (recommended), or every entry dated
    in the period. The second is stricter, but it blocks a late bank fee or a correction of an
-   expense, and the fiscal-year closing of phase 6 is the better place for it.
+   expense, and the fiscal-year closing of phase 6 is the better place for it. **Decided:** only
+   entries that touch VAT (PR 5).
 5. **Uncoded postings on VAT accounts.** Allowed, shown in the report, and settlement refused until
    fixed (recommended), or refused when posted. The second breaks the vouchers typed by hand
-   with a VAT line, which are useful for odd cases.
+   with a VAT line, which are useful for odd cases. **Decided:** allowed and shown, settlement
+   refused until fixed (PR 5).
 6. **The real return.** Please open the VAT return in TastSelv Erhverv (or the guide on skat.dk)
    and check three things: the labels and order of the boxes, whether amounts are whole
    kroner or with øre, and whether there is a box I have not mentioned that applies to you. I
    could not read the official guidance PDF I found (it is from 2017), so the boxes in section 6
    come from skat.dk and PwC pages and are not yet checked against the form.
 7. **Settling before the period has ended.** Refused (recommended), or allowed for a period still
-   running.
+   running. **Decided:** refused (PR 5).
 8. **The default VAT code per account**, which is my guess in the chart of accounts document:
    rent and insurance without VAT, postage and fares exempt, cars limited. The accountant should
    confirm it.
@@ -402,7 +429,7 @@ Each is a branch, with tests, and each is merged before the next.
 | 2 | api | The engine and the posting service: `vat_code` on lines, the VAT lines, the `journal_lines` columns, reversals copying the codes, manual vouchers with codes | PR 1 |
 | 3 | api | Invoices with a VAT code per line and VAT per code, the rule in `money-rules.md` and the shared cases, `tax_rates` removed | PR 1 |
 | 4 | api | `GET /reports/vat` with the check against the ledger | PR 2 |
-| 5 | api | `vat_periods`, the deadlines, settlement, filing and the lock | PR 2, 4 and decisions 4, 5, 6, 7 |
+| 5 | api | `vat_periods`, the deadlines, settlement, filing and the lock | PR 2, 4 and decisions 4, 5, 7 (6 does not change it: the boxes are the report's) |
 | 6 | app | VAT code per line in the voucher form, with the VAT lines shown as they will be posted | PR 2 |
 | 7 | app | VAT code per invoice line, VAT per code in the preview and on the show page | PR 3 |
 | 8 | app | The VAT report screen and the periods screen (deadline, settle, mark filed) | PR 4 and 5 |

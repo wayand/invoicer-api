@@ -36,6 +36,7 @@ from app.models.ledger import (
 )
 from app.models.organization import Organization
 from app.models.vat_code import VatCode
+from app.models.vat_period import SETTLEMENT, VatPeriod
 from app.money import MAX_AMOUNT, round_money
 from app.vat_engine import (
     BASE,
@@ -360,23 +361,63 @@ def fiscal_year_for(
     return year
 
 
-def _take_voucher_no(organization_id: int) -> int:
-    """The next voucher number. The row is locked until the transaction ends,
-    so numbers are taken one at a time, and a posting that fails gives its
-    number back: the sequence has no gaps."""
+def lock_ledger(organization_id: int) -> LedgerCounter:
+    """Lock the books of the organization until the transaction ends. Every
+    posting takes the same lock, so what is checked after it is taken cannot
+    change under the caller: a settlement and a posting happen one at a
+    time."""
     db.session.execute(
         insert(LedgerCounter)
         .values(organization_id=organization_id)
         .on_conflict_do_nothing()
     )
-    counter = (
+    return (
         LedgerCounter.query.filter_by(organization_id=organization_id)
         .with_for_update()
         .one()
     )
+
+
+def _take_voucher_no(organization_id: int) -> int:
+    """The next voucher number. The row is locked until the transaction ends,
+    so numbers are taken one at a time, and a posting that fails gives its
+    number back: the sequence has no gaps."""
+    counter = lock_ledger(organization_id)
     number = counter.next_voucher_no
     counter.next_voucher_no = number + 1
     return number
+
+
+def _check_vat_lock(
+    organization_id: int, entry_date: date, lines: Sequence[LineInput]
+) -> None:
+    """An entry that touches VAT cannot be posted in a settled VAT period: a
+    line with a VAT code, or a line on one of the VAT accounts. Other entries
+    can (docs/vat-design.md, section 8). The books are locked when this runs,
+    so a settlement cannot slip in between the check and the posting."""
+    period = VatPeriod.query.filter(
+        VatPeriod.organization_id == organization_id,
+        VatPeriod.start_date <= entry_date,
+        VatPeriod.end_date >= entry_date,
+    ).first()
+    if period is None:
+        return
+    touches_vat = any(line.vat_code for line in lines) or (
+        db.session.query(Account.id)
+        .filter(
+            Account.organization_id == organization_id,
+            Account.id.in_({line.account_id for line in lines}),
+            Account.system_role.in_(VAT_ACCOUNT_ROLES),
+        )
+        .first()
+        is not None
+    )
+    if touches_vat:
+        raise LedgerConflict(
+            f"The VAT period {period.start_date} to {period.end_date} is "
+            "settled: an entry that touches VAT cannot be dated in it. "
+            "Date it in the open period"
+        )
 
 
 def post_entry(
@@ -390,6 +431,7 @@ def post_entry(
     source_id: int | None = None,
     reverses_entry_id: int | None = None,
     add_vat: bool = True,
+    ignore_vat_lock: bool = False,
 ) -> JournalEntry:
     """Post a balanced entry with the next voucher number. Raises LedgerError
     if it cannot be posted, and then nothing is written.
@@ -397,6 +439,10 @@ def post_entry(
     A line with a `vat_code` is a net line: the VAT lines for it are added
     here, so the lines given must balance with them. A reversal passes
     add_vat=False and the lines of the entry it reverses, VAT lines included.
+
+    An entry that touches VAT is refused (409) in a settled VAT period. Only
+    the settlement itself, which belongs to the period, is let through with
+    `ignore_vat_lock`.
     """
     description = _text(description, "The description")
     if not FIRST_YEAR <= entry_date.year <= LAST_YEAR:
@@ -419,10 +465,13 @@ def post_entry(
 
     with db.session.begin_nested():
         year = fiscal_year_for(organization_id, entry_date, user_id)
+        voucher_no = _take_voucher_no(organization_id)
+        if not ignore_vat_lock:
+            _check_vat_lock(organization_id, entry_date, checked)
         entry = JournalEntry(
             organization_id=organization_id,
             fiscal_year_id=year.id,
-            voucher_no=_take_voucher_no(organization_id),
+            voucher_no=voucher_no,
             entry_date=entry_date,
             description=description,
             source_type=source_type,
@@ -508,6 +557,12 @@ def reverse_entry(
     or on the date of the entry if that is later, so that it never comes
     before the entry it cancels."""
     original = get_entry(organization_id, entry_id)
+    if original.source_type == SETTLEMENT:
+        raise LedgerConflict(
+            f"Voucher {original.voucher_no} settles a VAT period: it cannot "
+            "be reversed, a mistake in a settled period is corrected in a "
+            "later one"
+        )
     if original.reverses_entry_id is not None:
         raise LedgerConflict(
             f"Voucher {original.voucher_no} is a reversal: it cannot be "
