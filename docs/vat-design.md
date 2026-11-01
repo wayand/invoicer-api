@@ -229,7 +229,24 @@ nothing else, by the date of the entry. It returns what to enter in TastSelv Erh
 | Total to pay (or refund) | salgsmoms + the two acquisition lines - købsmoms |
 
 Each figure is also given per code, so any number can be traced to the vouchers behind it. The
-report has a second part: **the check against the ledger.** For each of the four VAT accounts it
+response (`app/reports.py`, `vat_report`), all amounts as positive numbers with 2 decimals:
+
+- `sales_vat`, `input_vat`, `eu_goods_vat`, `eu_services_vat`, and `total_to_pay` (negative when
+  the period is to be refunded).
+- `boxes`: `a_goods`, `a_services`, `b_goods`, `b_services` and `c`, the net amounts of the codes
+  with that `base_box`. A sale counts as credit minus debit, a purchase as debit minus credit, so
+  a credit note reduces its box.
+- `codes`: for each code with a posting in the range, sorted by code: `code`, `title`,
+  `applies_to`, `direction`, `base_box`, `rate`, `deduction`, and `base`, `output_vat`,
+  `input_vat`, `acquisition_vat` and `nondeductible_vat`. `input_vat` is only what is deducted; the
+  rest of the VAT of a purchase is `nondeductible_vat`, which is a cost and is not on the return.
+  A code whose entries were all reversed is still listed, with zeros.
+- `ledger_check`: `accounts`, one for each of the four VAT roles (`role`, `account`,
+  `ledger_balance`, `reported`, `difference`, with `account` null when the organization has no
+  account with the role), `uncoded_lines`, and `ties`, which says that every difference is zero.
+
+Only lines with a VAT code and part count toward a figure. An organization that has left VAT can
+still read its report. The report has a second part: **the check against the ledger.** For each of the four VAT accounts it
 shows the balance of the account in the range next to the figure above. They must be equal. If
 they are not, the difference is made of postings on a VAT account that have no VAT code (for
 example a voucher typed by hand with its VAT line, as before phase 2), and they are listed.

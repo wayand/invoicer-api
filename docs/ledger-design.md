@@ -300,6 +300,10 @@ accounts never posted to are not listed. Sorted by account number. The totals ar
 and closing) or equal (debit and credit), because every entry balances, and `balanced` says so: if
 it is ever `false`, something has bypassed the posting service and the database guards.
 
+**`GET /reports/vat?from=&to=`** is the VAT report of phase 2, in [vat-design.md](vat-design.md),
+section 6. It reads the VAT code and part of the lines, and checks its figures against the balances
+of the four VAT accounts.
+
 Unknown query fields and bad or reversed dates are refused with 422.
 
 **Checked against a plain sum.** Besides the worked examples, a test posts 70 random balanced
