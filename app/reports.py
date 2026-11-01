@@ -26,6 +26,7 @@ from app.models.account import Account, AccountType
 from app.models.base import db
 from app.models.ledger import JournalEntry, JournalLine
 from app.models.vat_code import VatCode
+from app.models.vat_period import SETTLEMENT
 from app.vat import SALES
 from app.vat_engine import (
     ACQUISITION_GOODS_VAT,
@@ -307,7 +308,9 @@ def vat_report(
     Then the check against the ledger: for each VAT account, its balance in
     the range next to the figure above. They are equal when every posting on
     the account has a VAT code. A posting without one (a voucher typed with
-    its own VAT line) is the difference, and is listed."""
+    its own VAT line) is the difference, and is listed. The voucher that
+    settles a period is left out of the check: it clears the accounts, and the
+    report of a settled period still shows the figures that were settled."""
     _check_range(date_from, date_to)
 
     coded = _in_range(
@@ -407,7 +410,8 @@ def vat_report(
             _lines(organization_id).filter(
                 JournalLine.account_id.in_(
                     [account.id for account in accounts.values()]
-                )
+                ),
+                JournalEntry.source_type != SETTLEMENT,
             ),
             date_from,
             date_to,
@@ -452,6 +456,7 @@ def vat_report(
             _lines(organization_id)
             .filter(
                 JournalLine.vat_part.is_(None),
+                JournalEntry.source_type != SETTLEMENT,
                 JournalLine.account_id.in_(
                     [account.id for account in accounts.values()]
                 ),

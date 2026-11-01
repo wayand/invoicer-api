@@ -300,6 +300,10 @@ accounts never posted to are not listed. Sorted by account number. The totals ar
 and closing) or equal (debit and credit), because every entry balances, and `balanced` says so: if
 it is ever `false`, something has bypassed the posting service and the database guards.
 
+The voucher that settles a VAT period has `source_type` `vat_settlement`, is dated the last day of
+the period, and cannot be reversed. An entry that touches VAT cannot be dated in a settled period
+(409); see [vat-design.md](vat-design.md), section 8.
+
 **`GET /reports/vat?from=&to=`** is the VAT report of phase 2, in [vat-design.md](vat-design.md),
 section 6. It reads the VAT code and part of the lines, and checks its figures against the balances
 of the four VAT accounts.
