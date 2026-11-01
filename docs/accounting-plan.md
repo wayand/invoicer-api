@@ -109,7 +109,7 @@ Sources are linked; check the official text before relying on any of this.
 | 0 | Decisions and groundwork | Money rules (2-decimal amounts, one rounding rule, server-side totals). `template_id` fixed. Chart of accounts proposed and checked with an accountant. | S |
 | 1 | Ledger core | Fiscal years and periods, journal entries and lines, a posting service, gapless voucher numbers, reversal entries, an append-only audit log, a manual voucher. Reports: account ledger, trial balance, general ledger. | L |
 | 2 | VAT engine | VAT codes with their return-box mapping, VAT per invoice line, server-side VAT, a VAT report for any period showing what to enter by hand in TastSelv (sales VAT, input VAT, boxes A/B/C, amount payable, deadline), VAT settlement posting, period locking after filing. Designed in [vat-design.md](vat-design.md). | L |
-| 3 | Sales on the ledger | Approving an invoice posts it (receivable, revenue, output VAT) and locks it: an approved invoice is read-only, and mistakes are corrected with a credit note. Payments, partial payments and allocation, replacing `is_paid`. Reminders. | L |
+| 3 | Sales on the ledger | Approving an invoice posts it (receivable, revenue, output VAT) and locks it: an approved invoice is read-only, and mistakes are corrected with a credit note. Payments, partial payments and allocation, replacing `is_paid`. Reminders. Designed in [invoice-posting-design.md](invoice-posting-design.md). | L |
 | 4 | Purchases and expenses | Suppliers, bills and vouchers with attachments (kept 5 years), input VAT including `REP`/`HREP`, reverse charge and foreign purchases, EU and non-EU codes. | L |
 | 5 | Bank (CSV) | Bank accounts, import of bank statements as CSV (with a configurable column mapping, as banks differ), matching lines against invoices and bills, reconciliation. No bank API. | M |
 | 6 | Statements and year-end | Income statement, balance sheet (assets, liabilities and equity), year-end closing to equity, accountant export. | M |
@@ -134,7 +134,9 @@ Sources are linked; check the official text before relying on any of this.
   whether the code applies to sales or purchases.
 - Later: `payments`, `payment_allocations`, `bills`, `bill_lines`, `attachments`,
   `bank_transactions`, `audit_log` (append-only).
-- Existing approved invoices get postings backfilled, plus an opening-balance entry.
+- Existing approved invoices get postings backfilled, plus an opening-balance entry. (Phase 3 proposes
+  instead to put them back to draft, as nothing is live: decision 2 of
+  [invoice-posting-design.md](invoice-posting-design.md).)
 
 ## How events post (illustration)
 
