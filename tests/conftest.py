@@ -170,6 +170,9 @@ def make_invoice_setting(db_session):
     they point at."""
 
     def make(org: Organization) -> InvoiceSetting:
+        # Its invoices have VAT (an organization that is not VAT-registered
+        # may only invoice without VAT)
+        org.vat_period_type = "quarter"
         account_type = AccountType(
             organization_id=org.id,
             name="Revenue",

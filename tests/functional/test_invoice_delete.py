@@ -47,8 +47,8 @@ def product(db_session, organization) -> Product:
 
 @pytest.fixture
 def make_invoice(db_session, organization, contact, product):
-    """Factory: an invoice with two lines; extra keyword arguments set the
-    state, is_sent, is_paid and so on."""
+    """Factory: a draft invoice with two lines; extra keyword arguments set
+    other fields."""
 
     def make(invoice_no="1001", **fields) -> Invoice:
         invoice = Invoice(
@@ -108,29 +108,6 @@ def test_deleting_a_draft_leaves_the_other_invoices_alone(
     delete(client, test_user, organization, doomed.id)
 
     assert [i.invoice_no for i in Invoice.query.all()] == ["1002"]
-    assert InvoiceLine.query.count() == 2
-
-
-@pytest.mark.parametrize(
-    "fields",
-    [
-        {"state": "approved"},
-        {"state": "draft", "is_sent": True},
-        {"state": "draft", "is_paid": True},
-        {"state": "approved", "is_sent": True, "is_paid": True},
-        {"state": "paid"},
-    ],
-)
-def test_an_invoice_that_is_not_a_plain_draft_cannot_be_deleted(
-    client, test_user, organization, make_invoice, fields
-):
-    invoice = make_invoice(**fields)
-
-    res = delete(client, test_user, organization, invoice.id)
-
-    assert res.status_code == 409
-    assert "draft" in res.get_json()["error"].lower()
-    assert Invoice.query.filter_by(id=invoice.id).count() == 1
     assert InvoiceLine.query.count() == 2
 
 

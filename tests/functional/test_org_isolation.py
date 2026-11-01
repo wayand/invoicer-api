@@ -132,7 +132,6 @@ def invoice_payload(organization_id: int, contact_id: int, product_id: int):
         "contact_id": contact_id,
         "invoice_no": "5000",
         "currency_id": "DKK",
-        "state": "draft",
         "invoice_date": "2026-01-01",
         "duedate": "2026-01-15",
         "lines": [

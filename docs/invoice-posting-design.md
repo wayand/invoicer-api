@@ -110,7 +110,8 @@ The system follows Danish rules only.
 
 ## 4. Approving an invoice
 
-`POST /invoices/<id>/approve`, for a draft invoice. In one transaction (so that nothing is half done):
+`POST /organizations/<id>/invoices/<id>/approve`, for a draft invoice (like the other routes that
+change an invoice). In one transaction (so that nothing is half done):
 
 1. Lock the books of the organization (the same lock every posting takes, and the VAT settlement).
 2. Check the invoice:
@@ -189,9 +190,11 @@ phase 6 (statements) will group by account, so the rule is documented here. It i
   same transaction as the posting, with the row locked. A failed approval gives the number back, so
   the series has no gaps, the same way as the voucher numbers. Invoices and credit notes share the
   series (decision 1).
-- **Manual mode.** The user types the number, in the draft or when approving. It has to be unique
-  among the numbers of the organization. A number that is taken is refused with 409 when approving.
-  The series is the user's responsibility, as it is now.
+- **Manual mode.** The user types the number, in the draft or when approving (the body of the
+  approval takes it). It has to be unique among the numbers of the organization. A number that is
+  taken is refused with 409 when approving. A plain number moves `next_invoice_no` to the one after
+  it, so the app can suggest it. The series is the user's responsibility, as it is now.
+  In sequential mode a number that the client sends with a draft is ignored.
 - The number is a text as today. An approved invoice keeps its number, and it cannot be changed.
 
 The database change: the primary key of `invoices` becomes `id`, and `(organization_id, invoice_no)`

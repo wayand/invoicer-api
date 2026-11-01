@@ -61,7 +61,6 @@ def body(organization, contact, lines, invoice_no="1001", **extra) -> dict:
         "contact_id": contact.id,
         "invoice_no": invoice_no,
         "currency_id": "DKK",
-        "state": "draft",
         "invoice_date": date(2026, 1, 1).isoformat(),
         "duedate": date(2026, 1, 15).isoformat(),
         "lines": lines,
@@ -620,9 +619,9 @@ def test_an_organization_that_is_not_vat_registered_can_still_invoice(
     product,
     invoice_setting,
 ):
-    # It uses a code without VAT. The registration is checked when an invoice
-    # is posted (phase 3), as for a voucher
-    assert organization.vat_period_type is None
+    # It uses the code without VAT, the only one it can have
+    organization.vat_period_type = None
+    db_session.commit()
 
     res = create(
         client,

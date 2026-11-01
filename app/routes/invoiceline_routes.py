@@ -71,6 +71,11 @@ def delete_invoiceline(organization_id, invoice_id, line_id):
             description=f"InvoiceLine with id {line_id} for invoice id {invoice_id} not found !"
         )
     )
+    if invoiceline.invoices.state != "draft":
+        return {
+            "error": "An approved invoice cannot be changed: a mistake is "
+            "corrected with a credit note"
+        }, 409
     invoiceline.delete()
     return {
         "message": f"invoiceline with id {line_id} is deleted from invoice id {invoice_id}!!"
