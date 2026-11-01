@@ -8,8 +8,9 @@ from app.models.report_schema import (
     account_ledger_schema,
     trial_balance_query_schema,
     trial_balance_schema,
+    vat_report_schema,
 )
-from app.reports import account_ledger, trial_balance
+from app.reports import account_ledger, trial_balance, vat_report
 from app.routes import bp
 
 
@@ -52,3 +53,21 @@ def get_trial_balance():
     except (LedgerError, ValidationError) as error:
         return _failed(error)
     return trial_balance_schema.dump(report)
+
+
+@bp.get("/reports/vat")
+@jwt_required()
+def get_vat_report():
+    """The VAT of a range of dates as the return asks for it, per VAT code,
+    and checked against the VAT accounts of the ledger. Query: from and to
+    (dates, both optional): without them, everything posted."""
+    try:
+        query = trial_balance_query_schema.load(request.args.to_dict())
+        report = vat_report(
+            current_user.organization_id,
+            query.get("date_from"),
+            query.get("date_to"),
+        )
+    except (LedgerError, ValidationError) as error:
+        return _failed(error)
+    return vat_report_schema.dump(report)
