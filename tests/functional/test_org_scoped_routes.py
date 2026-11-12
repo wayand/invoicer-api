@@ -36,6 +36,10 @@ ORG_SCOPED_ROUTES = [
     ("PUT", "/organizations/{organization_id}/invoices/{invoice_id}"),
     ("POST", "/organizations/{organization_id}/invoices/{invoice_id}/approve"),
     (
+        "POST",
+        "/organizations/{organization_id}/invoices/{invoice_id}/credit-note",
+    ),
+    (
         "GET",
         "/organizations/{organization_id}/invoices/{invoice_id}/invoice-lines",
     ),

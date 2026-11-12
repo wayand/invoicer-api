@@ -218,9 +218,12 @@ is a unique constraint (a null does not collide with another null). The lines al
 A credit note is an invoice with `kind` `credit_note` and `credits_invoice_id`, the invoice it
 corrects. It has lines, VAT codes, a date, a number and a state like any invoice.
 
-- `POST /invoices/<id>/credit-note` makes a draft credit note from an approved invoice, with its
-  lines copied. The user lowers or removes lines for a partial credit note, or adds a line, and
-  approves it. A credit note always refers to an invoice of the program (decision 4).
+- `POST /organizations/<id>/invoices/<id>/credit-note` makes a draft credit note from an approved
+  invoice, with its lines copied, dated today, for the customer of the invoice (a credit note cannot
+  be changed to another customer). The user lowers or removes lines for a partial credit note, or
+  adds a line, and approves it with the route of the invoices. A credit note always refers to an
+  invoice of the program (decision 4). It cannot be made from a draft, from a credit note, from an
+  invoice of nothing, or from an invoice that is credited in full.
 - **The amounts on the document are positive** (a credit note of 1,000 + 250 VAT shows 1,000, 250
   and 1,250), as on a printed credit note, with the word "Kreditnota". The ledger has them as a
   debit on the sales account, the VAT on the other side (the engine does this with a negative base)
@@ -228,11 +231,17 @@ corrects. It has lines, VAT codes, a date, a number and a state like any invoice
 - The total credited on one invoice, in gross amount, cannot be more than the invoice. The check is
   made when a credit note is approved, on the approved credit notes of the invoice plus this one, so
   two drafts cannot each credit all of it.
-- Approving it posts it the same way as an invoice, `source_type` `credit_note`. It cannot be dated
-  in a settled VAT period, and not before the invoice it corrects.
-- **It settles the invoice.** On approval the credit note is allocated to the invoice it credits, up
-  to the invoice's open amount (section 9). If the customer has paid, the rest stays as credit for the
-  customer. Paying it out is the refund of section 11.
+- Approving it posts it the same way as an invoice, `source_type` `credit_note`, with the number from
+  the same series. It cannot be dated in a settled VAT period, or before the invoice it corrects or
+  in the future, and its total has to be above 0.
+- An invoice response lists its credit notes (`credit_notes`: number, state, date, gross amount) and
+  `credited_amount`, the gross amount of the approved ones. A credit note says which invoice it
+  corrects with `credits_invoice_id` and `credits_invoice_no`.
+- **It settles the invoice.** The credit note is linked to the invoice it credits, and the open
+  amount of the invoice (section 9) is its gross amount less what the credit notes and the payments
+  allocated to it. If the customer has paid, the rest stays as credit for the customer. Paying it out
+  is the refund of section 11. The open amount itself is worked out with the payments, in PR 5: until
+  then the link is `credits_invoice_id` and `credited_amount`.
 - A credit note is never edited or deleted once approved, and there is no credit note of a credit
   note: a mistake is a new invoice.
 

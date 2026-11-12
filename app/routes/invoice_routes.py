@@ -3,7 +3,7 @@ from flask_jwt_extended import current_user, jwt_required
 from marshmallow import ValidationError
 from sqlalchemy import and_, exc, not_
 
-from app.invoice_posting import approve_invoice
+from app.invoice_posting import approve_invoice, create_credit_note
 from app.invoice_vat import (
     MAX_INVOICE_LINES,
     InvoiceVatError,
@@ -258,6 +258,14 @@ def update_invoice(organization_id, invoice_id):
             return {
                 "error": f"Contact with id {data['contact_id']} not found!"
             }, 404
+        if (
+            invoice.kind == "credit_note"
+            and data["contact_id"] != invoice.contact_id
+        ):
+            return {
+                "error": "A credit note is for the customer of the invoice "
+                "it corrects"
+            }, 422
         if data["invoice_no"] is not None and _invoice_no_exists(
             invoice_id, organization_id, data["invoice_no"]
         ):
@@ -383,3 +391,21 @@ def approve_invoice_route(organization_id, invoice_id):
         db.session.rollback()
         return {"error": str(error)}, error.status
     return invoice_schema_with_lines.dump(invoice), 200
+
+
+@bp.post(
+    "/organizations/<int:organization_id>/invoices/<int:invoice_id>/credit-note"
+)
+@jwt_required()
+@org_member_required
+def create_credit_note_route(organization_id, invoice_id):
+    """A draft credit note for an approved invoice, with its lines copied.
+    The user lowers or removes lines to credit part of the invoice, and
+    approves it like an invoice."""
+    try:
+        note = create_credit_note(organization_id, invoice_id)
+        db.session.commit()
+    except LedgerError as error:
+        db.session.rollback()
+        return {"error": str(error)}, error.status
+    return invoice_schema_with_lines.dump(note), 201

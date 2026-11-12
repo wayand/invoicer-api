@@ -1,6 +1,7 @@
 from .base import BaseModel, db
 
 STATES = ("draft", "approved")
+KINDS = ("invoice", "credit_note")
 
 
 class Invoice(BaseModel):
@@ -14,6 +15,15 @@ class Invoice(BaseModel):
         ),
         db.CheckConstraint(
             "state IN ('draft', 'approved')", name="ck_invoices_state"
+        ),
+        db.CheckConstraint(
+            "kind IN ('invoice', 'credit_note')", name="ck_invoices_kind"
+        ),
+        # A credit note corrects an invoice, and an invoice corrects nothing
+        db.CheckConstraint(
+            "(kind = 'credit_note') = (credits_invoice_id IS NOT NULL) "
+            "AND (credits_invoice_id IS NULL OR credits_invoice_id <> id)",
+            name="ck_invoices_credits",
         ),
         # An approved invoice has its number and its voucher, and says when
         # and by whom: the posting service sets them together
@@ -84,9 +94,29 @@ class Invoice(BaseModel):
     approved_by = db.Column(
         db.Integer, db.ForeignKey("users.id"), nullable=True
     )
+    # An invoice, or a credit note that corrects the invoice it refers to. A
+    # credit note has its own number, from the same series
+    # (docs/invoice-posting-design.md, section 8)
+    kind = db.Column(
+        db.String(20),
+        server_default="invoice",
+        default="invoice",
+        nullable=False,
+    )
+    credits_invoice_id = db.Column(
+        db.Integer,
+        db.ForeignKey("invoices.id"),
+        nullable=True,
+        index=True,
+    )
 
     contact = db.relationship("Contact", backref="invoices")
     journal_entry = db.relationship("JournalEntry", viewonly=True)
+    credits_invoice = db.relationship(
+        "Invoice",
+        remote_side=[id],
+        backref=db.backref("credit_notes", order_by="Invoice.id"),
+    )
     lines = db.relationship(
         "InvoiceLine", backref="invoices", cascade="all, delete"
     )
