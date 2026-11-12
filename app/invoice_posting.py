@@ -37,6 +37,7 @@ from app.models.account import Account
 from app.models.base import db
 from app.models.invoice import Invoice
 from app.models.invoice_setting import InvoiceSetting
+from app.models.invoiceline import InvoiceLine
 from app.models.organization import Organization
 from app.models.product import Product
 
@@ -141,6 +142,97 @@ def _number(
     return number
 
 
+def credited_amount(
+    invoice: Invoice, *, except_id: int | None = None
+) -> Decimal:
+    """The gross amount of the approved credit notes of an invoice."""
+    return sum(
+        (
+            note.gross_amount
+            for note in invoice.credit_notes
+            if note.state == "approved" and note.id != except_id
+        ),
+        ZERO,
+    )
+
+
+def create_credit_note(
+    organization_id: int, invoice_id: int, today: date | None = None
+) -> Invoice:
+    """A draft credit note for an approved invoice, with its lines copied.
+    The user lowers or removes lines to credit part of the invoice, and
+    approves it. What can be credited is checked when it is approved."""
+    today = today or date.today()
+    original = Invoice.query.filter_by(
+        organization_id=organization_id, id=invoice_id
+    ).first()
+    if original is None:
+        raise LedgerNotFound(f"Invoice with id {invoice_id} not found!")
+    if original.kind != "invoice":
+        raise LedgerConflict(
+            "A credit note cannot be credited: post a new invoice instead"
+        )
+    if original.state != "approved":
+        raise LedgerConflict(
+            "Only an approved invoice has a credit note: a draft is "
+            "changed or deleted"
+        )
+    if original.gross_amount <= ZERO:
+        raise LedgerConflict("There is nothing to credit on this invoice")
+    if credited_amount(original) >= original.gross_amount:
+        raise LedgerConflict(
+            f"Invoice {original.invoice_no} is already credited in full"
+        )
+    note = Invoice(
+        organization_id=organization_id,
+        kind="credit_note",
+        credits_invoice_id=original.id,
+        contact_id=original.contact_id,
+        invoice_date=today,
+        duedate=today,
+        currency_id=original.currency_id,
+        template_id=original.template_id,
+        lines=[
+            InvoiceLine(
+                product_id=line.product_id,
+                description=line.description,
+                vat_code_id=line.vat_code_id,
+                quantity=line.quantity,
+                unit_price=line.unit_price,
+            )
+            for line in original.lines
+        ],
+    )
+    codes = {line.vat_code_id: line.vat_code for line in original.lines}
+    apply_totals(note, note.lines, codes)
+    db.session.add(note)
+    db.session.flush()
+    return note
+
+
+def _check_credit(note: Invoice) -> None:
+    """What a credit note can be: it credits something, is not dated before
+    the invoice it corrects, and with the credit notes before it does not
+    credit more than the invoice."""
+    original = note.credits_invoice
+    if note.gross_amount <= ZERO:
+        raise LedgerError(
+            "A credit note must credit something: its total is not above 0"
+        )
+    if note.invoice_date < original.invoice_date:
+        raise LedgerError(
+            f"A credit note cannot be dated before the invoice it corrects, "
+            f"{original.invoice_date}"
+        )
+    credited = credited_amount(original, except_id=note.id)
+    if credited + note.gross_amount > original.gross_amount:
+        raise LedgerConflict(
+            f"Invoice {original.invoice_no} is {original.gross_amount}, and "
+            f"{credited} is credited already: a credit note of "
+            f"{note.gross_amount} credits more than the invoice"
+        )
+
+
 def approve_invoice(
     organization_id: int,
     user_id: int,
@@ -167,8 +259,8 @@ def approve_invoice(
             raise LedgerNotFound(f"Invoice with id {invoice_id} not found!")
         if invoice.state != "draft":
             raise LedgerConflict(
-                f"The invoice is already approved, as invoice "
-                f"{invoice.invoice_no}"
+                f"The {invoice.kind.replace('_', ' ')} is already approved, "
+                f"as number {invoice.invoice_no}"
             )
         setting = (
             InvoiceSetting.query.filter_by(organization_id=organization_id)
@@ -208,6 +300,15 @@ def approve_invoice(
         apply_totals(invoice, invoice.lines, {c.id: c for c in codes.values()})
         if all(line.amount == ZERO for line in invoice.lines):
             raise LedgerError("There is nothing to book: every line is 0")
+        credit_note = invoice.kind == "credit_note"
+        if credit_note:
+            _check_credit(invoice)
+        name = "Credit note" if credit_note else "Invoice"
+        # The amounts of a credit note are positive on the document, and
+        # posted the other way round: a debit on the sales accounts, the VAT
+        # on the other side (the engine follows the sign), and a credit on
+        # the receivable
+        sign = -1 if credit_note else 1
 
         number = _number(organization_id, invoice, setting, invoice_no)
         accounts = _sales_accounts(organization_id, invoice, setting)
@@ -216,25 +317,26 @@ def approve_invoice(
         ]
 
         lines = []
-        gross = invoice.gross_amount
+        gross = sign * invoice.gross_amount
         if gross != ZERO:
             lines.append(
                 LineInput(
                     receivables,
                     debit=max(gross, ZERO),
                     credit=max(-gross, ZERO),
-                    description=f"Invoice {number}",
+                    description=f"{name} {number}",
                     contact_id=invoice.contact_id,
                 )
             )
         for line in invoice.lines:
             if line.amount == ZERO:
                 continue  # a line of text
+            amount = sign * line.amount
             lines.append(
                 LineInput(
                     accounts[line.id],
-                    debit=max(-line.amount, ZERO),
-                    credit=max(line.amount, ZERO),
+                    debit=max(-amount, ZERO),
+                    credit=max(amount, ZERO),
                     description=line.description,
                     vat_code=line.vat_code.code if registered else None,
                 )
@@ -243,9 +345,9 @@ def approve_invoice(
             organization_id,
             user_id,
             invoice.invoice_date,
-            f"Invoice {number}",
+            f"{name} {number}",
             lines,
-            source_type="invoice",
+            source_type="credit_note" if credit_note else "invoice",
             source_id=invoice.id,
         )
 
@@ -258,11 +360,14 @@ def approve_invoice(
         record(
             organization_id,
             user_id,
-            "invoice.approved",
+            "credit_note.approved" if credit_note else "invoice.approved",
             "invoice",
             invoice.id,
             {
                 "invoice_no": number,
+                "credits_invoice_no": (
+                    invoice.credits_invoice.invoice_no if credit_note else None
+                ),
                 "voucher_no": entry.voucher_no,
                 "entry_id": entry.id,
                 "invoice_date": invoice.invoice_date,
